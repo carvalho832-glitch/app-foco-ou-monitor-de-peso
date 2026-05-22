@@ -101,8 +101,23 @@ button {
 }
 button:hover { background-color: #1d4ed8; }
 
-.btn-secondary { background-color: var(--btn-sec-bg); color: var(--btn-sec-text); padding: 8px 14px; font-size: 13px; border-radius: 8px; }
+/* CSS FIX: Botões secundários do header menores e mais discretos */
+.btn-secondary { background-color: var(--btn-sec-bg); color: var(--btn-sec-text); padding: 6px 12px; font-size: 12px; border-radius: 8px; }
 .btn-delete { background: none; color: #ef4444; border: none; padding: 4px 8px; font-size: 14px; cursor: pointer; }
+
+/* CSS FIX: Botão de Compartilhar Conquista mais fino e elegante */
+.btn-compartilhar-conquista {
+  width: 100%;
+  margin-top: 16px;
+  background: rgba(255, 255, 255, 0.15);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  padding: 10px 16px;
+  font-size: 14px;
+}
+.btn-compartilhar-conquista:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
 
 #cardGraficosSlider { padding: 16px 8px; }
 .swiper-container { width: 100%; height: 230px; position: relative; }
@@ -117,17 +132,7 @@ button:hover { background-color: #1d4ed8; }
 .history-title { font-size: 16px; font-weight: 600; color: var(--text-muted); }
 .history-list { display: flex; flex-direction: column; gap: 10px; }
 
-.history-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 16px;
-  background: var(--card-bg);
-  border: 1px solid var(--border-color);
-  border-radius: 12px;
-  border-left: 4px solid #38bdf8;
-  cursor: pointer;
-}
+.history-item { display: flex; justify-content: space-between; align-items: center; padding: 16px; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; border-left: 4px solid #38bdf8; cursor: pointer; }
 .history-date { font-size: 14px; color: var(--text-muted); font-weight: 500; }
 .history-medidas { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
 .history-actions { display: flex; align-items: flex-end; flex-direction: column; gap: 8px; }
@@ -135,31 +140,12 @@ button:hover { background-color: #1d4ed8; }
 
 /* --- NAVEGAÇÃO INFERIOR --- */
 .bottom-nav {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  background: var(--card-bg);
-  border-top: 1px solid var(--border-color);
-  display: flex;
-  justify-content: space-around;
-  padding: 10px 0 calc(10px + env(safe-area-inset-bottom));
-  z-index: 9999; 
-  box-shadow: 0 -4px 10px rgba(0,0,0,0.05);
+  position: fixed; bottom: 0; left: 0; width: 100%; background: var(--card-bg); border-top: 1px solid var(--border-color); display: flex; justify-content: space-around; padding: 10px 0 calc(10px + env(safe-area-inset-bottom)); z-index: 9999; box-shadow: 0 -4px 10px rgba(0,0,0,0.05);
 }
 
 .nav-item {
-  background: transparent;
-  color: var(--text-muted);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  padding: 8px 12px;
-  font-size: 12px;
-  border-radius: 0;
-  transition: color 0.3s;
-  width: 33%;
+  background: transparent; color: var(--text-muted); display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 8px 12px; font-size: 12px; border-radius: 0; transition: color 0.3s; 
+  width: 25%; /* Ajustado para 4 itens */
 }
 
 .nav-item.active { color: #0ea5e9; font-weight: bold; }
@@ -184,8 +170,10 @@ button:hover { background-color: #1d4ed8; }
 .food-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
 .food-tag { background: var(--input-bg); border: 1px solid var(--border-color); color: var(--text-main); padding: 8px 14px; border-radius: 20px; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.2s ease; user-select: none; }
 .food-tag.selected { background: #0ea5e9; color: #ffffff; border-color: #0ea5e9; box-shadow: 0 4px 6px -1px rgba(14, 165, 233, 0.3); }
-.custom-food-input { display: flex; gap: 8px; }
-.custom-food-input input { padding: 10px 14px; font-size: 14px; border-radius: 10px; }
+
+/* CSS FIX: Campo de input e botão alinhados com perfeição */
+.custom-food-input { display: flex; gap: 8px; align-items: stretch; }
+.custom-food-input input { padding: 10px 14px; font-size: 14px; border-radius: 10px; flex: 1; }
 .btn-add-food { padding: 0 16px; font-size: 20px; border-radius: 10px; display: flex; align-items: center; justify-content: center; }
 
 /* --- TREINO E GPS --- */
@@ -202,16 +190,24 @@ button:hover { background-color: #1d4ed8; }
 .btn-parar-treino { background-color: #ef4444; width: 100%; padding: 20px; font-size: 20px; border-radius: 16px; box-shadow: 0 4px 14px rgba(239, 68, 68, 0.4); }
 .btn-parar-treino:hover { background-color: #dc2626; }
 
-/* Correção visual para Leaflet no Dark Mode */
-[data-theme="dark"] .leaflet-layer,
-[data-theme="dark"] .leaflet-control-zoom-in,
-[data-theme="dark"] .leaflet-control-zoom-out,
-[data-theme="dark"] .leaflet-control-attribution {
-  filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%);
-}
+/* Leaflet Dark Mode Fix */
+[data-theme="dark"] .leaflet-layer, [data-theme="dark"] .leaflet-control-zoom-in, [data-theme="dark"] .leaflet-control-zoom-out, [data-theme="dark"] .leaflet-control-attribution { filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%); }
 
 /* --- MODAL --- */
 .modal { display: none; position: fixed; z-index: 10000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); backdrop-filter: blur(4px); justify-content: center; align-items: center; }
 .modal-content { background-color: var(--card-bg); border: 1px solid var(--border-color); padding: 20px; border-radius: 16px; width: 90%; max-width: 400px; position: relative; }
 .close-modal { position: absolute; right: 16px; top: 12px; color: var(--text-muted); font-size: 28px; font-weight: bold; cursor: pointer; }
 .close-modal:hover { color: var(--text-main); }
+
+/* --- ESTILO TREINADOR IA (PREMIUM) --- */
+.card-ia-status { background: var(--card-bg); border: 1px solid var(--border-color); text-align: center; }
+.ia-status-info { font-size: 13px; color: var(--text-muted); margin-bottom: 15px; }
+.btn-ia-action { background: linear-gradient(135deg, #6366f1, #a855f7); color: white; border: none; width: 100%; border-radius: 12px; padding: 16px; font-size: 15px; font-weight: 600; box-shadow: 0 4px 12px rgba(168, 85, 247, 0.25); cursor: pointer; }
+.card-ia-resposta { border-left: 3px solid #a855f7; padding: 20px; animation: fadeIn 0.5s ease; }
+.ia-secao-titulo { font-size: 11px; font-weight: 800; letter-spacing: 1px; color: #a855f7; margin-bottom: 10px; text-transform: uppercase; }
+.ia-texto-conteudo { font-size: 15px; line-height: 1.6; color: var(--text-main); margin-bottom: 20px; white-space: pre-wrap; }
+.ia-loading { text-align: center; padding: 40px; }
+.spinner { width: 30px; height: 30px; border: 3px solid rgba(168, 85, 247, 0.1); border-top: 3px solid #a855f7; border-radius: 50%; margin: 0 auto 15px; animation: spin 1s linear infinite; }
+
+@keyframes spin { 100% { transform: rotate(360deg); } }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }

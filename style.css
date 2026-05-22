@@ -1,5 +1,5 @@
 /* ==========================================
-   VARIÁVEIS DE CORES (Temas Light e Dark)
+   CONFIGURAÇÕES GERAIS E MODO ESCURO
    ========================================== */
 :root {
   --bg-color: #f8fafc;
@@ -23,9 +23,6 @@
   --btn-sec-text: #cbd5e1;
 }
 
-/* ==========================================
-   RESET E CONFIGURAÇÕES GERAIS
-   ========================================== */
 * {
   box-sizing: border-box;
   margin: 0;
@@ -40,7 +37,7 @@ body {
   justify-content: center;
   min-height: 100vh;
   overflow-x: hidden;
-  transition: background-color 0.3s ease, color 0.3s ease;
+  transition: background-color 0.3s ease;
 }
 
 .app-container {
@@ -51,28 +48,17 @@ body {
   display: flex;
   flex-direction: column;
   padding: 20px 16px;
-  padding-bottom: 100px; /* Espaço para o menu inferior não cobrir os botões */
 }
 
 /* ==========================================
-   CABEÇALHO (Header)
+   CABEÇALHO
    ========================================== */
-header { 
-  margin-bottom: 24px; 
-}
-header h1 { 
-  font-size: 26px; 
-  font-weight: 700; 
-  letter-spacing: -0.5px; 
-}
-header p { 
-  font-size: 14px; 
-  color: var(--text-muted); 
-  margin-top: 4px; 
-}
+header { margin-bottom: 24px; }
+header h1 { font-size: 26px; font-weight: 700; letter-spacing: -0.5px; }
+header p { font-size: 14px; color: var(--text-muted); margin-top: 4px; }
 
 /* ==========================================
-   ESTILIZAÇÃO DOS CARDS
+   CARDS
    ========================================== */
 .card {
   background: var(--card-bg);
@@ -90,77 +76,31 @@ header p {
   box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.2);
 }
 
-.meta-grid { 
-  display: flex; 
-  justify-content: space-between; 
-  align-items: center; 
-}
-.meta-item .label { 
-  font-size: 11px; 
-  opacity: 0.85; 
-  text-transform: uppercase; 
-  font-weight: 600; 
-}
-.meta-item .value { 
-  font-size: 32px; 
-  font-weight: 700; 
-  margin-top: 4px; 
-}
-.meta-item .sub-value { 
-  font-size: 18px; 
-  font-weight: 600; 
-  margin-top: 2px; 
-}
-.card-divider { 
-  height: 1px; 
-  background: rgba(255, 255, 255, 0.2); 
-  margin: 14px 0; 
-}
-.card h3 { 
-  font-size: 16px; 
-  font-weight: 600; 
-  margin-bottom: 14px; 
-}
+.meta-grid { display: flex; justify-content: space-between; align-items: center; }
+.meta-item .label { font-size: 11px; opacity: 0.85; text-transform: uppercase; font-weight: 600; }
+.meta-item .value { font-size: 32px; font-weight: 700; margin-top: 4px; }
+.meta-item .sub-value { font-size: 18px; font-weight: 600; margin-top: 2px; }
+.card-divider { height: 1px; background: rgba(255, 255, 255, 0.2); margin: 14px 0; }
+.card h3 { font-size: 16px; font-weight: 600; margin-bottom: 14px; }
 
 /* ==========================================
-   FORMULÁRIOS, ENTRADAS E TEXTAREAS
+   INPUTS & BOTÕES
    ========================================== */
-.input-group { 
-  display: flex; 
-  flex-direction: column; 
-}
-.row-input { 
-  display: flex; 
-  gap: 12px; 
-  align-items: flex-end; 
-  flex-wrap: wrap; 
-  margin-bottom: 4px; 
-}
+.input-group { display: flex; flex-direction: column; }
+.row-input { display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap; margin-bottom: 4px; }
 
-input[type="number"], input[type="date"], textarea {
+input[type="number"], input[type="date"] {
   width: 100%;
   padding: 14px 16px;
   border: 1px solid var(--border-color);
   border-radius: 12px;
-  font-size: 15px;
+  font-size: 16px;
   background-color: var(--input-bg);
   color: var(--text-main);
   outline: none;
-  font-family: inherit;
-  transition: border-color 0.2s ease;
 }
-input:focus, textarea:focus { 
-  border-color: #2563eb; 
-}
+input:focus { border-color: #2563eb; }
 
-textarea {
-  resize: vertical;
-  min-height: 90px;
-}
-
-/* ==========================================
-   BOTÕES
-   ========================================== */
 button {
   background-color: #2563eb;
   color: white;
@@ -170,87 +110,36 @@ button {
   font-size: 16px;
   font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.2s ease;
 }
-button:hover { 
-  background-color: #1d4ed8; 
-}
+button:hover { background-color: #1d4ed8; }
 
-.btn-secondary { 
-  background-color: var(--btn-sec-bg); 
-  color: var(--btn-sec-text); 
-  padding: 8px 14px; 
-  font-size: 13px; 
-  border-radius: 8px; 
+.btn-secondary {
+  background-color: var(--btn-sec-bg);
+  color: var(--btn-sec-text);
+  padding: 8px 14px;
+  font-size: 13px;
+  border-radius: 8px;
 }
-.btn-delete { 
-  background: none; 
-  color: #ef4444; 
-  border: none; 
-  padding: 4px 8px; 
-  font-size: 14px; 
-  cursor: pointer; 
-}
+.btn-delete { background: none; color: #ef4444; border: none; padding: 4px 8px; font-size: 14px; cursor: pointer; }
 
 /* ==========================================
-   SLIDER DE GRÁFICOS (Swiper)
+   ESTILOS DO CARROSSEL DE GRÁFICOS
    ========================================== */
-#cardGraficosSlider { 
-  padding: 16px 8px; 
-}
-.swiper-container { 
-  width: 100%; 
-  height: 230px; 
-  position: relative; 
-}
-.swiper-slide { 
-  display: flex; 
-  justify-content: center; 
-  align-items: center; 
-  position: relative; 
-}
-.swiper-slide canvas { 
-  width: 100% !important; 
-  height: 200px !important; 
-}
+#cardGraficosSlider { padding: 16px 8px; }
+.swiper-container { width: 100%; height: 230px; position: relative; }
+.swiper-slide { display: flex; justify-content: center; align-items: center; position: relative; }
+.swiper-slide canvas { width: 100% !important; height: 200px !important; }
 
-.swiper-pagination { 
-  position: absolute; 
-  bottom: 0px !important; 
-  left: 0; 
-  width: 100%; 
-  text-align: center; 
-  z-index: 10; 
-}
-.swiper-pagination-bullet { 
-  width: 8px; height: 8px; 
-  background: var(--text-muted); 
-  opacity: 0.4; 
-}
-.swiper-pagination-bullet-active { 
-  background: #0ea5e9; 
-  opacity: 1; 
-}
+.swiper-pagination { position: absolute; bottom: 0px !important; left: 0; width: 100%; text-align: center; z-index: 10; }
+.swiper-pagination-bullet { width: 8px; height: 8px; background: var(--text-muted); opacity: 0.4; }
+.swiper-pagination-bullet-active { background: #0ea5e9; opacity: 1; }
 
 /* ==========================================
-   SEÇÃO DE HISTÓRICO
+   HISTÓRICO
    ========================================== */
-.history-header { 
-  display: flex; 
-  justify-content: space-between; 
-  align-items: center; 
-  margin-bottom: 12px; 
-}
-.history-title { 
-  font-size: 16px; 
-  font-weight: 600; 
-  color: var(--text-muted); 
-}
-.history-list { 
-  display: flex; 
-  flex-direction: column; 
-  gap: 10px; 
-}
+.history-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+.history-title { font-size: 16px; font-weight: 600; color: var(--text-muted); }
+.history-list { display: flex; flex-direction: column; gap: 10px; }
 
 .history-item {
   display: flex;
@@ -262,106 +151,7 @@ button:hover {
   border-radius: 12px;
   border-left: 4px solid #38bdf8;
 }
-.history-date { 
-  font-size: 14px; 
-  color: var(--text-muted); 
-  font-weight: 500; 
-}
-.history-medidas { 
-  font-size: 12px; 
-  color: var(--text-muted); 
-  margin-top: 4px; 
-}
-.history-actions { 
-  display: flex; 
-  align-items: center; 
-  gap: 16px; 
-}
-.history-weight { 
-  font-size: 16px; 
-  font-weight: 600; 
-}
-
-/* ==========================================
-   CONTROLE DE TELAS E ANIMAÇÃO DE TRANSIÇÃO
-   ========================================== */
-.tela { 
-  display: none; 
-  animation: abrirSuave 0.3s ease; 
-}
-.tela.ativa { 
-  display: block; 
-}
-
-@keyframes abrirSuave {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-/* ==========================================
-   BARRA DE NAVEGAÇÃO INFERIOR (Bottom Nav)
-   ========================================== */
-.bottom-nav {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  background-color: var(--card-bg);
-  border-top: 1px solid var(--border-color);
-  display: flex;
-  justify-content: space-around;
-  padding: 10px 0;
-  padding-bottom: calc(10px + env(safe-area-inset-bottom)); /* Garante boa distância em telas com notch embaixo */
-  z-index: 1000;
-}
-
-.nav-item {
-  background: none;
-  color: var(--text-muted);
-  border: none;
-  font-size: 11px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  padding: 6px 24px;
-  cursor: pointer;
-  font-weight: 500;
-  transition: color 0.2s ease;
-}
-
-.nav-item span:first-child {
-  font-size: 20px; /* Tamanho do Emoji */
-}
-
-.nav-item.active { 
-  color: #2563eb; 
-  font-weight: 700; 
-}
-
-/* ==========================================
-   TOAST DE CELEBRAÇÃO (Notificação Slim)
-   ========================================== */
-#toastCelebracao {
-  position: fixed;
-  bottom: 85px; /* Ajustado para ficar logo acima do menu inferior */
-  left: 50%;
-  transform: translateX(-50%) translateY(100px);
-  background: linear-gradient(135deg, #10b981, #059669);
-  color: white;
-  padding: 12px 24px;
-  border-radius: 50px;
-  font-size: 14px;
-  font-weight: 600;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.4s;
-  z-index: 9999;
-  opacity: 0;
-  pointer-events: none;
-  white-space: nowrap;
-}
-
-#toastCelebracao.mostrar {
-  transform: translateX(-50%) translateY(0);
-  opacity: 1;
-}
+.history-date { font-size: 14px; color: var(--text-muted); font-weight: 500; }
+.history-medidas { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+.history-actions { display: flex; align-items: center; gap: 16px; }
+.history-weight { font-size: 16px; font-weight: 600; }

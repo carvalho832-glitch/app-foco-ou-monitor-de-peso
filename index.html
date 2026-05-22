@@ -11,118 +11,190 @@
   <link rel="manifest" href="manifest.json">
 </head>
 <body>
-  <div class="app-container">
-    <header style="display: flex; justify-content: space-between; align-items: flex-start;">
-      <div>
-        <h1>Bora focar!</h1>
-        <p>Acompanhe sua evolução diária</p>
-      </div>
-      <div style="display: flex; flex-direction: column; gap: 8px; align-items: flex-end;">
-        <button id="btnTema" class="btn-secondary">🌙 Escuro</button>
-        <div style="display: flex; gap: 8px;">
-          <button id="btnModificarMeta" class="btn-secondary">Editar Meta</button>
-          <button id="btnModificarAltura" class="btn-secondary" style="display: none;">Editar Altura</button>
+  <div class="app-container" style="padding-bottom: 80px;">
+    
+    <div id="aba-dashboard" class="aba-conteudo" style="display: block;">
+      <header style="display: flex; justify-content: space-between; align-items: flex-start;">
+        <div>
+          <h1>Bora focar!</h1>
+          <p>Acompanhe sua evolução diária</p>
         </div>
-      </div>
-    </header>
-
-    <div class="card card-highlight">
-      <div class="meta-grid">
-        <div class="meta-item">
-          <div class="label">Peso Atual</div>
-          <div class="value" id="pesoAtualCard">--.- <span style="font-size: 16px; font-weight: 400;">kg</span></div>
-        </div>
-        <div class="meta-item" style="text-align: right;">
-          <div class="label">Meta</div>
-          <div class="value" id="pesoMetaCard">--.- <span style="font-size: 16px; font-weight: 400;">kg</span></div>
-        </div>
-      </div>
-      <div class="card-divider"></div>
-      <div class="meta-grid">
-        <div class="meta-item">
-          <div class="label">Meu IMC</div>
-          <div class="sub-value" id="imcValue">--.-</div>
-        </div>
-        <div class="meta-item" style="text-align: right;">
-          <div class="label">Status</div>
-          <div class="sub-value" id="imcStatus">Defina a altura</div>
-        </div>
-      </div>
-      <div class="card-divider"></div>
-      <div class="meta-grid">
-        <div class="meta-item">
-          <div class="label">Total Eliminado</div>
-          <div class="sub-value" id="totalEliminadoCard" style="font-size: 20px; font-weight: 700;">--.- kg</div>
-        </div>
-        <div class="meta-item" style="text-align: right;">
-          <div class="label">Tempo de Jornada</div>
-          <div class="sub-value" id="tempoJornadaCard" style="font-size: 16px; font-weight: 600;">-- dias</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="card" id="cardMeta" style="display: none;">
-      <h3>Configurar Meta de Peso</h3>
-      <div class="input-group">
-        <div class="row-input">
-          <input type="number" step="0.1" placeholder="Ex: 75.0" id="metaInput">
-          <button id="btnSalvarMeta">Definir</button>
-        </div>
-      </div>
-    </div>
-
-    <div class="card" id="cardAltura">
-      <h3>Configurar Perfil (Altura)</h3>
-      <div class="input-group">
-        <div class="row-input">
-          <input type="number" step="0.01" placeholder="Sua altura. Ex: 1.75" id="alturaInput">
-          <button id="btnSalvarAltura">Definir</button>
-        </div>
-      </div>
-    </div>
-
-    <div class="card">
-      <h3>Registrar Medidas</h3>
-      <div class="input-group" style="gap: 12px;">
-        <div class="row-input">
-          <div style="flex: 1; display: flex; flex-direction: column; gap: 4px;">
-            <span style="font-size: 12px; color: var(--text-muted); font-weight: 600;">Data:</span>
-            <input type="date" id="dataInput">
-          </div>
-          <div style="flex: 1; display: flex; flex-direction: column; gap: 4px;">
-            <span style="font-size: 12px; color: var(--text-muted); font-weight: 600;">Peso (kg):</span>
-            <input type="number" step="0.1" placeholder="Ex: 84.2" id="pesoInput">
+        <div style="display: flex; flex-direction: column; gap: 8px; align-items: flex-end;">
+          <button id="btnTema" class="btn-secondary">🌙 Escuro</button>
+          <div style="display: flex; gap: 8px;">
+            <button id="btnModificarMeta" class="btn-secondary">Editar Meta</button>
+            <button id="btnModificarAltura" class="btn-secondary" style="display: none;">Editar Altura</button>
           </div>
         </div>
-        <div class="row-input">
-          <div style="flex: 1; display: flex; flex-direction: column; gap: 4px;">
-            <span style="font-size: 12px; color: var(--text-muted); font-weight: 600;">Cintura (cm) - Opcional:</span>
-            <input type="number" step="0.1" placeholder="Ex: 90" id="cinturaInput">
+      </header>
+
+      <div class="card card-highlight">
+        <div class="meta-grid">
+          <div class="meta-item">
+            <div class="label">Peso Atual</div>
+            <div class="value" id="pesoAtualCard">--.- <span style="font-size: 16px; font-weight: 400;">kg</span></div>
           </div>
-          <div style="flex: 1; display: flex; flex-direction: column; gap: 4px;">
-            <span style="font-size: 12px; color: var(--text-muted); font-weight: 600;">Quadril (cm) - Opcional:</span>
-            <input type="number" step="0.1" placeholder="Ex: 105" id="quadrilInput">
+          <div class="meta-item" style="text-align: right;">
+            <div class="label">Meta</div>
+            <div class="value" id="pesoMetaCard">--.- <span style="font-size: 16px; font-weight: 400;">kg</span></div>
           </div>
         </div>
-        <button id="btnSalvar" style="width: 100%; margin-top: 8px;">Salvar Registro</button>
-      </div>
-    </div>
-
-    <div class="card" id="cardGraficosSlider" style="display: none;">
-      <div class="swiper-container mySwiper">
-        <div class="swiper-wrapper" id="graficosWrapper">
+        <div class="card-divider"></div>
+        <div class="meta-grid">
+          <div class="meta-item">
+            <div class="label">Meu IMC</div>
+            <div class="sub-value" id="imcValue">--.-</div>
           </div>
-        <div class="swiper-pagination"></div>
+          <div class="meta-item" style="text-align: right;">
+            <div class="label">Status</div>
+            <div class="sub-value" id="imcStatus">Defina a altura</div>
+          </div>
+        </div>
+        <div class="card-divider"></div>
+        <div class="meta-grid">
+          <div class="meta-item">
+            <div class="label">Total Eliminado</div>
+            <div class="sub-value" id="totalEliminadoCard" style="font-size: 20px; font-weight: 700;">--.- kg</div>
+          </div>
+          <div class="meta-item" style="text-align: right;">
+            <div class="label">Tempo de Jornada</div>
+            <div class="sub-value" id="tempoJornadaCard" style="font-size: 16px; font-weight: 600;">-- dias</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" id="cardMeta" style="display: none;">
+        <h3>Configurar Meta de Peso</h3>
+        <div class="input-group">
+          <div class="row-input">
+            <input type="number" step="0.1" placeholder="Ex: 75.0" id="metaInput">
+            <button id="btnSalvarMeta">Definir</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" id="cardAltura">
+        <h3>Configurar Perfil (Altura)</h3>
+        <div class="input-group">
+          <div class="row-input">
+            <input type="number" step="0.01" placeholder="Sua altura. Ex: 1.75" id="alturaInput">
+            <button id="btnSalvarAltura">Definir</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Registrar Medidas</h3>
+        <div class="input-group" style="gap: 12px;">
+          <div class="row-input">
+            <div style="flex: 1; display: flex; flex-direction: column; gap: 4px;">
+              <span style="font-size: 12px; color: var(--text-muted); font-weight: 600;">Data:</span>
+              <input type="date" id="dataInput">
+            </div>
+            <div style="flex: 1; display: flex; flex-direction: column; gap: 4px;">
+              <span style="font-size: 12px; color: var(--text-muted); font-weight: 600;">Peso (kg):</span>
+              <input type="number" step="0.1" placeholder="Ex: 84.2" id="pesoInput">
+            </div>
+          </div>
+          <div class="row-input">
+            <div style="flex: 1; display: flex; flex-direction: column; gap: 4px;">
+              <span style="font-size: 12px; color: var(--text-muted); font-weight: 600;">Cintura (cm) - Opcional:</span>
+              <input type="number" step="0.1" placeholder="Ex: 90" id="cinturaInput">
+            </div>
+            <div style="flex: 1; display: flex; flex-direction: column; gap: 4px;">
+              <span style="font-size: 12px; color: var(--text-muted); font-weight: 600;">Quadril (cm) - Opcional:</span>
+              <input type="number" step="0.1" placeholder="Ex: 105" id="quadrilInput">
+            </div>
+          </div>
+          <button id="btnSalvar" style="width: 100%; margin-top: 8px;">Salvar Registro</button>
+        </div>
+      </div>
+
+      <div class="card" id="cardGraficosSlider" style="display: none;">
+        <div class="swiper-container mySwiper">
+          <div class="swiper-wrapper" id="graficosWrapper"></div>
+          <div class="swiper-pagination"></div>
+        </div>
+      </div>
+
+      <div class="history-section">
+        <div class="history-header">
+          <div class="history-title">Registros anteriores</div>
+          <button id="btnExportar" class="btn-secondary">⬇️ Excel (CSV)</button>
+        </div>
+        <div class="history-list" id="historicoLista"></div>
       </div>
     </div>
 
-    <div class="history-section">
-      <div class="history-header">
-        <div class="history-title">Registros anteriores</div>
-        <button id="btnExportar" class="btn-secondary">⬇️ Excel (CSV)</button>
+    <div id="aba-alimentacao" class="aba-conteudo" style="display: none;">
+      <header>
+        <h1>Diário</h1>
+        <p>Acompanhe sua nutrição e hidratação</p>
+      </header>
+
+      <div class="card">
+        <div class="input-group">
+          <span style="font-size: 12px; color: var(--text-muted); font-weight: 600; margin-bottom: 4px;">Data do Diário:</span>
+          <input type="date" id="dataAlimentacaoInput">
+        </div>
       </div>
-      <div class="history-list" id="historicoLista"></div>
+
+      <div class="card card-water">
+        <h3>💧 Meta de Água</h3>
+        <div class="water-status">
+          <span id="aguaAtualDisplay">0</span> / <span id="aguaMetaDisplay">2000</span> <span style="font-size: 14px; font-weight: normal;">ml</span>
+        </div>
+        <div class="water-progress-bar">
+          <div class="water-progress-fill" id="aguaProgressFill" style="width: 0%;"></div>
+        </div>
+        <div class="water-buttons">
+          <button type="button" class="btn-water" onclick="adicionarAgua(250)">+ 250ml</button>
+          <button type="button" class="btn-water" onclick="adicionarAgua(500)">+ 500ml</button>
+          <button type="button" class="btn-water btn-water-remove" onclick="adicionarAgua(-250)">- 250ml</button>
+        </div>
+      </div>
+
+      <div class="card meal-card">
+        <h3>☕ Café da Manhã</h3>
+        <div class="food-tags" id="tags-cafe"></div>
+        <div class="custom-food-input">
+          <input type="text" id="custom-cafe" placeholder="Outro item... (Ex: Mamão)">
+          <button type="button" class="btn-add-food" onclick="adicionarComidaCustomizada('cafe')">+</button>
+        </div>
+      </div>
+
+      <div class="card meal-card">
+        <h3>🍽️ Almoço</h3>
+        <div class="food-tags" id="tags-almoco"></div>
+        <div class="custom-food-input">
+          <input type="text" id="custom-almoco" placeholder="Outro item... (Ex: Lasanha)">
+          <button type="button" class="btn-add-food" onclick="adicionarComidaCustomizada('almoco')">+</button>
+        </div>
+      </div>
+
+      <div class="card meal-card">
+        <h3>🌙 Jantar</h3>
+        <div class="food-tags" id="tags-jantar"></div>
+        <div class="custom-food-input">
+          <input type="text" id="custom-jantar" placeholder="Outro item... (Ex: Sopa)">
+          <button type="button" class="btn-add-food" onclick="adicionarComidaCustomizada('jantar')">+</button>
+        </div>
+      </div>
+      
+      <button id="btnSalvarAlimentacao" style="width: 100%; margin-top: 8px;">Salvar Diário do Dia</button>
     </div>
+
+    <nav class="bottom-nav">
+      <button class="nav-item active" onclick="trocarAba('dashboard', this)">
+        <span style="font-size: 20px;">📊</span>
+        <span>Evolução</span>
+      </button>
+      <button class="nav-item" onclick="trocarAba('alimentacao', this)">
+        <span style="font-size: 20px;">🍎</span>
+        <span>Diário</span>
+      </button>
+    </nav>
+
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>

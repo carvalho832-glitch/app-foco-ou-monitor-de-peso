@@ -18,7 +18,6 @@ function iniciarApp() {
   carregarDados();
 }
 
-// --- LÓGICA DO TEMA (MODO ESCURO) ---
 function carregarTema() {
   const temaSalvo = localStorage.getItem('usuarioTema');
   if (temaSalvo === 'dark') {
@@ -50,7 +49,6 @@ function configurarDataPadrao() {
   document.getElementById('dataInput').value = hoje.toISOString().split('T')[0];
 }
 
-// --- ALTURA E META ---
 function obterAltura() { return localStorage.getItem('usuarioAltura') || null; }
 function verificarExibicaoAltura() {
   const altura = obterAltura();
@@ -60,7 +58,7 @@ function verificarExibicaoAltura() {
     document.getElementById('alturaInput').value = altura;
   } else {
     document.getElementById('cardAltura').style.display = 'block';
-    document.getElementById('btnModificarAltura').style.none;
+    document.getElementById('btnModificarAltura').style.display = 'none';
   }
 }
 function abrirEdicaoAltura() {
@@ -94,7 +92,6 @@ function salvarMeta() {
   carregarDados();
 }
 
-// --- DADOS E REGISTROS ---
 function obterHistorico() {
   const dados = localStorage.getItem('historicoPeso');
   return dados ? JSON.parse(dados) : [];
@@ -187,7 +184,6 @@ function deletarRegistro(id) {
   carregarDados();
 }
 
-// --- EXPORTAR EXCEL ---
 function exportarParaExcel() {
   const historico = obterHistorico().sort((a, b) => b.id - a.id);
   if(historico.length === 0) return alert("Nenhum dado para exportar.");
@@ -204,7 +200,6 @@ function exportarParaExcel() {
   link.click();
 }
 
-// --- CONFIGURAÇÃO DO CARROSSEL DE GRÁFICOS ---
 function atualizarGraficosSlider() {
   const historico = obterHistorico();
   const cardSlider = document.getElementById('cardGraficosSlider');

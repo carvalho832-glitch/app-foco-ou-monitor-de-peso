@@ -45,6 +45,7 @@ body {
   display: flex;
   flex-direction: column;
   padding: 20px 16px;
+  padding-bottom: 90px; /* Espaço extra para o menu inferior não cobrir o conteúdo */
 }
 
 header { margin-bottom: 24px; }
@@ -77,17 +78,23 @@ header p { font-size: 14px; color: var(--text-muted); margin-top: 4px; }
 .input-group { display: flex; flex-direction: column; }
 .row-input { display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap; margin-bottom: 4px; }
 
-input[type="number"], input[type="date"] {
+input[type="number"], input[type="date"], textarea {
   width: 100%;
   padding: 14px 16px;
   border: 1px solid var(--border-color);
   border-radius: 12px;
-  font-size: 16px;
+  font-size: 15px;
   background-color: var(--input-bg);
   color: var(--text-main);
   outline: none;
+  font-family: inherit;
 }
-input:focus { border-color: #2563eb; }
+input:focus, textarea:focus { border-color: #2563eb; }
+
+textarea {
+  resize: vertical;
+  min-height: 80px;
+}
 
 button {
   background-color: #2563eb;
@@ -133,11 +140,51 @@ button:hover { background-color: #1d4ed8; }
 .history-weight { font-size: 16px; font-weight: 600; }
 
 /* ==========================================
+   TELAS E NAVEGAÇÃO
+   ========================================== */
+.tela { display: none; animation: fadeIn 0.3s ease; }
+.tela.ativa { display: block; }
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background-color: var(--card-bg);
+  border-top: 1px solid var(--border-color);
+  display: flex;
+  justify-content: space-around;
+  padding: 10px 0;
+  padding-bottom: calc(10px + env(safe-area-inset-bottom)); 
+  z-index: 1000;
+}
+
+.nav-item {
+  background: none;
+  color: var(--text-muted);
+  border: none;
+  font-size: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 20px;
+}
+
+.nav-item.active { color: #2563eb; font-weight: 600; }
+.nav-icon { font-size: 22px; }
+
+/* ==========================================
    TOAST DE CELEBRAÇÃO
    ========================================== */
 #toastCelebracao {
   position: fixed;
-  bottom: 20px;
+  bottom: 90px; /* Mais alto para não cobrir o menu */
   left: 50%;
   transform: translateX(-50%) translateY(100px);
   background: linear-gradient(135deg, #10b981, #059669);

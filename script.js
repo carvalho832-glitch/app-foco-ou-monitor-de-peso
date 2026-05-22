@@ -10,14 +10,74 @@ document.getElementById('btnSalvarMeta').addEventListener('click', salvarMeta);
 document.getElementById('btnTema').addEventListener('click', alternarTema);
 document.getElementById('btnExportar').addEventListener('click', exportarParaExcel);
 
+// Novos Eventos da Alimentação
+document.getElementById('btnSalvarAlimentacao').addEventListener('click', salvarAlimentacao);
+document.getElementById('dataAlimentacao').addEventListener('change', carregarAlimentacaoDaData);
+
 function iniciarApp() {
   carregarTema();
-  configurarDataPadrao();
+  configurarDatasPadrao();
   verificarExibicaoAltura();
   carregarMeta();
   carregarDados();
+  carregarAlimentacaoDaData();
 }
 
+function configurarDatasPadrao() {
+  const hoje = new Date().toISOString().split('T')[0];
+  document.getElementById('dataInput').value = hoje;
+  document.getElementById('dataAlimentacao').value = hoje;
+}
+
+// --- CONTROLE DE TELAS (NAVEGAÇÃO INFERIOR) ---
+function mudarTela(telaSelecionada) {
+  // Esconde todas as telas e remove o active dos botões
+  document.querySelectorAll('.tela').forEach(t => t.classList.remove('ativa'));
+  document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+
+  // Mostra a tela correta
+  if (telaSelecionada === 'medidas') {
+    document.getElementById('telaMedidas').classList.add('ativa');
+    document.getElementById('navMedidas').classList.add('active');
+  } else if (telaSelecionada === 'alimentacao') {
+    document.getElementById('telaAlimentacao').classList.add('ativa');
+    document.getElementById('navAlimentacao').classList.add('active');
+  }
+}
+
+// --- LÓGICA DE ALIMENTAÇÃO ---
+function salvarAlimentacao() {
+  const data = document.getElementById('dataAlimentacao').value;
+  const cafe = document.getElementById('cafeInput').value;
+  const almoco = document.getElementById('almocoInput').value;
+  const jantar = document.getElementById('jantarInput').value;
+
+  if (!data) return alert('Selecione uma data válida.');
+
+  let historicoDieta = JSON.parse(localStorage.getItem('historicoAlimentacao') || '{}');
+  
+  historicoDieta[data] = {
+    cafe: cafe,
+    almoco: almoco,
+    jantar: jantar
+  };
+
+  localStorage.setItem('historicoAlimentacao', JSON.stringify(historicoDieta));
+  dispararCelebracao("Refeições salvas com sucesso! 🥗", false);
+}
+
+function carregarAlimentacaoDaData() {
+  const data = document.getElementById('dataAlimentacao').value;
+  let historicoDieta = JSON.parse(localStorage.getItem('historicoAlimentacao') || '{}');
+  
+  const diaAlvo = historicoDieta[data] || { cafe: '', almoco: '', jantar: '' };
+
+  document.getElementById('cafeInput').value = diaAlvo.cafe;
+  document.getElementById('almocoInput').value = diaAlvo.almoco;
+  document.getElementById('jantarInput').value = diaAlvo.jantar;
+}
+
+// --- LÓGICA EXISTENTE DO APP ---
 function carregarTema() {
   const temaSalvo = localStorage.getItem('usuarioTema');
   if (temaSalvo === 'dark') {
@@ -42,11 +102,6 @@ function alternarTema() {
     metaColor.setAttribute('content', '#0f172a');
   }
   atualizarGraficos(); 
-}
-
-function configurarDataPadrao() {
-  const hoje = new Date();
-  document.getElementById('dataInput').value = hoje.toISOString().split('T')[0];
 }
 
 function obterAltura() { return localStorage.getItem('usuarioAltura') || null; }
@@ -161,7 +216,6 @@ function adicionarRegistro() {
   const historico = obterHistorico();
   const partes = data.split('-');
   
-  // Lógica inteligente para saber se o peso diminuiu
   let ultimoPeso = null;
   if(historico.length > 0) {
       const histOrd = [...historico].sort((a,b) => b.id - a.id);
@@ -184,7 +238,6 @@ function adicionarRegistro() {
   document.getElementById('cinturaInput').value = '';
   document.getElementById('quadrilInput').value = '';
   
-  // Gatilho da comemoração
   if (ultimoPeso !== null && peso < ultimoPeso) {
       dispararCelebracao("Peso menor que o anterior! Mandou bem! 🎉", true);
   } else if (ultimoPeso === null) {
@@ -303,7 +356,6 @@ function renderizarGraficoUnico(canvasId, label, dados, labels, corGrid, corText
   });
 }
 
-// --- FUNÇÃO DE CELEBRAÇÃO (CONFETES E MENSAGEM) ---
 function dispararCelebracao(mensagem, comConfete) {
   const toast = document.getElementById('toastCelebracao');
   document.getElementById('toastMensagem').innerText = mensagem;

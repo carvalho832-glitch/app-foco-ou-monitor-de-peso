@@ -84,7 +84,6 @@ function obterMetaAguaDinamica() {
     return Math.round(pesoAtual * 35);
   }
   
-  // Se ainda não houver peso registrado, o padrão é 2000ml
   return 2000; 
 }
 
@@ -108,9 +107,9 @@ function renderizarAgua() {
   progressFill.style.width = `${porcentagem}%`;
   
   if (atual >= metaAgua) {
-    progressFill.style.backgroundColor = '#10b981'; // Verde se bater a meta
+    progressFill.style.backgroundColor = '#10b981'; 
   } else {
-    progressFill.style.backgroundColor = '#0ea5e9'; // Azul padrão
+    progressFill.style.backgroundColor = '#0ea5e9'; 
   }
 }
 
@@ -121,24 +120,32 @@ function renderizarTagsDeComida() {
     const container = document.getElementById(`tags-${refeicao}`);
     container.innerHTML = '';
     
+    if (!Array.isArray(refeicoesAtuais[refeicao])) {
+      refeicoesAtuais[refeicao] = [];
+    }
+    
     const itensUnicos = new Set([...itensPreProgramados[refeicao], ...refeicoesAtuais[refeicao]]);
     
     itensUnicos.forEach(item => {
       const isSelected = refeicoesAtuais[refeicao].includes(item);
-      const tag = document.createElement('div');
+      
+      const tag = document.createElement('button');
+      tag.type = 'button';
       tag.className = `food-tag ${isSelected ? 'selected' : ''}`;
       tag.innerText = item;
       
-      tag.onclick = () => {
+      tag.addEventListener('click', function(event) {
+        event.preventDefault(); 
+        
         const index = refeicoesAtuais[refeicao].indexOf(item);
         if (index > -1) {
-          refeicoesAtuais[refeicao].splice(index, 1);
-          tag.classList.remove('selected');
+          refeicoesAtuais[refeicao].splice(index, 1); 
         } else {
-          refeicoesAtuais[refeicao].push(item);
-          tag.classList.add('selected');
+          refeicoesAtuais[refeicao].push(item); 
         }
-      };
+        
+        renderizarTagsDeComida(); 
+      });
       
       container.appendChild(tag);
     });
@@ -311,8 +318,6 @@ function carregarDados() {
   });
   
   atualizarGraficosSlider();
-  
-  // Atualiza a barra de água caso o peso seja modificado na primeira tela
   renderizarAgua();
 }
 

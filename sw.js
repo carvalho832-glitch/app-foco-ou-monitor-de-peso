@@ -1,4 +1,4 @@
-const CACHE_NAME = 'monitor-peso-v6';
+const CACHE_NAME = 'monitor-peso-v7';
 const urlsToCache = [
   './',
   './index.html',
@@ -8,9 +8,7 @@ const urlsToCache = [
 ];
 
 self.addEventListener('install', (event) => {
-  // ESSA LINHA É A MÁGICA: Força o novo Service Worker a assumir na hora!
   self.skipWaiting(); 
-  
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then((cache) => {
@@ -20,7 +18,6 @@ self.addEventListener('install', (event) => {
 });
 
 self.addEventListener('activate', (event) => {
-  // ESSA PARTE DELETA O CACHE ZUMBI ANTIGO
   event.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(
@@ -32,7 +29,6 @@ self.addEventListener('activate', (event) => {
       );
     })
   );
-  // Toma o controle da tela imediatamente
   self.clients.claim(); 
 });
 

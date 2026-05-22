@@ -1,4 +1,4 @@
-const CACHE_NAME = 'monitor-peso-v11';
+const CACHE_NAME = 'monitor-peso-v12';
 const urlsToCache = [
   './',
   './index.html',

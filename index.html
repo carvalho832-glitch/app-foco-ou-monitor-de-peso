@@ -10,6 +10,7 @@
   
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <link rel="manifest" href="manifest.json">
 </head>
 <body>
@@ -63,6 +64,9 @@
             <div class="sub-value" id="tempoJornadaCard" style="font-size: 16px; font-weight: 600;">-- dias</div>
           </div>
         </div>
+        <button id="btnCompartilharProgresso" style="width: 100%; margin-top: 16px; background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.4);">
+          🚀 Compartilhar Conquista
+        </button>
       </div>
 
       <div class="card" id="cardMeta" style="display: none;">
@@ -186,6 +190,74 @@
       <button id="btnSalvarAlimentacao" style="width: 100%; margin-top: 8px;">Salvar Diário do Dia</button>
     </div>
 
+    <div id="aba-exercicio" class="aba-conteudo" style="display: none;">
+      <header>
+        <h1>Treino</h1>
+        <p>Monitore suas atividades ao ar livre</p>
+      </header>
+
+      <div class="card" style="text-align: center;">
+        <div style="margin-bottom: 20px;">
+          <select id="tipoAtividade" class="select-treino">
+            <option value="caminhada">🚶 Caminhada</option>
+            <option value="corrida">🏃 Corrida</option>
+          </select>
+        </div>
+
+        <div id="mapaTreinoContainer" style="height: 220px; width: 100%; border-radius: 12px; overflow: hidden; margin-bottom: 20px; border: 1px solid var(--border-color);"></div>
+
+        <div class="treino-display">
+          <div class="treino-cronometro" id="displayTempo">00:00:00</div>
+          
+          <div class="treino-grid">
+            <div class="treino-dado">
+              <span id="displayDistancia">0.00</span>
+              <div class="treino-label">Quilômetros</div>
+            </div>
+            <div class="treino-dado">
+              <span id="displayVelocidade">0.0</span>
+              <div class="treino-label">km/h</div>
+            </div>
+          </div>
+          
+          <div class="treino-dado-destaque">
+            <span id="displayCalorias">0</span>
+            <div class="treino-label">Calorias (kcal)</div>
+          </div>
+        </div>
+
+        <div id="msgGpsErro" style="color: #ef4444; font-size: 13px; margin-bottom: 12px; display: none;">
+          Aguardando sinal do GPS... Ative a localização.
+        </div>
+
+        <button id="btnIniciarTreino" class="btn-iniciar-treino">▶ Iniciar Treino</button>
+        <button id="btnPararTreino" class="btn-parar-treino" style="display: none;">⏹ Encerrar e Salvar</button>
+      </div>
+      
+      <div class="history-section">
+        <div class="history-header">
+          <div class="history-title">Histórico de Treinos</div>
+        </div>
+        <div class="history-list" id="historicoTreinosLista"></div>
+      </div>
+    </div>
+
+    <div id="modalTreino" class="modal">
+      <div class="modal-content">
+        <span class="close-modal" onclick="fecharModalTreino()">&times;</span>
+        <h3 id="modalTituloTreino" style="margin-bottom: 16px;">Detalhes do Treino</h3>
+        <div id="mapaDetalheContainer" style="height: 200px; width: 100%; border-radius: 12px; overflow: hidden; margin-bottom: 16px; border: 1px solid var(--border-color);"></div>
+        
+        <div class="treino-grid" style="margin-bottom: 16px;">
+          <div class="treino-dado"><span id="modalDistancia" style="font-size: 24px;"></span><div class="treino-label">km</div></div>
+          <div class="treino-dado"><span id="modalTempo" style="font-size: 24px;"></span><div class="treino-label">Tempo</div></div>
+          <div class="treino-dado-destaque"><span id="modalCalorias" style="font-size: 24px;"></span><div class="treino-label">kcal</div></div>
+        </div>
+
+        <button id="btnCompartilharTreino" onclick="compartilharTreinoModal()" style="width: 100%; background-color: #10b981;">📲 Compartilhar Treino</button>
+      </div>
+    </div>
+
     <nav class="bottom-nav">
       <button class="nav-item active" onclick="trocarAba('dashboard', this)">
         <span style="font-size: 20px;">📊</span>
@@ -195,12 +267,17 @@
         <span style="font-size: 20px;">🍎</span>
         <span>Diário</span>
       </button>
+      <button class="nav-item" onclick="trocarAba('exercicio', this)">
+        <span style="font-size: 20px;">👟</span>
+        <span>Treino</span>
+      </button>
     </nav>
 
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="script.js"></script>
   
   <script>

@@ -161,6 +161,13 @@ function adicionarRegistro() {
   const historico = obterHistorico();
   const partes = data.split('-');
   
+  // Lógica inteligente para saber se o peso diminuiu
+  let ultimoPeso = null;
+  if(historico.length > 0) {
+      const histOrd = [...historico].sort((a,b) => b.id - a.id);
+      ultimoPeso = histOrd[0].peso;
+  }
+  
   historico.push({
     id: Date.now(),
     dataTexto: new Date(partes[0], partes[1] - 1, partes[2]).toLocaleDateString('pt-BR', {day: 'numeric', month: 'short'}).replace('.',''),
@@ -172,9 +179,19 @@ function adicionarRegistro() {
   
   localStorage.setItem('historicoPeso', JSON.stringify(historico));
   carregarDados();
+  
   document.getElementById('pesoInput').value = '';
   document.getElementById('cinturaInput').value = '';
   document.getElementById('quadrilInput').value = '';
+  
+  // Gatilho da comemoração
+  if (ultimoPeso !== null && peso < ultimoPeso) {
+      dispararCelebracao("Peso menor que o anterior! Mandou bem! 🎉", true);
+  } else if (ultimoPeso === null) {
+      dispararCelebracao("Primeiro registro! Rumo à meta! 🚀", false);
+  } else {
+      dispararCelebracao("Registro salvo! Bora focar! 💪", false);
+  }
 }
 
 function deletarRegistro(id) {
@@ -206,39 +223,20 @@ function atualizarGraficosSlider() {
   const wrapper = document.getElementById('graficosWrapper');
   
   wrapper.innerHTML = '';
-  
-  if (meuSwiper) {
-    meuSwiper.destroy(true, true);
-    meuSwiper = null;
-  }
-  
-  if (historico.length < 2) {
-    cardSlider.style.display = 'none';
-    return;
-  }
+  if (meuSwiper) { meuSwiper.destroy(true, true); meuSwiper = null; }
+  if (historico.length < 2) { cardSlider.style.display = 'none'; return; }
   
   cardSlider.style.display = 'block';
   const dadosHistorico = [...historico].sort((a, b) => a.id - b.id);
   
-  if (dadosHistorico.filter(i => i.peso).length >= 2) {
-    adicionarSlideComGrafico(wrapper, 'graficoPeso');
-  }
-  if (dadosHistorico.filter(i => i.cintura).length >= 2) {
-    adicionarSlideComGrafico(wrapper, 'graficoCintura');
-  }
-  if (dadosHistorico.filter(i => i.quadril).length >= 2) {
-    adicionarSlideComGrafico(wrapper, 'graficoQuadril');
-  }
+  if (dadosHistorico.filter(i => i.peso).length >= 2) adicionarSlideComGrafico(wrapper, 'graficoPeso');
+  if (dadosHistorico.filter(i => i.cintura).length >= 2) adicionarSlideComGrafico(wrapper, 'graficoCintura');
+  if (dadosHistorico.filter(i => i.quadril).length >= 2) adicionarSlideComGrafico(wrapper, 'graficoQuadril');
   
   meuSwiper = new Swiper('.mySwiper', {
     pagination: { el: '.swiper-pagination', clickable: true },
-    on: {
-      slideChangeTransitionEnd: function () {
-        atualizarGraficos(); 
-      }
-    }
+    on: { slideChangeTransitionEnd: function () { atualizarGraficos(); } }
   });
-  
   atualizarGraficos();
 }
 
@@ -303,4 +301,25 @@ function renderizarGraficoUnico(canvasId, label, dados, labels, corGrid, corText
       }
     }
   });
+}
+
+// --- FUNÇÃO DE CELEBRAÇÃO (CONFETES E MENSAGEM) ---
+function dispararCelebracao(mensagem, comConfete) {
+  const toast = document.getElementById('toastCelebracao');
+  document.getElementById('toastMensagem').innerText = mensagem;
+  toast.classList.add('mostrar');
+
+  if(comConfete) {
+      confetti({
+        particleCount: 150,
+        spread: 70,
+        origin: { y: 0.6 },
+        colors: ['#0ea5e9', '#2563eb', '#10b981', '#fbbf24'],
+        zIndex: 10000
+      });
+  }
+
+  setTimeout(() => {
+    toast.classList.remove('mostrar');
+  }, 4000);
 }

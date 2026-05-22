@@ -10,9 +10,16 @@ document.getElementById('btnSalvarMeta').addEventListener('click', salvarMeta);
 document.getElementById('btnTema').addEventListener('click', alternarTema);
 document.getElementById('btnExportar').addEventListener('click', exportarParaExcel);
 
-// Listeners da Aba de Diário
+// Listeners Diário
 document.getElementById('dataAlimentacaoInput').addEventListener('change', carregarRefeicoesDoDia);
 document.getElementById('btnSalvarAlimentacao').addEventListener('click', salvarRefeicoes);
+
+// Listeners Treino
+document.getElementById('btnIniciarTreino').addEventListener('click', iniciarTreino);
+document.getElementById('btnPararTreino').addEventListener('click', encerrarTreino);
+
+// Listener Compartilhamento Conquista (Aba 1)
+document.getElementById('btnCompartilharProgresso').addEventListener('click', compartilharProgresso);
 
 function iniciarApp() {
   carregarTema();
@@ -22,7 +29,282 @@ function iniciarApp() {
   carregarMeta();
   carregarDados();
   carregarRefeicoesDoDia();
+  carregarHistoricoTreinos();
 }
+
+function trocarAba(abaId, elementoBotao) {
+  document.getElementById('aba-dashboard').style.display = abaId === 'dashboard' ? 'block' : 'none';
+  document.getElementById('aba-alimentacao').style.display = abaId === 'alimentacao' ? 'block' : 'none';
+  document.getElementById('aba-exercicio').style.display = abaId === 'exercicio' ? 'block' : 'none';
+  
+  document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('active'));
+  elementoBotao.classList.add('active');
+
+  if (abaId === 'alimentacao') {
+    const inputData = document.getElementById('dataAlimentacaoInput');
+    if (!inputData.value) inputData.value = new Date().toISOString().split('T')[0];
+    carregarRefeicoesDoDia();
+  }
+  
+  if (abaId === 'exercicio') {
+    setTimeout(iniciarMapaTreino, 200);
+  }
+}
+
+// ==========================================
+// COMPARTILHAMENTO (Nativo do Celular)
+// ==========================================
+
+function compartilharProgresso() {
+  const pesoAtual = document.getElementById('pesoAtualCard').innerText.replace('kg', '').trim();
+  const eliminado = document.getElementById('totalEliminadoCard').innerText;
+  
+  const texto = `Bora focar! 🚀 Já eliminei ${eliminado} e estou pesando ${pesoAtual} kg. 💪 Acompanhando tudo pelo meu app Monitor de Peso!`;
+
+  if (navigator.share) {
+    navigator.share({
+      title: 'Minha Evolução',
+      text: texto
+    }).catch(console.error);
+  } else {
+    alert("Seu navegador não suporta o compartilhamento nativo. Copie o texto:\n\n" + texto);
+  }
+}
+
+let treinoAtualModalId = null;
+
+function compartilharTreinoModal() {
+  const treinos = JSON.parse(localStorage.getItem('historicoTreinos') || '[]');
+  const treino = treinos.find(t => t.id === treinoAtualModalId);
+  if (!treino) return;
+
+  const icone = treino.tipo === 'corrida' ? '🏃' : '🚶';
+  const nome = treino.tipo.charAt(0).toUpperCase() + treino.tipo.slice(1);
+  const texto = `Treino concluído! ${icone} ${nome} \n⏱️ Tempo: ${treino.tempo} \n🛣️ Distância: ${treino.distancia} km \n🔥 Gasto: ${treino.calorias} kcal. \nBora focar! 💪`;
+
+  if (navigator.share) {
+    navigator.share({
+      title: 'Meu Treino',
+      text: texto
+    }).catch(console.error);
+  } else {
+    alert("Seu navegador não suporta o compartilhamento nativo. Copie o texto:\n\n" + texto);
+  }
+}
+
+// ==========================================
+// LÓGICA DE TREINO, GPS E MAPAS (Leaflet)
+// ==========================================
+
+let isTreinando = false;
+let gpsWatchId = null;
+let timerInterval = null;
+let tempoInicio = 0;
+let distanciaTotalKm = 0;
+let ultimaPosicao = null;
+
+let mapaTreino = null;
+let marcadorGPS = null;
+let rotaPolyline = null;
+let coordenadasRota = []; 
+
+let mapaDetalhe = null;
+let detalhePolyline = null;
+
+function iniciarMapaTreino() {
+  if (mapaTreino !== null) {
+    mapaTreino.invalidateSize(); 
+    return;
+  }
+  mapaTreino = L.map('mapaTreinoContainer').setView([-14.235, -51.925], 4);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© OpenStreetMap' }).addTo(mapaTreino);
+
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const latLng = [pos.coords.latitude, pos.coords.longitude];
+        mapaTreino.setView(latLng, 16);
+        marcadorGPS = L.circleMarker(latLng, { color: '#0ea5e9', radius: 8, fillOpacity: 1 }).addTo(mapaTreino);
+      },
+      () => { console.log("Aguardando permissão de GPS"); }
+    );
+  }
+}
+
+function iniciarTreino() {
+  if (!navigator.geolocation) return alert("Seu navegador não suporta GPS.");
+  isTreinando = true; distanciaTotalKm = 0; ultimaPosicao = null; coordenadasRota = []; tempoInicio = Date.now();
+
+  document.getElementById('displayDistancia').innerText = "0.00";
+  document.getElementById('displayVelocidade').innerText = "0.0";
+  document.getElementById('displayCalorias').innerText = "0";
+  document.getElementById('displayTempo').innerText = "00:00:00";
+
+  document.getElementById('btnIniciarTreino').style.display = 'none';
+  document.getElementById('btnPararTreino').style.display = 'block';
+  document.getElementById('msgGpsErro').style.display = 'none';
+
+  if (rotaPolyline) mapaTreino.removeLayer(rotaPolyline);
+  rotaPolyline = L.polyline([], { color: '#ef4444', weight: 5 }).addTo(mapaTreino);
+
+  timerInterval = setInterval(atualizarCronometro, 1000);
+  gpsWatchId = navigator.geolocation.watchPosition(processarPosicaoGps, erroGps, { enableHighAccuracy: true, maximumAge: 0, timeout: 5000 });
+}
+
+function processarPosicaoGps(posicao) {
+  if (posicao.coords.accuracy > 40) return;
+  const latLng = [posicao.coords.latitude, posicao.coords.longitude];
+  
+  if (marcadorGPS) marcadorGPS.setLatLng(latLng);
+  else marcadorGPS = L.circleMarker(latLng, { color: '#0ea5e9', radius: 8, fillOpacity: 1 }).addTo(mapaTreino);
+  mapaTreino.setView(latLng);
+
+  if (isTreinando) {
+    coordenadasRota.push(latLng); 
+    rotaPolyline.setLatLngs(coordenadasRota); 
+    const coordAtual = { lat: latLng[0], lon: latLng[1] };
+    if (ultimaPosicao) distanciaTotalKm += calcularDistanciaHaversine(ultimaPosicao, coordAtual);
+    ultimaPosicao = coordAtual;
+    atualizarTelaTreino();
+  }
+}
+
+function erroGps(erro) { console.warn("Erro no GPS:", erro); document.getElementById('msgGpsErro').style.display = 'block'; }
+
+function calcularDistanciaHaversine(pos1, pos2) {
+  const R = 6371; 
+  const dLat = (pos2.lat - pos1.lat) * Math.PI / 180;
+  const dLon = (pos2.lon - pos1.lon) * Math.PI / 180;
+  const a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(pos1.lat * Math.PI / 180) * Math.cos(pos2.lat * Math.PI / 180) * Math.sin(dLon/2) * Math.sin(dLon/2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  return R * c;
+}
+
+function atualizarCronometro() {
+  const diferenca = Date.now() - tempoInicio;
+  const horas = Math.floor((diferenca % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+  const minutos = Math.floor((diferenca % (1000 * 60 * 60)) / (1000 * 60));
+  const segundos = Math.floor((diferenca % (1000 * 60)) / 1000);
+
+  document.getElementById('displayTempo').innerText = String(horas).padStart(2, '0') + ":" + String(minutos).padStart(2, '0') + ":" + String(segundos).padStart(2, '0');
+  atualizarTelaTreino(); 
+}
+
+function atualizarTelaTreino() {
+  if (!isTreinando) return;
+  const tempoHoras = (Date.now() - tempoInicio) / (1000 * 60 * 60);
+  let velocidade = tempoHoras > 0 ? (distanciaTotalKm / tempoHoras) : 0;
+
+  const historico = obterHistorico();
+  const ordenado = [...historico].sort((a, b) => b.id - a.id);
+  const pesoAtual = ordenado.length > 0 ? ordenado[0].peso : 80;
+
+  const tipo = document.getElementById('tipoAtividade').value;
+  let fatorCalorico = tipo === 'corrida' ? 1.03 : 0.75; 
+  const caloriasQueimadas = Math.round(pesoAtual * distanciaTotalKm * fatorCalorico);
+
+  document.getElementById('displayDistancia').innerText = distanciaTotalKm.toFixed(2);
+  document.getElementById('displayVelocidade').innerText = velocidade.toFixed(1);
+  document.getElementById('displayCalorias').innerText = caloriasQueimadas;
+}
+
+function encerrarTreino() {
+  if (!isTreinando) return;
+  isTreinando = false;
+
+  clearInterval(timerInterval);
+  if (gpsWatchId) navigator.geolocation.clearWatch(gpsWatchId);
+
+  document.getElementById('btnIniciarTreino').style.display = 'block';
+  document.getElementById('btnPararTreino').style.display = 'none';
+
+  const treinos = JSON.parse(localStorage.getItem('historicoTreinos') || '[]');
+  treinos.push({
+    id: Date.now(),
+    data: new Date().toLocaleDateString('pt-BR'),
+    tipo: document.getElementById('tipoAtividade').value,
+    tempo: document.getElementById('displayTempo').innerText,
+    distancia: document.getElementById('displayDistancia').innerText,
+    calorias: document.getElementById('displayCalorias').innerText,
+    rota: coordenadasRota 
+  });
+
+  localStorage.setItem('historicoTreinos', JSON.stringify(treinos));
+  carregarHistoricoTreinos();
+  alert("Treino salvo com sucesso!");
+}
+
+function carregarHistoricoTreinos() {
+  const treinos = JSON.parse(localStorage.getItem('historicoTreinos') || '[]');
+  const lista = document.getElementById('historicoTreinosLista');
+  lista.innerHTML = '';
+
+  const ordenado = [...treinos].sort((a, b) => b.id - a.id);
+
+  ordenado.forEach(treino => {
+    const icone = treino.tipo === 'corrida' ? '🏃' : '🚶';
+    const nome = treino.tipo.charAt(0).toUpperCase() + treino.tipo.slice(1);
+    
+    lista.innerHTML += `
+      <div class="history-item" onclick="abrirModalTreino(${treino.id})">
+        <div class="history-info">
+          <span class="history-date">${icone} ${nome} - ${treino.data}</span>
+          <span class="history-medidas">⏱️ ${treino.tempo} | 🛣️ ${treino.distancia} km</span>
+        </div>
+        <div class="history-actions" style="display: flex; flex-direction: column; align-items: flex-end; gap: 8px;">
+          <span class="history-weight" style="color: #f97316;">🔥 ${treino.calorias} kcal</span>
+          <button class="btn-delete" onclick="event.stopPropagation(); deletarTreino(${treino.id})">Excluir</button>
+        </div>
+      </div>
+    `;
+  });
+}
+
+function deletarTreino(id) {
+  if (!confirm("Excluir este treino definitivamente?")) return;
+  const treinos = JSON.parse(localStorage.getItem('historicoTreinos') || '[]');
+  const treinosFiltrados = treinos.filter(t => t.id !== id);
+  localStorage.setItem('historicoTreinos', JSON.stringify(treinosFiltrados));
+  carregarHistoricoTreinos();
+}
+
+function abrirModalTreino(id) {
+  const treinos = JSON.parse(localStorage.getItem('historicoTreinos') || '[]');
+  const treino = treinos.find(t => t.id === id);
+  if(!treino) return;
+
+  treinoAtualModalId = id; // Guarda o ID para o botão compartilhar
+
+  document.getElementById('modalTituloTreino').innerText = `${treino.tipo === 'corrida' ? '🏃 Corrida' : '🚶 Caminhada'} - ${treino.data}`;
+  document.getElementById('modalDistancia').innerText = treino.distancia;
+  document.getElementById('modalTempo').innerText = treino.tempo;
+  document.getElementById('modalCalorias').innerText = treino.calorias;
+
+  document.getElementById('modalTreino').style.display = 'flex';
+
+  setTimeout(() => {
+    if (!mapaDetalhe) {
+      mapaDetalhe = L.map('mapaDetalheContainer');
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(mapaDetalhe);
+      detalhePolyline = L.polyline([], { color: '#ef4444', weight: 5 }).addTo(mapaDetalhe);
+    }
+    
+    mapaDetalhe.invalidateSize();
+
+    if(treino.rota && treino.rota.length > 0) {
+      detalhePolyline.setLatLngs(treino.rota);
+      mapaDetalhe.fitBounds(detalhePolyline.getBounds()); 
+    } else {
+      detalhePolyline.setLatLngs([]);
+      mapaDetalhe.setView([-14.235, -51.925], 4); 
+    }
+  }, 200);
+}
+
+function fecharModalTreino() {
+  document.getElementById('modalTreino').style.display = 'none';
+}
+
 
 // ==========================================
 // LÓGICA DO DIÁRIO (ALIMENTAÇÃO E ÁGUA)
@@ -36,54 +318,23 @@ const itensPreProgramados = {
 
 let refeicoesAtuais = { cafe: [], almoco: [], jantar: [], agua: 0 };
 
-function trocarAba(abaId, elementoBotao) {
-  document.getElementById('aba-dashboard').style.display = abaId === 'dashboard' ? 'block' : 'none';
-  document.getElementById('aba-alimentacao').style.display = abaId === 'alimentacao' ? 'block' : 'none';
-  
-  document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('active'));
-  elementoBotao.classList.add('active');
-
-  if (abaId === 'alimentacao') {
-    const inputData = document.getElementById('dataAlimentacaoInput');
-    if (!inputData.value) {
-      inputData.value = new Date().toISOString().split('T')[0];
-    }
-    carregarRefeicoesDoDia();
-  }
-}
-
-function configurarDataAlimentacaoPadrao() {
-  const hoje = new Date();
-  document.getElementById('dataAlimentacaoInput').value = hoje.toISOString().split('T')[0];
-}
+function configurarDataAlimentacaoPadrao() { document.getElementById('dataAlimentacaoInput').value = new Date().toISOString().split('T')[0]; }
 
 function carregarRefeicoesDoDia() {
   const dataSelect = document.getElementById('dataAlimentacaoInput').value;
   const historico = JSON.parse(localStorage.getItem('historicoAlimentacao') || '{}');
-  
   if (historico[dataSelect]) {
     refeicoesAtuais = JSON.parse(JSON.stringify(historico[dataSelect]));
     if (typeof refeicoesAtuais.agua === 'undefined') refeicoesAtuais.agua = 0;
-  } else {
-    refeicoesAtuais = { cafe: [], almoco: [], jantar: [], agua: 0 };
-  }
-  
-  renderizarTagsDeComida();
-  renderizarAgua();
+  } else { refeicoesAtuais = { cafe: [], almoco: [], jantar: [], agua: 0 }; }
+  renderizarTagsDeComida(); renderizarAgua();
 }
-
-// --- Funções de Água (Calculada por Peso) ---
 
 function obterMetaAguaDinamica() {
   const historico = obterHistorico();
   const ordenado = [...historico].sort((a, b) => b.id - a.id);
   const pesoAtual = ordenado.length > 0 ? ordenado[0].peso : 0;
-  
-  if (pesoAtual > 0) {
-    // 35ml multiplicados pelo peso atual em kg
-    return Math.round(pesoAtual * 35);
-  }
-  
+  if (pesoAtual > 0) return Math.round(pesoAtual * 35);
   return 2000; 
 }
 
@@ -94,94 +345,48 @@ function adicionarAgua(qtd) {
 }
 
 function renderizarAgua() {
-  const atual = refeicoesAtuais.agua;
-  const metaAgua = obterMetaAguaDinamica();
-  
-  document.getElementById('aguaAtualDisplay').innerText = atual;
-  document.getElementById('aguaMetaDisplay').innerText = metaAgua;
-  
-  let porcentagem = (atual / metaAgua) * 100;
-  if (porcentagem > 100) porcentagem = 100; 
-  
+  const atual = refeicoesAtuais.agua; const metaAgua = obterMetaAguaDinamica();
+  document.getElementById('aguaAtualDisplay').innerText = atual; document.getElementById('aguaMetaDisplay').innerText = metaAgua;
+  let porcentagem = (atual / metaAgua) * 100; if (porcentagem > 100) porcentagem = 100; 
   const progressFill = document.getElementById('aguaProgressFill');
-  progressFill.style.width = `${porcentagem}%`;
-  
-  if (atual >= metaAgua) {
-    progressFill.style.backgroundColor = '#10b981'; 
-  } else {
-    progressFill.style.backgroundColor = '#0ea5e9'; 
-  }
+  progressFill.style.width = `${porcentagem}%`; progressFill.style.backgroundColor = atual >= metaAgua ? '#10b981' : '#0ea5e9';
 }
-
-// --- Funções de Comida ---
 
 function renderizarTagsDeComida() {
   ['cafe', 'almoco', 'jantar'].forEach(refeicao => {
-    const container = document.getElementById(`tags-${refeicao}`);
-    container.innerHTML = '';
-    
-    if (!Array.isArray(refeicoesAtuais[refeicao])) {
-      refeicoesAtuais[refeicao] = [];
-    }
-    
+    const container = document.getElementById(`tags-${refeicao}`); container.innerHTML = '';
+    if (!Array.isArray(refeicoesAtuais[refeicao])) refeicoesAtuais[refeicao] = [];
     const itensUnicos = new Set([...itensPreProgramados[refeicao], ...refeicoesAtuais[refeicao]]);
     
     itensUnicos.forEach(item => {
       const isSelected = refeicoesAtuais[refeicao].includes(item);
-      
-      const tag = document.createElement('button');
-      tag.type = 'button';
-      tag.className = `food-tag ${isSelected ? 'selected' : ''}`;
-      tag.innerText = item;
+      const tag = document.createElement('button'); tag.type = 'button'; tag.className = `food-tag ${isSelected ? 'selected' : ''}`; tag.innerText = item;
       
       tag.addEventListener('click', function(event) {
         event.preventDefault(); 
-        
         const index = refeicoesAtuais[refeicao].indexOf(item);
-        if (index > -1) {
-          refeicoesAtuais[refeicao].splice(index, 1); 
-        } else {
-          refeicoesAtuais[refeicao].push(item); 
-        }
-        
+        if (index > -1) refeicoesAtuais[refeicao].splice(index, 1); 
+        else refeicoesAtuais[refeicao].push(item); 
         renderizarTagsDeComida(); 
       });
-      
       container.appendChild(tag);
     });
   });
 }
 
 function adicionarComidaCustomizada(refeicao) {
-  const input = document.getElementById(`custom-${refeicao}`);
-  const valor = input.value.trim();
+  const input = document.getElementById(`custom-${refeicao}`); const valor = input.value.trim();
   const valorFormatado = valor.charAt(0).toUpperCase() + valor.slice(1);
-  
-  if (valorFormatado) {
-    if (!refeicoesAtuais[refeicao].includes(valorFormatado)) {
-      refeicoesAtuais[refeicao].push(valorFormatado);
-    }
-    input.value = '';
-    renderizarTagsDeComida();
-  }
+  if (valorFormatado && !refeicoesAtuais[refeicao].includes(valorFormatado)) { refeicoesAtuais[refeicao].push(valorFormatado); input.value = ''; renderizarTagsDeComida(); }
 }
 
 function salvarRefeicoes() {
   const dataSelect = document.getElementById('dataAlimentacaoInput').value;
   const historico = JSON.parse(localStorage.getItem('historicoAlimentacao') || '{}');
-  
-  historico[dataSelect] = refeicoesAtuais;
-  localStorage.setItem('historicoAlimentacao', JSON.stringify(historico));
-  
-  const btn = document.getElementById('btnSalvarAlimentacao');
-  const textoOriginal = btn.innerText;
-  btn.innerText = "✅ Salvo com sucesso!";
-  btn.style.backgroundColor = "#10b981"; 
-  
-  setTimeout(() => {
-    btn.innerText = textoOriginal;
-    btn.style.backgroundColor = ""; 
-  }, 2000);
+  historico[dataSelect] = refeicoesAtuais; localStorage.setItem('historicoAlimentacao', JSON.stringify(historico));
+  const btn = document.getElementById('btnSalvarAlimentacao'); const textoOriginal = btn.innerText;
+  btn.innerText = "✅ Salvo com sucesso!"; btn.style.backgroundColor = "#10b981"; 
+  setTimeout(() => { btn.innerText = textoOriginal; btn.style.backgroundColor = ""; }, 2000);
 }
 
 // ==========================================
@@ -201,88 +406,50 @@ function alternarTema() {
   const temaAtual = document.documentElement.getAttribute('data-theme');
   const metaColor = document.getElementById('metaThemeColor');
   if (temaAtual === 'dark') {
-    document.documentElement.removeAttribute('data-theme');
-    localStorage.setItem('usuarioTema', 'light');
-    document.getElementById('btnTema').innerText = '🌙 Escuro';
-    metaColor.setAttribute('content', '#ffffff');
+    document.documentElement.removeAttribute('data-theme'); localStorage.setItem('usuarioTema', 'light');
+    document.getElementById('btnTema').innerText = '🌙 Escuro'; metaColor.setAttribute('content', '#ffffff');
   } else {
-    document.documentElement.setAttribute('data-theme', 'dark');
-    localStorage.setItem('usuarioTema', 'dark');
-    document.getElementById('btnTema').innerText = '☀️ Claro';
-    metaColor.setAttribute('content', '#0f172a');
+    document.documentElement.setAttribute('data-theme', 'dark'); localStorage.setItem('usuarioTema', 'dark');
+    document.getElementById('btnTema').innerText = '☀️ Claro'; metaColor.setAttribute('content', '#0f172a');
   }
   atualizarGraficos(); 
 }
 
-function configurarDataPadrao() {
-  const hoje = new Date();
-  document.getElementById('dataInput').value = hoje.toISOString().split('T')[0];
-}
+function configurarDataPadrao() { document.getElementById('dataInput').value = new Date().toISOString().split('T')[0]; }
 
 function obterAltura() { return localStorage.getItem('usuarioAltura') || null; }
 function verificarExibicaoAltura() {
   const altura = obterAltura();
-  if (altura) {
-    document.getElementById('cardAltura').style.display = 'none';
-    document.getElementById('btnModificarAltura').style.display = 'block';
-    document.getElementById('alturaInput').value = altura;
-  } else {
-    document.getElementById('cardAltura').style.display = 'block';
-    document.getElementById('btnModificarAltura').style.display = 'none';
-  }
+  if (altura) { document.getElementById('cardAltura').style.display = 'none'; document.getElementById('btnModificarAltura').style.display = 'block'; document.getElementById('alturaInput').value = altura; } 
+  else { document.getElementById('cardAltura').style.display = 'block'; document.getElementById('btnModificarAltura').style.display = 'none'; }
 }
-function abrirEdicaoAltura() {
-  document.getElementById('cardAltura').style.display = 'block';
-  document.getElementById('btnModificarAltura').style.display = 'none';
-}
+function abrirEdicaoAltura() { document.getElementById('cardAltura').style.display = 'block'; document.getElementById('btnModificarAltura').style.display = 'none'; }
 function salvarAltura() {
   const altura = parseFloat(document.getElementById('alturaInput').value);
   if (!altura || isNaN(altura) || altura <= 0) return alert('Altura inválida!');
-  localStorage.setItem('usuarioAltura', altura.toFixed(2));
-  verificarExibicaoAltura();
-  carregarDados();
+  localStorage.setItem('usuarioAltura', altura.toFixed(2)); verificarExibicaoAltura(); carregarDados();
 }
 
 function obterMeta() { return localStorage.getItem('usuarioMeta') || "80.0"; }
 function carregarMeta() {
-  const meta = obterMeta();
-  document.getElementById('pesoMetaCard').innerHTML = `${parseFloat(meta).toFixed(1)} <span style="font-size: 16px; font-weight: 400;">kg</span>`;
-  document.getElementById('metaInput').value = meta;
+  const meta = obterMeta(); document.getElementById('pesoMetaCard').innerHTML = `${parseFloat(meta).toFixed(1)} <span style="font-size: 16px; font-weight: 400;">kg</span>`; document.getElementById('metaInput').value = meta;
 }
-function abrirEdicaoMeta() {
-  const card = document.getElementById('cardMeta');
-  card.style.display = card.style.display === 'none' ? 'block' : 'none';
-}
+function abrirEdicaoMeta() { const card = document.getElementById('cardMeta'); card.style.display = card.style.display === 'none' ? 'block' : 'none'; }
 function salvarMeta() {
   const meta = parseFloat(document.getElementById('metaInput').value);
   if (!meta || isNaN(meta) || meta <= 0) return alert('Meta inválida!');
-  localStorage.setItem('usuarioMeta', meta.toFixed(1));
-  carregarMeta();
-  document.getElementById('cardMeta').style.display = 'none';
-  carregarDados();
+  localStorage.setItem('usuarioMeta', meta.toFixed(1)); carregarMeta(); document.getElementById('cardMeta').style.display = 'none'; carregarDados();
 }
 
-function obterHistorico() {
-  const dados = localStorage.getItem('historicoPeso');
-  return dados ? JSON.parse(dados) : [];
-}
+function obterHistorico() { return JSON.parse(localStorage.getItem('historicoPeso') || '[]'); }
 
 function carregarDados() {
-  const historico = obterHistorico();
-  const altura = obterAltura();
-  const lista = document.getElementById('historicoLista');
-  lista.innerHTML = ''; 
-
-  let ordenado = [...historico].sort((a, b) => b.id - a.id);
-  let pesoAtual = ordenado.length > 0 ? ordenado[0].peso : 0;
-
-  document.getElementById('pesoAtualCard').innerHTML = pesoAtual > 0 
-    ? `${pesoAtual.toFixed(1)} <span style="font-size: 16px; font-weight: 400;">kg</span>` 
-    : `--.- <span style="font-size: 16px; font-weight: 400;">kg</span>`;
+  const historico = obterHistorico(); const altura = obterAltura(); const lista = document.getElementById('historicoLista'); lista.innerHTML = ''; 
+  let ordenado = [...historico].sort((a, b) => b.id - a.id); let pesoAtual = ordenado.length > 0 ? ordenado[0].peso : 0;
+  document.getElementById('pesoAtualCard').innerHTML = pesoAtual > 0 ? `${pesoAtual.toFixed(1)} <span style="font-size: 16px; font-weight: 400;">kg</span>` : `--.- <span style="font-size: 16px; font-weight: 400;">kg</span>`;
 
   if (altura && pesoAtual > 0) {
-    const imc = pesoAtual / (altura * altura);
-    document.getElementById('imcValue').innerText = imc.toFixed(1);
+    const imc = pesoAtual / (altura * altura); document.getElementById('imcValue').innerText = imc.toFixed(1);
     if(imc < 18.5) document.getElementById('imcStatus').innerText = "Abaixo";
     else if(imc < 25) document.getElementById('imcStatus').innerText = "Ideal";
     else if(imc < 30) document.getElementById('imcStatus').innerText = "Sobrepeso";
@@ -290,188 +457,67 @@ function carregarDados() {
   }
 
   if (historico.length > 0) {
-    const cronologico = [...historico].sort((a, b) => a.id - b.id);
-    const dif = cronologico[0].peso - cronologico[cronologico.length - 1].peso;
+    const cronologico = [...historico].sort((a, b) => a.id - b.id); const dif = cronologico[0].peso - cronologico[cronologico.length - 1].peso;
     document.getElementById('totalEliminadoCard').innerText = dif >= 0 ? `${dif.toFixed(1)} kg` : `+${Math.abs(dif).toFixed(1)} kg`;
-    
     const dias = Math.round(Math.abs((new Date(cronologico[cronologico.length - 1].dataRaw) - new Date(cronologico[0].dataRaw)) / 86400000));
     document.getElementById('tempoJornadaCard').innerText = dias === 0 ? "1º dia" : `${dias} dias`;
   }
 
   ordenado.forEach(item => {
-    let medidasTxt = '';
-    if(item.cintura) medidasTxt += `Cintura: ${item.cintura}cm `;
-    if(item.quadril) medidasTxt += `| Quadril: ${item.quadril}cm`;
-    
-    lista.innerHTML += `
-      <div class="history-item">
-        <div class="history-info">
-          <span class="history-date">${item.dataTexto}</span>
-          ${medidasTxt ? `<span class="history-medidas">${medidasTxt}</span>` : ''}
-        </div>
-        <div class="history-actions">
-          <span class="history-weight">${item.peso.toFixed(1)} kg</span>
-          <button class="btn-delete" onclick="deletarRegistro(${item.id})">Excluir</button>
-        </div>
-      </div>
-    `;
+    let medidasTxt = ''; if(item.cintura) medidasTxt += `Cintura: ${item.cintura}cm `; if(item.quadril) medidasTxt += `| Quadril: ${item.quadril}cm`;
+    lista.innerHTML += `<div class="history-item"><div class="history-info"><span class="history-date">${item.dataTexto}</span>${medidasTxt ? `<span class="history-medidas">${medidasTxt}</span>` : ''}</div><div class="history-actions"><span class="history-weight">${item.peso.toFixed(1)} kg</span><button class="btn-delete" onclick="event.stopPropagation(); deletarRegistro(${item.id})">Excluir</button></div></div>`;
   });
   
-  atualizarGraficosSlider();
-  renderizarAgua();
+  atualizarGraficosSlider(); renderizarAgua();
 }
 
 function adicionarRegistro() {
-  const peso = parseFloat(document.getElementById('pesoInput').value);
-  const data = document.getElementById('dataInput').value;
-  const cintura = document.getElementById('cinturaInput').value;
-  const quadril = document.getElementById('quadrilInput').value;
-  
+  const peso = parseFloat(document.getElementById('pesoInput').value); const data = document.getElementById('dataInput').value; const cintura = document.getElementById('cinturaInput').value; const quadril = document.getElementById('quadrilInput').value;
   if (!peso || isNaN(peso)) return alert('Digite o peso!');
-  
-  const historico = obterHistorico();
-  const partes = data.split('-');
-  
-  historico.push({
-    id: Date.now(),
-    dataTexto: new Date(partes[0], partes[1] - 1, partes[2]).toLocaleDateString('pt-BR', {day: 'numeric', month: 'short'}).replace('.',''),
-    dataRaw: data,
-    peso: peso,
-    cintura: cintura ? parseFloat(cintura) : null,
-    quadril: quadril ? parseFloat(quadril) : null
-  });
-  
-  localStorage.setItem('historicoPeso', JSON.stringify(historico));
-  carregarDados();
-  document.getElementById('pesoInput').value = '';
-  document.getElementById('cinturaInput').value = '';
-  document.getElementById('quadrilInput').value = '';
+  const historico = obterHistorico(); const partes = data.split('-');
+  historico.push({ id: Date.now(), dataTexto: new Date(partes[0], partes[1] - 1, partes[2]).toLocaleDateString('pt-BR', {day: 'numeric', month: 'short'}).replace('.',''), dataRaw: data, peso: peso, cintura: cintura ? parseFloat(cintura) : null, quadril: quadril ? parseFloat(quadril) : null });
+  localStorage.setItem('historicoPeso', JSON.stringify(historico)); carregarDados();
+  document.getElementById('pesoInput').value = ''; document.getElementById('cinturaInput').value = ''; document.getElementById('quadrilInput').value = '';
 }
 
 function deletarRegistro(id) {
   if (!confirm("Excluir pesagem?")) return;
-  const historico = obterHistorico().filter(i => i.id !== id);
-  localStorage.setItem('historicoPeso', JSON.stringify(historico));
-  carregarDados();
+  localStorage.setItem('historicoPeso', JSON.stringify(obterHistorico().filter(i => i.id !== id))); carregarDados();
 }
 
 function exportarParaExcel() {
-  const historico = obterHistorico().sort((a, b) => b.id - a.id);
-  if(historico.length === 0) return alert("Nenhum dado para exportar.");
-  
-  let csv = "Data,Peso (kg),Cintura (cm),Quadril (cm)\n";
-  historico.forEach(item => {
-    csv += `${item.dataRaw},${item.peso},${item.cintura || ''},${item.quadril || ''}\n`;
-  });
-  
-  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-  const link = document.createElement("a");
-  link.href = URL.createObjectURL(blob);
-  link.download = "meu_historico_peso.csv";
-  link.click();
+  const historico = obterHistorico().sort((a, b) => b.id - a.id); if(historico.length === 0) return alert("Nenhum dado para exportar.");
+  let csv = "Data,Peso (kg),Cintura (cm),Quadril (cm)\n"; historico.forEach(item => { csv += `${item.dataRaw},${item.peso},${item.cintura || ''},${item.quadril || ''}\n`; });
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' }); const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.download = "meu_historico_peso.csv"; link.click();
 }
 
 function atualizarGraficosSlider() {
-  const historico = obterHistorico();
-  const cardSlider = document.getElementById('cardGraficosSlider');
-  const wrapper = document.getElementById('graficosWrapper');
-  
-  wrapper.innerHTML = '';
-  
-  if (meuSwiper) {
-    meuSwiper.destroy(true, true);
-    meuSwiper = null;
-  }
-  
-  if (historico.length < 2) {
-    cardSlider.style.display = 'none';
-    return;
-  }
-  
-  cardSlider.style.display = 'block';
-  const dadosHistorico = [...historico].sort((a, b) => a.id - b.id);
-  
-  if (dadosHistorico.filter(i => i.peso).length >= 2) {
-    adicionarSlideComGrafico(wrapper, 'graficoPeso');
-  }
-  if (dadosHistorico.filter(i => i.cintura).length >= 2) {
-    adicionarSlideComGrafico(wrapper, 'graficoCintura');
-  }
-  if (dadosHistorico.filter(i => i.quadril).length >= 2) {
-    adicionarSlideComGrafico(wrapper, 'graficoQuadril');
-  }
-  
-  meuSwiper = new Swiper('.mySwiper', {
-    pagination: { el: '.swiper-pagination', clickable: true },
-    on: {
-      slideChangeTransitionEnd: function () {
-        atualizarGraficos(); 
-      }
-    }
-  });
-  
+  const historico = obterHistorico(); const cardSlider = document.getElementById('cardGraficosSlider'); const wrapper = document.getElementById('graficosWrapper'); wrapper.innerHTML = '';
+  if (meuSwiper) { meuSwiper.destroy(true, true); meuSwiper = null; }
+  if (historico.length < 2) { cardSlider.style.display = 'none'; return; }
+  cardSlider.style.display = 'block'; const dadosHistorico = [...historico].sort((a, b) => a.id - b.id);
+  if (dadosHistorico.filter(i => i.peso).length >= 2) adicionarSlideComGrafico(wrapper, 'graficoPeso');
+  if (dadosHistorico.filter(i => i.cintura).length >= 2) adicionarSlideComGrafico(wrapper, 'graficoCintura');
+  if (dadosHistorico.filter(i => i.quadril).length >= 2) adicionarSlideComGrafico(wrapper, 'graficoQuadril');
+  meuSwiper = new Swiper('.mySwiper', { pagination: { el: '.swiper-pagination', clickable: true }, on: { slideChangeTransitionEnd: function () { atualizarGraficos(); } } });
   atualizarGraficos();
 }
 
 function adicionarSlideComGrafico(wrapper, canvasId) {
-  const slide = document.createElement('div');
-  slide.className = 'swiper-slide';
-  const canvas = document.createElement('canvas');
-  canvas.id = canvasId;
-  slide.appendChild(canvas);
-  wrapper.appendChild(slide);
+  const slide = document.createElement('div'); slide.className = 'swiper-slide'; const canvas = document.createElement('canvas'); canvas.id = canvasId; slide.appendChild(canvas); wrapper.appendChild(slide);
 }
 
 function atualizarGraficos() {
-  const historico = obterHistorico();
-  if (historico.length < 2) return;
-  const dadosHistorico = [...historico].sort((a, b) => a.id - b.id);
-  const temaAtual = document.documentElement.getAttribute('data-theme');
-  const corGrid = temaAtual === 'dark' ? '#334155' : '#f1f5f9';
-  const corTexto = temaAtual === 'dark' ? '#94a3b8' : '#64748b';
-
+  const historico = obterHistorico(); if (historico.length < 2) return; const dadosHistorico = [...historico].sort((a, b) => a.id - b.id);
+  const temaAtual = document.documentElement.getAttribute('data-theme'); const corGrid = temaAtual === 'dark' ? '#334155' : '#f1f5f9'; const corTexto = temaAtual === 'dark' ? '#94a3b8' : '#64748b';
   renderizarGraficoUnico('graficoPeso', 'Peso (kg)', dadosHistorico.map(i => i.peso), dadosHistorico.map(i => i.dataTexto), corGrid, corTexto, 'peso');
   renderizarGraficoUnico('graficoCintura', 'Cintura (cm)', dadosHistorico.filter(i => i.cintura).map(i => i.cintura), dadosHistorico.filter(i => i.cintura).map(i => i.dataTexto), corGrid, corTexto, 'cintura');
   renderizarGraficoUnico('graficoQuadril', 'Quadril (cm)', dadosHistorico.filter(i => i.quadril).map(i => i.quadril), dadosHistorico.filter(i => i.quadril).map(i => i.dataTexto), corGrid, corTexto, 'quadril');
 }
 
 function renderizarGraficoUnico(canvasId, label, dados, labels, corGrid, corTexto, metricKey) {
-  const canvas = document.getElementById(canvasId);
-  if (!canvas) return; 
-  const ctx = canvas.getContext('2d');
-
-  if (instanciasGraficos[metricKey]) {
-    instanciasGraficos[metricKey].destroy();
-  }
-
-  const gradiente = ctx.createLinearGradient(0, 0, 0, 180);
-  gradiente.addColorStop(0, 'rgba(14, 165, 233, 0.45)');
-  gradiente.addColorStop(1, 'rgba(37, 99, 235, 0.00)');
-
-  instanciasGraficos[metricKey] = new Chart(ctx, {
-    type: 'line',
-    data: {
-      labels: labels,
-      datasets: [{
-        label: label, data: dados,
-        borderColor: '#0ea5e9', borderWidth: 3, tension: 0.4,
-        pointBackgroundColor: '#2563eb', pointRadius: 4, pointHoverRadius: 6,
-        fill: true, backgroundColor: gradiente
-      }]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      plugins: { 
-        legend: { display: false },
-        title: {
-            display: true, text: `Evolução de ${label}`, color: corTexto,
-            font: { size: 14, weight: '600' }, padding: { bottom: 16 }
-        }
-      },
-      scales: {
-        y: { grid: { color: corGrid }, ticks: { color: corTexto } },
-        x: { grid: { display: false }, ticks: { color: corTexto } }
-      }
-    }
-  });
+  const canvas = document.getElementById(canvasId); if (!canvas) return; 
+  if (instanciasGraficos[metricKey]) instanciasGraficos[metricKey].destroy();
+  const ctx = canvas.getContext('2d'); const gradiente = ctx.createLinearGradient(0, 0, 0, 180); gradiente.addColorStop(0, 'rgba(14, 165, 233, 0.45)'); gradiente.addColorStop(1, 'rgba(37, 99, 235, 0.00)');
+  instanciasGraficos[metricKey] = new Chart(ctx, { type: 'line', data: { labels: labels, datasets: [{ label: label, data: dados, borderColor: '#0ea5e9', borderWidth: 3, tension: 0.4, pointBackgroundColor: '#2563eb', pointRadius: 4, pointHoverRadius: 6, fill: true, backgroundColor: gradiente }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, title: { display: true, text: `Evolução de ${label}`, color: corTexto, font: { size: 14, weight: '600' }, padding: { bottom: 16 } } }, scales: { y: { grid: { color: corGrid }, ticks: { color: corTexto } }, x: { grid: { display: false }, ticks: { color: corTexto } } } } });
 }

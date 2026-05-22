@@ -5,19 +5,18 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta name="theme-color" content="#ffffff" id="metaThemeColor">
   <title>Monitor de Peso</title>
-  
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css" />
   <link rel="manifest" href="manifest.json">
 </head>
 <body>
   <div class="app-container">
-    <header style="display: flex; justify-content: space-between; align-items: flex-start;">
+    <header id="headerApp" style="display: flex; justify-content: space-between; align-items: flex-start;">
       <div>
         <h1>Bora focar!</h1>
         <p>Acompanhe sua evolução diária</p>
       </div>
-      <div style="display: flex; flex-direction: column; gap: 8px; align-items: flex-end;">
+      <div id="headerActions" style="display: flex; flex-direction: column; gap: 8px; align-items: flex-end;">
         <button id="btnTema" class="btn-secondary">🌙 Escuro</button>
         <div style="display: flex; gap: 8px;">
           <button id="btnModificarMeta" class="btn-secondary">Editar Meta</button>
@@ -47,17 +46,6 @@
           <div class="meta-item" style="text-align: right;">
             <div class="label">Status</div>
             <div class="sub-value" id="imcStatus">Defina a altura</div>
-          </div>
-        </div>
-        <div class="card-divider"></div>
-        <div class="meta-grid">
-          <div class="meta-item">
-            <div class="label">Total Eliminado</div>
-            <div class="sub-value" id="totalEliminadoCard" style="font-size: 20px; font-weight: 700;">--.- kg</div>
-          </div>
-          <div class="meta-item" style="text-align: right;">
-            <div class="label">Tempo de Jornada</div>
-            <div class="sub-value" id="tempoJornadaCard" style="font-size: 16px; font-weight: 600;">-- dias</div>
           </div>
         </div>
       </div>
@@ -95,94 +83,68 @@
               <input type="number" step="0.1" placeholder="Ex: 84.2" id="pesoInput">
             </div>
           </div>
-          <div class="row-input">
-            <div style="flex: 1; display: flex; flex-direction: column; gap: 4px;">
-              <span style="font-size: 12px; color: var(--text-muted); font-weight: 600;">Cintura (cm) - Opcional:</span>
-              <input type="number" step="0.1" placeholder="Ex: 90" id="cinturaInput">
-            </div>
-            <div style="flex: 1; display: flex; flex-direction: column; gap: 4px;">
-              <span style="font-size: 12px; color: var(--text-muted); font-weight: 600;">Quadril (cm) - Opcional:</span>
-              <input type="number" step="0.1" placeholder="Ex: 105" id="quadrilInput">
-            </div>
-          </div>
           <button id="btnSalvar" style="width: 100%; margin-top: 8px;">Salvar Registro</button>
         </div>
       </div>
 
       <div class="card" id="cardGraficosSlider" style="display: none;">
         <div class="swiper-container mySwiper">
-          <div class="swiper-wrapper" id="graficosWrapper">
-          </div>
+          <div class="swiper-wrapper" id="graficosWrapper"></div>
           <div class="swiper-pagination"></div>
         </div>
-      </div>
-
-      <div class="history-section">
-        <div class="history-header">
-          <div class="history-title">Registros anteriores</div>
-          <button id="btnExportar" class="btn-secondary">⬇️ Excel</button>
-        </div>
-        <div class="history-list" id="historicoLista"></div>
       </div>
     </div>
 
     <div id="telaAlimentacao" class="tela">
       <div class="card">
         <h3>Diário de Alimentação</h3>
-        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">Registre suas refeições para manter o foco.</p>
-        
-        <div class="input-group" style="margin-bottom: 20px;">
-          <span style="font-size: 12px; color: var(--text-muted); font-weight: 600; margin-bottom: 4px;">Data do Diário:</span>
+        <div class="input-group" style="margin: 16px 0;">
           <input type="date" id="dataAlimentacao">
         </div>
-        
         <div class="input-group" style="margin-bottom: 16px;">
-          <span style="font-size: 13px; font-weight: 600; margin-bottom: 6px;">☕ Café da Manhã</span>
-          <textarea id="cafeInput" placeholder="Ex: 2 ovos mexidos, mamão e café puro..."></textarea>
+          <span style="font-size: 13px; font-weight: 600;">☕ Café da Manhã</span>
+          <textarea id="cafeInput"></textarea>
         </div>
-
         <div class="input-group" style="margin-bottom: 16px;">
-          <span style="font-size: 13px; font-weight: 600; margin-bottom: 6px;">🥗 Almoço</span>
-          <textarea id="almocoInput" placeholder="Ex: Frango grelhado, arroz, feijão e salada verde..."></textarea>
+          <span style="font-size: 13px; font-weight: 600;">🥗 Almoço</span>
+          <textarea id="almocoInput"></textarea>
         </div>
-
+        <div class="input-group" style="margin-bottom: 16px;">
+          <span style="font-size: 13px; font-weight: 600;">🍎 Lanches / Ceia</span>
+          <textarea id="lancheInput"></textarea>
+        </div>
         <div class="input-group" style="margin-bottom: 24px;">
-          <span style="font-size: 13px; font-weight: 600; margin-bottom: 6px;">🍲 Jantar</span>
-          <textarea id="jantarInput" placeholder="Ex: Sopa de legumes com carne..."></textarea>
+          <span style="font-size: 13px; font-weight: 600;">🍲 Jantar</span>
+          <textarea id="jantarInput"></textarea>
         </div>
-
-        <button id="btnSalvarAlimentacao" style="width: 100%;">Salvar Refeições</button>
+        <div class="card" style="background: var(--btn-sec-bg); border: none;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+              <div style="font-weight: 600;">💧 Água (250ml)</div>
+              <div id="metaAguaTexto" style="font-size: 11px; color: var(--text-muted);">Meta: --- ml</div>
+            </div>
+            <div style="display: flex; gap: 15px; align-items: center;">
+              <button onclick="ajustarAgua(-1)" class="btn-secondary" style="padding: 5px 15px;">-</button>
+              <span id="contagemAgua" style="font-weight: 700; font-size: 18px;">0</span>
+              <button onclick="ajustarAgua(1)" class="btn-secondary" style="padding: 5px 15px;">+</button>
+            </div>
+          </div>
+        </div>
+        <button id="btnSalvarAlimentacao" style="width: 100%; margin-top: 10px;">Salvar Diário</button>
       </div>
     </div>
-
   </div>
 
   <nav class="bottom-nav">
-    <button class="nav-item active" id="navMedidas" onclick="mudarTela('medidas')">
-      <span class="nav-icon">📏</span>
-      <span>Medidas</span>
-    </button>
-    <button class="nav-item" id="navAlimentacao" onclick="mudarTela('alimentacao')">
-      <span class="nav-icon">🍽️</span>
-      <span>Alimentação</span>
-    </button>
+    <button class="nav-item active" id="navMedidas" onclick="mudarTela('medidas')">📏 <span>Medidas</span></button>
+    <button class="nav-item" id="navAlimentacao" onclick="mudarTela('alimentacao')">🍽️ <span>Alimentação</span></button>
   </nav>
 
-  <div id="toastCelebracao">
-    <span id="toastMensagem">Parabéns!</span>
-  </div>
+  <div id="toastCelebracao"><span id="toastMensagem"></span></div>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
   <script src="script.js"></script>
-  
-  <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js').catch((err) => console.log(err));
-      });
-    }
-  </script>
 </body>
 </html>

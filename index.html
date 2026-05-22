@@ -64,7 +64,7 @@
             <div class="sub-value" id="tempoJornadaCard" style="font-size: 16px; font-weight: 600;">-- dias</div>
           </div>
         </div>
-        <button id="btnCompartilharProgresso" style="width: 100%; margin-top: 16px; background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.4);">
+        <button id="btnCompartilharProgresso" class="btn-compartilhar-conquista">
           🚀 Compartilhar Conquista
         </button>
       </div>
@@ -242,6 +242,35 @@
       </div>
     </div>
 
+    <div id="aba-ia" class="aba-conteudo" style="display: none;">
+      <header>
+        <h1>Treinador I.A.</h1>
+        <p>Sua análise de performance personalizada</p>
+      </header>
+
+      <div class="card card-ia-status">
+        <div class="ia-status-info">
+          <span id="iaStatusData">Aguardando primeira análise</span>
+        </div>
+        <button id="btnAnalisarDia" class="btn-ia-action">🧠 Analisar meu dia e montar plano</button>
+      </div>
+
+      <div id="iaRespostaContainer" class="card card-ia-resposta" style="display: none;">
+        <div class="ia-secao-titulo">📋 PLANO DE HOJE</div>
+        <div id="iaTextoPlano" class="ia-texto-conteudo"></div>
+        
+        <div class="card-divider" style="background: rgba(0,0,0,0.05);"></div>
+        
+        <div class="ia-secao-titulo">💡 DICA DO TREINADOR</div>
+        <div id="iaTextoDica" class="ia-texto-conteudo"></div>
+      </div>
+
+      <div id="iaLoading" class="ia-loading" style="display: none;">
+        <div class="spinner"></div>
+        <p>IA processando seus dados...</p>
+      </div>
+    </div>
+
     <div id="modalTreino" class="modal">
       <div class="modal-content">
         <span class="close-modal" onclick="fecharModalTreino()">&times;</span>
@@ -270,6 +299,10 @@
       <button class="nav-item" onclick="trocarAba('exercicio', this)">
         <span style="font-size: 20px;">👟</span>
         <span>Treino</span>
+      </button>
+      <button class="nav-item" onclick="trocarAba('ia', this)">
+        <span style="font-size: 20px;">🤖</span>
+        <span>I.A.</span>
       </button>
     </nav>
 

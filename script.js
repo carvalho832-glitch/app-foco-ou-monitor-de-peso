@@ -10,13 +10,176 @@ document.getElementById('btnSalvarMeta').addEventListener('click', salvarMeta);
 document.getElementById('btnTema').addEventListener('click', alternarTema);
 document.getElementById('btnExportar').addEventListener('click', exportarParaExcel);
 
+// Listeners da Aba de Diário
+document.getElementById('dataAlimentacaoInput').addEventListener('change', carregarRefeicoesDoDia);
+document.getElementById('btnSalvarAlimentacao').addEventListener('click', salvarRefeicoes);
+
 function iniciarApp() {
   carregarTema();
   configurarDataPadrao();
+  configurarDataAlimentacaoPadrao();
   verificarExibicaoAltura();
   carregarMeta();
   carregarDados();
+  carregarRefeicoesDoDia();
 }
+
+// ==========================================
+// LÓGICA DO DIÁRIO (ALIMENTAÇÃO E ÁGUA)
+// ==========================================
+
+const itensPreProgramados = {
+  cafe: ["Pão Francês", "Fruta", "Iogurte", "Café Preto", "Suco", "Ovos", "Biscoito"],
+  almoco: ["Arroz", "Feijão", "Frango", "Carne", "Salada", "Legumes", "Macarrão"],
+  jantar: ["Sopa", "Salada", "Frango", "Omelete", "Pão", "Iogurte", "Fruta"]
+};
+
+let refeicoesAtuais = { cafe: [], almoco: [], jantar: [], agua: 0 };
+
+function trocarAba(abaId, elementoBotao) {
+  document.getElementById('aba-dashboard').style.display = abaId === 'dashboard' ? 'block' : 'none';
+  document.getElementById('aba-alimentacao').style.display = abaId === 'alimentacao' ? 'block' : 'none';
+  
+  document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('active'));
+  elementoBotao.classList.add('active');
+
+  if (abaId === 'alimentacao') {
+    const inputData = document.getElementById('dataAlimentacaoInput');
+    if (!inputData.value) {
+      inputData.value = new Date().toISOString().split('T')[0];
+    }
+    carregarRefeicoesDoDia();
+  }
+}
+
+function configurarDataAlimentacaoPadrao() {
+  const hoje = new Date();
+  document.getElementById('dataAlimentacaoInput').value = hoje.toISOString().split('T')[0];
+}
+
+function carregarRefeicoesDoDia() {
+  const dataSelect = document.getElementById('dataAlimentacaoInput').value;
+  const historico = JSON.parse(localStorage.getItem('historicoAlimentacao') || '{}');
+  
+  if (historico[dataSelect]) {
+    refeicoesAtuais = JSON.parse(JSON.stringify(historico[dataSelect]));
+    if (typeof refeicoesAtuais.agua === 'undefined') refeicoesAtuais.agua = 0;
+  } else {
+    refeicoesAtuais = { cafe: [], almoco: [], jantar: [], agua: 0 };
+  }
+  
+  renderizarTagsDeComida();
+  renderizarAgua();
+}
+
+// --- Funções de Água (Calculada por Peso) ---
+
+function obterMetaAguaDinamica() {
+  const historico = obterHistorico();
+  const ordenado = [...historico].sort((a, b) => b.id - a.id);
+  const pesoAtual = ordenado.length > 0 ? ordenado[0].peso : 0;
+  
+  if (pesoAtual > 0) {
+    // 35ml multiplicados pelo peso atual em kg
+    return Math.round(pesoAtual * 35);
+  }
+  
+  // Se ainda não houver peso registrado, o padrão é 2000ml
+  return 2000; 
+}
+
+function adicionarAgua(qtd) {
+  refeicoesAtuais.agua += qtd;
+  if (refeicoesAtuais.agua < 0) refeicoesAtuais.agua = 0; 
+  renderizarAgua();
+}
+
+function renderizarAgua() {
+  const atual = refeicoesAtuais.agua;
+  const metaAgua = obterMetaAguaDinamica();
+  
+  document.getElementById('aguaAtualDisplay').innerText = atual;
+  document.getElementById('aguaMetaDisplay').innerText = metaAgua;
+  
+  let porcentagem = (atual / metaAgua) * 100;
+  if (porcentagem > 100) porcentagem = 100; 
+  
+  const progressFill = document.getElementById('aguaProgressFill');
+  progressFill.style.width = `${porcentagem}%`;
+  
+  if (atual >= metaAgua) {
+    progressFill.style.backgroundColor = '#10b981'; // Verde se bater a meta
+  } else {
+    progressFill.style.backgroundColor = '#0ea5e9'; // Azul padrão
+  }
+}
+
+// --- Funções de Comida ---
+
+function renderizarTagsDeComida() {
+  ['cafe', 'almoco', 'jantar'].forEach(refeicao => {
+    const container = document.getElementById(`tags-${refeicao}`);
+    container.innerHTML = '';
+    
+    const itensUnicos = new Set([...itensPreProgramados[refeicao], ...refeicoesAtuais[refeicao]]);
+    
+    itensUnicos.forEach(item => {
+      const isSelected = refeicoesAtuais[refeicao].includes(item);
+      const tag = document.createElement('div');
+      tag.className = `food-tag ${isSelected ? 'selected' : ''}`;
+      tag.innerText = item;
+      
+      tag.onclick = () => {
+        const index = refeicoesAtuais[refeicao].indexOf(item);
+        if (index > -1) {
+          refeicoesAtuais[refeicao].splice(index, 1);
+          tag.classList.remove('selected');
+        } else {
+          refeicoesAtuais[refeicao].push(item);
+          tag.classList.add('selected');
+        }
+      };
+      
+      container.appendChild(tag);
+    });
+  });
+}
+
+function adicionarComidaCustomizada(refeicao) {
+  const input = document.getElementById(`custom-${refeicao}`);
+  const valor = input.value.trim();
+  const valorFormatado = valor.charAt(0).toUpperCase() + valor.slice(1);
+  
+  if (valorFormatado) {
+    if (!refeicoesAtuais[refeicao].includes(valorFormatado)) {
+      refeicoesAtuais[refeicao].push(valorFormatado);
+    }
+    input.value = '';
+    renderizarTagsDeComida();
+  }
+}
+
+function salvarRefeicoes() {
+  const dataSelect = document.getElementById('dataAlimentacaoInput').value;
+  const historico = JSON.parse(localStorage.getItem('historicoAlimentacao') || '{}');
+  
+  historico[dataSelect] = refeicoesAtuais;
+  localStorage.setItem('historicoAlimentacao', JSON.stringify(historico));
+  
+  const btn = document.getElementById('btnSalvarAlimentacao');
+  const textoOriginal = btn.innerText;
+  btn.innerText = "✅ Salvo com sucesso!";
+  btn.style.backgroundColor = "#10b981"; 
+  
+  setTimeout(() => {
+    btn.innerText = textoOriginal;
+    btn.style.backgroundColor = ""; 
+  }, 2000);
+}
+
+// ==========================================
+// LÓGICA DE PESO E GRÁFICOS (Original)
+// ==========================================
 
 function carregarTema() {
   const temaSalvo = localStorage.getItem('usuarioTema');
@@ -148,6 +311,9 @@ function carregarDados() {
   });
   
   atualizarGraficosSlider();
+  
+  // Atualiza a barra de água caso o peso seja modificado na primeira tela
+  renderizarAgua();
 }
 
 function adicionarRegistro() {

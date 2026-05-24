@@ -307,9 +307,25 @@
           <i class="bi bi-stars"></i> Treinar com I.A
         </button>
 
-        <div id="treinoIAContainer" class="card card-treino-ia" style="display: none;">
-          <div class="ia-secao-titulo"><i class="bi bi-lightning-charge"></i> TREINO PERSONALIZADO</div>
-          <div id="treinoIATexto" class="ia-texto-conteudo"></div>
+        <div id="treinoIAContainer" class="card card-treino-ia treino-ia-collapsed" style="display: none;">
+          <button id="treinoIAHeader" class="treino-ia-header" type="button">
+            <div class="treino-ia-header-info">
+              <div class="ia-secao-titulo">
+                <i class="bi bi-lightning-charge"></i> TREINO PERSONALIZADO
+              </div>
+              <div class="treino-ia-subtitle">Toque para abrir a orientação da Luma</div>
+            </div>
+
+            <i id="treinoIAIconeToggle" class="bi bi-chevron-down treino-ia-toggle"></i>
+          </button>
+
+          <div id="treinoIABody" class="treino-ia-body">
+            <div id="treinoIATexto" class="ia-texto-conteudo"></div>
+
+            <button id="btnRecolherTreinoIA" class="btn-recolher-treino" type="button">
+              <i class="bi bi-chevron-up"></i> Recolher treino
+            </button>
+          </div>
         </div>
 
         <div id="treinoIALoading" class="ia-loading" style="display: none;">

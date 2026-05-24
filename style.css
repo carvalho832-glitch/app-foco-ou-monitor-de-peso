@@ -347,7 +347,9 @@ button i {
   padding: 0;
   background: linear-gradient(135deg, #7c3aed, #a855f7, #ec4899);
   color: #ffffff;
-  box-shadow: 0 12px 30px rgba(168, 85, 247, 0.38);
+  box-shadow:
+    0 12px 30px rgba(168, 85, 247, 0.38),
+    0 0 0 0 rgba(168, 85, 247, 0.50);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -356,10 +358,48 @@ button i {
   pointer-events: auto;
   position: relative;
   z-index: 3;
+  overflow: visible;
+  animation: lumaPulse 2.8s ease-in-out infinite;
+}
+
+.floating-main::before {
+  content: "";
+  position: absolute;
+  inset: -5px;
+  border-radius: 50%;
+  padding: 2px;
+  background: conic-gradient(
+    from 0deg,
+    rgba(168, 85, 247, 0),
+    rgba(168, 85, 247, 0.95),
+    rgba(236, 72, 153, 0.85),
+    rgba(14, 165, 233, 0.80),
+    rgba(168, 85, 247, 0)
+  );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  animation: lumaRotate 4s linear infinite;
+  pointer-events: none;
+}
+
+.floating-main::after {
+  content: "";
+  position: absolute;
+  inset: -12px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(168, 85, 247, 0.24), transparent 65%);
+  animation: lumaGlow 2.4s ease-in-out infinite;
+  pointer-events: none;
+  z-index: -1;
 }
 
 .floating-main i {
   margin: 0;
+  position: relative;
+  z-index: 2;
 }
 
 .floating-main:hover {
@@ -563,30 +603,164 @@ button i {
   margin-right: 2px;
 }
 
+/* --- CARD INTELIGENTE DE KCAL --- */
+
 .card-total-kcal {
-  background: linear-gradient(135deg, rgba(249, 115, 22, 0.10), rgba(14, 165, 233, 0.08));
+  background: linear-gradient(135deg, rgba(249, 115, 22, 0.10), rgba(168, 85, 247, 0.09), rgba(14, 165, 233, 0.08));
   border: 1px solid rgba(249, 115, 22, 0.22);
   text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.card-total-kcal::before {
+  content: "";
+  position: absolute;
+  width: 160px;
+  height: 160px;
+  right: -70px;
+  top: -90px;
+  background: radial-gradient(circle, rgba(168, 85, 247, 0.22), transparent 65%);
+  pointer-events: none;
 }
 
 .total-kcal-label {
   font-size: 13px;
   color: var(--text-muted);
-  font-weight: 800;
-  margin-bottom: 6px;
+  font-weight: 900;
+  margin-bottom: 12px;
+  position: relative;
+  z-index: 1;
 }
 
-.total-kcal-value {
-  font-size: 30px;
+.kcal-dashboard {
+  position: relative;
+  z-index: 1;
+}
+
+.kcal-main-box {
+  background: rgba(255, 255, 255, 0.58);
+  border: 1px solid rgba(249, 115, 22, 0.20);
+  border-radius: 18px;
+  padding: 16px;
+  margin-bottom: 10px;
+}
+
+[data-theme="dark"] .kcal-main-box {
+  background: rgba(15, 23, 42, 0.42);
+  border-color: rgba(249, 115, 22, 0.30);
+}
+
+.kcal-box-label {
+  display: block;
+  font-size: 12px;
+  color: var(--text-muted);
   font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}
+
+.kcal-main-box strong {
+  font-size: 32px;
+  font-weight: 950;
   color: var(--luma-orange);
   line-height: 1.1;
 }
 
+.kcal-mini-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.kcal-mini-box {
+  background: rgba(255, 255, 255, 0.45);
+  border: 1px solid rgba(148, 163, 184, 0.20);
+  border-radius: 16px;
+  padding: 12px 8px;
+}
+
+[data-theme="dark"] .kcal-mini-box {
+  background: rgba(15, 23, 42, 0.34);
+  border-color: rgba(148, 163, 184, 0.18);
+}
+
+.kcal-mini-box span {
+  display: block;
+  font-size: 11px;
+  color: var(--text-muted);
+  font-weight: 850;
+  margin-bottom: 4px;
+}
+
+.kcal-mini-box strong {
+  display: block;
+  font-size: 18px;
+  font-weight: 950;
+  color: var(--text-main);
+}
+
+.kcal-status-pill {
+  position: relative;
+  z-index: 1;
+  margin-top: 12px;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 32px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 900;
+  background: rgba(100, 116, 139, 0.12);
+  color: var(--text-muted);
+  border: 1px solid rgba(100, 116, 139, 0.18);
+}
+
+.kcal-status-pill.status-abaixo {
+  background: rgba(14, 165, 233, 0.12);
+  color: #0284c7;
+  border-color: rgba(14, 165, 233, 0.25);
+}
+
+.kcal-status-pill.status-dentro {
+  background: rgba(16, 185, 129, 0.13);
+  color: #059669;
+  border-color: rgba(16, 185, 129, 0.28);
+}
+
+.kcal-status-pill.status-acima {
+  background: rgba(249, 115, 22, 0.13);
+  color: #ea580c;
+  border-color: rgba(249, 115, 22, 0.30);
+}
+
+.btn-meta-kcal {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  margin-top: 12px;
+  padding: 11px 14px;
+  border-radius: 13px;
+  font-size: 13px;
+  font-weight: 900;
+  background: rgba(168, 85, 247, 0.12);
+  color: var(--luma-purple);
+  border: 1px solid rgba(168, 85, 247, 0.30);
+}
+
+.btn-meta-kcal:hover {
+  background: rgba(168, 85, 247, 0.20);
+}
+
 .total-kcal-note {
+  position: relative;
+  z-index: 1;
   font-size: 12px;
   color: var(--text-muted);
   margin-top: 8px;
+  line-height: 1.4;
 }
 
 [data-theme="dark"] .kcal-refeicao {
@@ -595,7 +769,7 @@ button i {
 }
 
 [data-theme="dark"] .card-total-kcal {
-  background: linear-gradient(135deg, rgba(249, 115, 22, 0.14), rgba(14, 165, 233, 0.10));
+  background: linear-gradient(135deg, rgba(249, 115, 22, 0.14), rgba(168, 85, 247, 0.12), rgba(14, 165, 233, 0.10));
   border-color: rgba(249, 115, 22, 0.32);
 }
 
@@ -1074,8 +1248,12 @@ button i {
     font-size: 14px;
   }
 
-  .total-kcal-value {
-    font-size: 26px;
+  .kcal-main-box strong {
+    font-size: 27px;
+  }
+
+  .kcal-mini-box strong {
+    font-size: 15px;
   }
 
   .btn-ia-treino {
@@ -1112,5 +1290,37 @@ button i {
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@keyframes lumaRotate {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes lumaPulse {
+  0%, 100% {
+    box-shadow:
+      0 12px 30px rgba(168, 85, 247, 0.34),
+      0 0 0 0 rgba(168, 85, 247, 0.42);
+  }
+
+  50% {
+    box-shadow:
+      0 14px 34px rgba(168, 85, 247, 0.48),
+      0 0 0 9px rgba(168, 85, 247, 0.02);
+  }
+}
+
+@keyframes lumaGlow {
+  0%, 100% {
+    opacity: 0.55;
+    transform: scale(0.94);
+  }
+
+  50% {
+    opacity: 1;
+    transform: scale(1.06);
   }
 }

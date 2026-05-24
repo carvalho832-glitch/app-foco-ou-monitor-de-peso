@@ -134,7 +134,7 @@ async function solicitarAnaliseIA() {
     });
 
     if (!resposta.ok) {
-      throw new Error("Erro ao conectar com a IA");
+      throw new Error("Erro ao conectar com a IA. Status: " + resposta.status);
     }
 
     const resultado = await resposta.json();
@@ -160,7 +160,7 @@ async function solicitarAnaliseIA() {
 
   } catch (erro) {
     console.error(erro);
-    alert("Erro ao gerar análise da IA.");
+    alert("Erro ao gerar análise da IA:\n\n" + erro.message);
   } finally {
     loading.style.display = 'none';
     btnIA.style.display = 'block';
@@ -247,7 +247,7 @@ async function gerarTreinoIA() {
     });
 
     if (!resposta.ok) {
-      throw new Error("Erro ao conectar com a IA de treino.");
+      throw new Error("Erro ao conectar com a IA de treino. Status: " + resposta.status);
     }
 
     const resultado = await resposta.json();
@@ -271,8 +271,15 @@ async function gerarTreinoIA() {
 
   } catch (erro) {
     console.error("Erro treino IA:", erro);
-    alert("Não consegui gerar o treino agora. Verifique se a API está ativa.");
+
+    alert(
+      "Erro ao gerar treino:\n\n" +
+      erro.message +
+      "\n\nSe persistir, veja os logs do Render."
+    );
+
     btn.innerText = textoOriginal;
+
   } finally {
     loading.style.display = 'none';
     btn.disabled = false;
@@ -886,7 +893,7 @@ async function calcularCaloriasComIA() {
   });
 
   if (!resposta.ok) {
-    throw new Error("Erro ao conectar com a API de calorias.");
+    throw new Error("Erro ao conectar com a API de calorias. Status: " + resposta.status);
   }
 
   const resultado = await resposta.json();

@@ -764,6 +764,7 @@ button i {
   border-left: 4px solid var(--luma-purple);
   background: linear-gradient(135deg, rgba(168, 85, 247, 0.10), rgba(14, 165, 233, 0.06));
   animation: fadeIn 0.5s ease;
+  overflow: hidden;
 }
 
 [data-theme="dark"] .card-treino-ia {
@@ -773,6 +774,81 @@ button i {
 
 [data-theme="dark"] .btn-ia-treino {
   box-shadow: 0 8px 24px rgba(168, 85, 247, 0.22);
+}
+
+/* --- TREINO IA RECOLHÍVEL --- */
+
+.treino-ia-header {
+  width: 100%;
+  background: transparent;
+  color: var(--text-main);
+  padding: 0;
+  border-radius: 0;
+  box-shadow: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  text-align: left;
+}
+
+.treino-ia-header:hover {
+  background: transparent;
+}
+
+.treino-ia-header-info {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.treino-ia-subtitle {
+  font-size: 12px;
+  color: var(--text-muted);
+  font-weight: 700;
+}
+
+.treino-ia-toggle {
+  font-size: 22px;
+  color: var(--luma-purple);
+  transition: transform 0.25s ease;
+}
+
+.treino-ia-body {
+  max-height: 900px;
+  opacity: 1;
+  overflow: hidden;
+  transition: max-height 0.35s ease, opacity 0.25s ease, margin-top 0.25s ease;
+  margin-top: 16px;
+}
+
+.treino-ia-collapsed .treino-ia-body {
+  max-height: 0;
+  opacity: 0;
+  margin-top: 0;
+}
+
+.treino-ia-collapsed .treino-ia-toggle {
+  transform: rotate(0deg);
+}
+
+.card-treino-ia:not(.treino-ia-collapsed) .treino-ia-toggle {
+  transform: rotate(180deg);
+}
+
+.btn-recolher-treino {
+  width: 100%;
+  margin-top: 14px;
+  padding: 11px 14px;
+  border-radius: 12px;
+  background: rgba(168, 85, 247, 0.12);
+  color: var(--luma-purple);
+  border: 1px solid rgba(168, 85, 247, 0.28);
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.btn-recolher-treino:hover {
+  background: rgba(168, 85, 247, 0.20);
 }
 
 /* Leaflet Dark Mode Fix */

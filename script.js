@@ -22,6 +22,10 @@ document.getElementById('btnIniciarTreino').addEventListener('click', iniciarTre
 document.getElementById('btnPararTreino').addEventListener('click', encerrarTreino);
 document.getElementById('btnGerarTreinoIA').addEventListener('click', gerarTreinoIA);
 
+// Listener Treino IA Recolhível
+document.getElementById('treinoIAHeader').addEventListener('click', alternarCardTreinoIA);
+document.getElementById('btnRecolherTreinoIA').addEventListener('click', recolherCardTreinoIA);
+
 // Listener Compartilhamento
 document.getElementById('btnCompartilharProgresso').addEventListener('click', compartilharProgresso);
 
@@ -345,7 +349,7 @@ function carregarTreinoIASalvo() {
   const hoje = new Date().toLocaleDateString('pt-BR');
 
   if (cache && cache.data === hoje && cache.treino) {
-    exibirTreinoIA(cache.treino);
+    exibirTreinoIA(cache.treino, true);
     document.getElementById('btnGerarTreinoIA').innerHTML = '<i class="bi bi-arrow-clockwise"></i> Atualizar treino com I.A';
   }
 }
@@ -392,7 +396,7 @@ async function gerarTreinoIA() {
 
     localStorage.setItem('treinoIACache', JSON.stringify(cache));
 
-    exibirTreinoIA(treino);
+    exibirTreinoIA(treino, true);
 
     btn.innerHTML = '<i class="bi bi-arrow-clockwise"></i> Atualizar treino com I.A';
 
@@ -447,9 +451,28 @@ function montarDadosTreinoIA() {
   };
 }
 
-function exibirTreinoIA(treino) {
-  document.getElementById('treinoIATexto').innerText = treino;
-  document.getElementById('treinoIAContainer').style.display = 'block';
+function exibirTreinoIA(treino, recolhido = true) {
+  const container = document.getElementById('treinoIAContainer');
+  const texto = document.getElementById('treinoIATexto');
+
+  texto.innerText = treino;
+  container.style.display = 'block';
+
+  if (recolhido) {
+    container.classList.add('treino-ia-collapsed');
+  } else {
+    container.classList.remove('treino-ia-collapsed');
+  }
+}
+
+function alternarCardTreinoIA() {
+  const container = document.getElementById('treinoIAContainer');
+  container.classList.toggle('treino-ia-collapsed');
+}
+
+function recolherCardTreinoIA() {
+  const container = document.getElementById('treinoIAContainer');
+  container.classList.add('treino-ia-collapsed');
 }
 
 // ==========================================

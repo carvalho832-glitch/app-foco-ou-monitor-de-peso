@@ -17,6 +17,7 @@ document.getElementById('btnSalvarAlimentacao').addEventListener('click', salvar
 // Listeners Treino
 document.getElementById('btnIniciarTreino').addEventListener('click', iniciarTreino);
 document.getElementById('btnPararTreino').addEventListener('click', encerrarTreino);
+document.getElementById('btnGerarTreinoIA').addEventListener('click', gerarTreinoIA);
 
 // Listener Compartilhamento Conquista
 document.getElementById('btnCompartilharProgresso').addEventListener('click', compartilharProgresso);
@@ -33,6 +34,7 @@ function iniciarApp() {
   carregarDados();
   carregarRefeicoesDoDia();
   carregarHistoricoTreinos();
+  carregarTreinoIASalvo();
 }
 
 function trocarAba(abaId, elementoBotao) {
@@ -52,6 +54,7 @@ function trocarAba(abaId, elementoBotao) {
 
   if (abaId === 'exercicio') {
     setTimeout(iniciarMapaTreino, 200);
+    carregarTreinoIASalvo();
   }
 
   if (abaId === 'ia') {
@@ -204,6 +207,114 @@ function exibirRespostaIA(plano, dica) {
       hour: '2-digit',
       minute: '2-digit'
     })}`;
+}
+
+// ==========================================
+// TREINO COM IA
+// ==========================================
+
+function carregarTreinoIASalvo() {
+  const cache = JSON.parse(localStorage.getItem('treinoIACache') || 'null');
+  const hoje = new Date().toLocaleDateString('pt-BR');
+
+  if (cache && cache.data === hoje && cache.treino) {
+    exibirTreinoIA(cache.treino);
+    document.getElementById('btnGerarTreinoIA').innerText = "🔄 Atualizar treino com I.A";
+  }
+}
+
+async function gerarTreinoIA() {
+  const btn = document.getElementById('btnGerarTreinoIA');
+  const container = document.getElementById('treinoIAContainer');
+  const loading = document.getElementById('treinoIALoading');
+
+  const textoOriginal = btn.innerText;
+
+  btn.disabled = true;
+  btn.innerText = "🧠 Gerando treino...";
+  container.style.display = 'none';
+  loading.style.display = 'block';
+
+  try {
+    const dadosTreino = montarDadosTreinoIA();
+
+    const resposta = await fetch("https://luma-gemini-api.onrender.com/gerar-treino", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(dadosTreino)
+    });
+
+    if (!resposta.ok) {
+      throw new Error("Erro ao conectar com a IA de treino.");
+    }
+
+    const resultado = await resposta.json();
+
+    if (!resultado.sucesso) {
+      throw new Error(resultado.erro || "Erro ao gerar treino.");
+    }
+
+    const treino = resultado.resposta || "Não consegui montar o treino agora.";
+
+    const cache = {
+      data: new Date().toLocaleDateString('pt-BR'),
+      treino: treino
+    };
+
+    localStorage.setItem('treinoIACache', JSON.stringify(cache));
+
+    exibirTreinoIA(treino);
+
+    btn.innerText = "🔄 Atualizar treino com I.A";
+
+  } catch (erro) {
+    console.error("Erro treino IA:", erro);
+    alert("Não consegui gerar o treino agora. Verifique se a API está ativa.");
+    btn.innerText = textoOriginal;
+  } finally {
+    loading.style.display = 'none';
+    btn.disabled = false;
+  }
+}
+
+function montarDadosTreinoIA() {
+  const historicoPeso = JSON.parse(localStorage.getItem('historicoPeso') || '[]');
+  const historicoAlimentacao = JSON.parse(localStorage.getItem('historicoAlimentacao') || '{}');
+  const historicoTreinos = JSON.parse(localStorage.getItem('historicoTreinos') || '[]');
+
+  const hojeISO = new Date().toISOString().split('T')[0];
+  const altura = parseFloat(localStorage.getItem('usuarioAltura'));
+  const metaPeso = localStorage.getItem('usuarioMeta') || "80.0";
+
+  const pesoOrdenado = [...historicoPeso].sort((a, b) => b.id - a.id);
+  const pesoAtual = pesoOrdenado.length > 0 ? pesoOrdenado[0].peso : null;
+
+  let imc = null;
+
+  if (altura && pesoAtual) {
+    imc = pesoAtual / (altura * altura);
+  }
+
+  const tipoAtividadeEscolhida = document.getElementById('tipoAtividade').value;
+
+  return {
+    dataHoje: hojeISO,
+    tipoAtividadeEscolhida: tipoAtividadeEscolhida,
+    altura: altura || null,
+    pesoAtual: pesoAtual,
+    imc: imc ? Number(imc.toFixed(1)) : null,
+    metaPeso: metaPeso,
+    historicoPeso: historicoPeso.slice(-10),
+    diarioHoje: historicoAlimentacao[hojeISO] || null,
+    ultimosTreinos: historicoTreinos.slice(-7)
+  };
+}
+
+function exibirTreinoIA(treino) {
+  document.getElementById('treinoIATexto').innerText = treino;
+  document.getElementById('treinoIAContainer').style.display = 'block';
 }
 
 // ==========================================

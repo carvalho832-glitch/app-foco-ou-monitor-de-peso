@@ -1,7 +1,10 @@
+const API_BASE_URL = "https://luma-gemini-api.onrender.com";
+
 let meuSwiper = null;
 let instanciasGraficos = { peso: null, cintura: null, quadril: null };
 
 document.addEventListener('DOMContentLoaded', iniciarApp);
+
 document.getElementById('btnSalvar').addEventListener('click', adicionarRegistro);
 document.getElementById('btnSalvarAltura').addEventListener('click', salvarAltura);
 document.getElementById('btnModificarAltura').addEventListener('click', abrirEdicaoAltura);
@@ -19,11 +22,26 @@ document.getElementById('btnIniciarTreino').addEventListener('click', iniciarTre
 document.getElementById('btnPararTreino').addEventListener('click', encerrarTreino);
 document.getElementById('btnGerarTreinoIA').addEventListener('click', gerarTreinoIA);
 
-// Listener Compartilhamento Conquista
+// Listener Compartilhamento
 document.getElementById('btnCompartilharProgresso').addEventListener('click', compartilharProgresso);
 
 // Listener IA
 document.getElementById('btnAnalisarDia').addEventListener('click', solicitarAnaliseIA);
+
+// Listener Perfil
+document.getElementById('btnSalvarPerfil').addEventListener('click', salvarPerfilUsuario);
+
+// Listener Menu Flutuante
+document.getElementById('btnMenuLuma').addEventListener('click', alternarMenuLuma);
+
+document.addEventListener('click', function(event) {
+  const nav = document.getElementById('floatingNav');
+  const clicouNoMenu = nav.contains(event.target);
+
+  if (!clicouNoMenu && nav.classList.contains('open')) {
+    nav.classList.remove('open');
+  }
+});
 
 function iniciarApp() {
   carregarTema();
@@ -31,6 +49,7 @@ function iniciarApp() {
   configurarDataAlimentacaoPadrao();
   verificarExibicaoAltura();
   carregarMeta();
+  carregarPerfilUsuario();
   carregarDados();
   carregarRefeicoesDoDia();
   carregarHistoricoTreinos();
@@ -43,8 +62,18 @@ function trocarAba(abaId, elementoBotao) {
   document.getElementById('aba-exercicio').style.display = abaId === 'exercicio' ? 'block' : 'none';
   document.getElementById('aba-ia').style.display = abaId === 'ia' ? 'block' : 'none';
 
-  document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('active'));
-  elementoBotao.classList.add('active');
+  document.querySelectorAll('.floating-item').forEach(btn => {
+    btn.classList.remove('active');
+  });
+
+  if (elementoBotao) {
+    elementoBotao.classList.add('active');
+  } else {
+    const botaoAba = document.querySelector(`.floating-item[data-aba="${abaId}"]`);
+    if (botaoAba) botaoAba.classList.add('active');
+  }
+
+  document.getElementById('floatingNav').classList.remove('open');
 
   if (abaId === 'alimentacao') {
     const inputData = document.getElementById('dataAlimentacaoInput');
@@ -58,8 +87,99 @@ function trocarAba(abaId, elementoBotao) {
   }
 
   if (abaId === 'ia') {
+    carregarPerfilUsuario();
     carregarAnaliseSalva();
   }
+}
+
+function alternarMenuLuma(event) {
+  event.stopPropagation();
+  document.getElementById('floatingNav').classList.toggle('open');
+}
+
+// ==========================================
+// PERFIL DA LUMA
+// ==========================================
+
+function obterPerfilUsuario() {
+  return JSON.parse(localStorage.getItem('usuarioPerfil') || 'null');
+}
+
+function carregarPerfilUsuario() {
+  const perfil = obterPerfilUsuario();
+
+  if (!perfil) {
+    atualizarStatusPerfil(null);
+    return;
+  }
+
+  document.getElementById('perfilNome').value = perfil.nome || '';
+  document.getElementById('perfilIdade').value = perfil.idade || '';
+  document.getElementById('perfilSexo').value = perfil.sexo || '';
+  document.getElementById('perfilNivel').value = perfil.nivel || '';
+  document.getElementById('perfilObjetivo').value = perfil.objetivo || '';
+  document.getElementById('perfilObservacoes').value = perfil.observacoes || '';
+
+  atualizarStatusPerfil(perfil);
+}
+
+function salvarPerfilUsuario() {
+  const nome = document.getElementById('perfilNome').value.trim();
+  const idade = document.getElementById('perfilIdade').value.trim();
+  const sexo = document.getElementById('perfilSexo').value;
+  const nivel = document.getElementById('perfilNivel').value;
+  const objetivo = document.getElementById('perfilObjetivo').value;
+  const observacoes = document.getElementById('perfilObservacoes').value.trim();
+
+  const perfil = {
+    nome: nome,
+    idade: idade ? Number(idade) : null,
+    sexo: sexo,
+    nivel: nivel,
+    objetivo: objetivo,
+    observacoes: observacoes,
+    atualizadoEm: new Date().toLocaleString('pt-BR')
+  };
+
+  localStorage.setItem('usuarioPerfil', JSON.stringify(perfil));
+
+  atualizarStatusPerfil(perfil);
+
+  const btn = document.getElementById('btnSalvarPerfil');
+  const textoOriginal = btn.innerHTML;
+
+  btn.innerHTML = '<i class="bi bi-check2-circle"></i> Perfil salvo!';
+  btn.style.background = '#10b981';
+
+  setTimeout(() => {
+    btn.innerHTML = textoOriginal;
+    btn.style.background = '';
+  }, 1800);
+}
+
+function atualizarStatusPerfil(perfil) {
+  const status = document.getElementById('perfilStatus');
+
+  if (!status) return;
+
+  if (!perfil) {
+    status.innerText = "Perfil ainda não configurado.";
+    return;
+  }
+
+  const nome = perfil.nome || "Usuário";
+  const idade = perfil.idade ? `${perfil.idade} anos` : "idade não informada";
+  const nivel = perfil.nivel ? formatarTextoPerfil(perfil.nivel) : "nível não informado";
+  const objetivo = perfil.objetivo ? formatarTextoPerfil(perfil.objetivo) : "objetivo não informado";
+
+  status.innerText = `${nome} • ${idade} • ${nivel} • ${objetivo}`;
+}
+
+function formatarTextoPerfil(texto) {
+  return String(texto || '')
+    .replace(/_/g, ' ')
+    .replace('nao informar', 'prefere não informar')
+    .replace(/\b\w/g, letra => letra.toUpperCase());
 }
 
 // ==========================================
@@ -69,10 +189,14 @@ function trocarAba(abaId, elementoBotao) {
 function compartilharProgresso() {
   const pesoAtual = document.getElementById('pesoAtualCard').innerText.replace('kg', '').trim();
   const eliminado = document.getElementById('totalEliminadoCard').innerText;
-  const texto = `Bora focar! 🚀 Já eliminei ${eliminado} e estou pesando ${pesoAtual} kg. 💪 Acompanhando tudo pelo meu app Monitor de Peso!`;
+
+  const texto = `Bora focar! 🚀 Já eliminei ${eliminado} e estou pesando ${pesoAtual} kg. 💪 Acompanhando tudo pelo meu app Luma!`;
 
   if (navigator.share) {
-    navigator.share({ title: 'Minha Evolução', text: texto }).catch(console.error);
+    navigator.share({
+      title: 'Minha Evolução',
+      text: texto
+    }).catch(console.error);
   } else {
     alert("Seu navegador não suporta o compartilhamento nativo. Copie o texto:\n\n" + texto);
   }
@@ -86,13 +210,15 @@ function compartilharTreinoModal() {
 
   if (!treino) return;
 
-  const icone = treino.tipo === 'corrida' ? '🏃' : '🚶';
   const nome = treino.tipo.charAt(0).toUpperCase() + treino.tipo.slice(1);
 
-  const texto = `Treino concluído! ${icone} ${nome} \n⏱️ Tempo: ${treino.tempo} \n🛣️ Distância: ${treino.distancia} km \n🔥 Gasto: ${treino.calorias} kcal. \nBora focar! 💪`;
+  const texto = `Treino concluído! ${nome}\n⏱️ Tempo: ${treino.tempo}\n🛣️ Distância: ${treino.distancia} km\n🔥 Gasto: ${treino.calorias} kcal.\nBora focar com a Luma! 💪`;
 
   if (navigator.share) {
-    navigator.share({ title: 'Meu Treino', text: texto }).catch(console.error);
+    navigator.share({
+      title: 'Meu Treino',
+      text: texto
+    }).catch(console.error);
   } else {
     alert("Seu navegador não suporta o compartilhamento nativo. Copie o texto:\n\n" + texto);
   }
@@ -109,7 +235,7 @@ function carregarAnaliseSalva() {
   if (analise && analise.data === hoje) {
     exibirRespostaIA(analise.plano, analise.dica);
     document.getElementById('iaStatusData').innerText = `Análise de hoje concluída ✅`;
-    document.getElementById('btnAnalisarDia').innerText = "🔄 Atualizar Análise";
+    document.getElementById('btnAnalisarDia').innerHTML = '<i class="bi bi-arrow-clockwise"></i> Atualizar análise';
   }
 }
 
@@ -125,7 +251,7 @@ async function solicitarAnaliseIA() {
   try {
     const dadosParaIA = montarDadosParaIA();
 
-    const resposta = await fetch("https://luma-gemini-api.onrender.com/analisar-dia", {
+    const resposta = await fetch(`${API_BASE_URL}/analisar-dia`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -156,7 +282,7 @@ async function solicitarAnaliseIA() {
     localStorage.setItem('iaAnaliseCache', JSON.stringify(cache));
 
     exibirRespostaIA(cache.plano, cache.dica);
-    btnIA.innerText = "🔄 Atualizar Análise";
+    btnIA.innerHTML = '<i class="bi bi-arrow-clockwise"></i> Atualizar análise';
 
   } catch (erro) {
     console.error(erro);
@@ -175,6 +301,7 @@ function montarDadosParaIA() {
 
   return {
     dataHoje: hojeISO,
+    perfilUsuario: obterPerfilUsuario(),
     altura: localStorage.getItem('usuarioAltura'),
     metaPeso: localStorage.getItem('usuarioMeta') || "80.0",
     historicoPeso: historicoPeso.slice(-10),
@@ -219,7 +346,7 @@ function carregarTreinoIASalvo() {
 
   if (cache && cache.data === hoje && cache.treino) {
     exibirTreinoIA(cache.treino);
-    document.getElementById('btnGerarTreinoIA').innerText = "🔄 Atualizar treino com I.A";
+    document.getElementById('btnGerarTreinoIA').innerHTML = '<i class="bi bi-arrow-clockwise"></i> Atualizar treino com I.A';
   }
 }
 
@@ -228,17 +355,17 @@ async function gerarTreinoIA() {
   const container = document.getElementById('treinoIAContainer');
   const loading = document.getElementById('treinoIALoading');
 
-  const textoOriginal = btn.innerText;
+  const textoOriginal = btn.innerHTML;
 
   btn.disabled = true;
-  btn.innerText = "🧠 Gerando treino...";
+  btn.innerHTML = '<i class="bi bi-cpu"></i> Gerando treino...';
   container.style.display = 'none';
   loading.style.display = 'block';
 
   try {
     const dadosTreino = montarDadosTreinoIA();
 
-    const resposta = await fetch("https://luma-gemini-api.onrender.com/gerar-treino", {
+    const resposta = await fetch(`${API_BASE_URL}/gerar-treino`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -267,7 +394,7 @@ async function gerarTreinoIA() {
 
     exibirTreinoIA(treino);
 
-    btn.innerText = "🔄 Atualizar treino com I.A";
+    btn.innerHTML = '<i class="bi bi-arrow-clockwise"></i> Atualizar treino com I.A';
 
   } catch (erro) {
     console.error("Erro treino IA:", erro);
@@ -278,7 +405,7 @@ async function gerarTreinoIA() {
       "\n\nSe persistir, veja os logs do Render."
     );
 
-    btn.innerText = textoOriginal;
+    btn.innerHTML = textoOriginal;
 
   } finally {
     loading.style.display = 'none';
@@ -308,6 +435,7 @@ function montarDadosTreinoIA() {
 
   return {
     dataHoje: hojeISO,
+    perfilUsuario: obterPerfilUsuario(),
     tipoAtividadeEscolhida: tipoAtividadeEscolhida,
     altura: altura || null,
     pesoAtual: pesoAtual,
@@ -360,7 +488,9 @@ function iniciarMapaTreino() {
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         const latLng = [pos.coords.latitude, pos.coords.longitude];
+
         mapaTreino.setView(latLng, 16);
+
         marcadorGPS = L.circleMarker(latLng, {
           color: '#0ea5e9',
           radius: 8,
@@ -377,6 +507,8 @@ function iniciarMapaTreino() {
 function iniciarTreino() {
   if (!navigator.geolocation) return alert("Seu navegador não suporta GPS.");
 
+  if (!mapaTreino) iniciarMapaTreino();
+
   isTreinando = true;
   distanciaTotalKm = 0;
   ultimaPosicao = null;
@@ -392,7 +524,7 @@ function iniciarTreino() {
   document.getElementById('btnPararTreino').style.display = 'block';
   document.getElementById('msgGpsErro').style.display = 'none';
 
-  if (rotaPolyline) mapaTreino.removeLayer(rotaPolyline);
+  if (rotaPolyline && mapaTreino) mapaTreino.removeLayer(rotaPolyline);
 
   rotaPolyline = L.polyline([], {
     color: '#ef4444',
@@ -443,6 +575,7 @@ function processarPosicaoGps(posicao) {
     }
 
     ultimaPosicao = coordAtual;
+
     atualizarTelaTreino();
   }
 }
@@ -542,7 +675,10 @@ function carregarHistoricoTreinos() {
   const ordenado = [...treinos].sort((a, b) => b.id - a.id);
 
   ordenado.forEach(treino => {
-    const icone = treino.tipo === 'corrida' ? '🏃' : '🚶';
+    const icone = treino.tipo === 'corrida'
+      ? '<i class="bi bi-lightning-charge"></i>'
+      : '<i class="bi bi-person-walking"></i>';
+
     const nome = treino.tipo.charAt(0).toUpperCase() + treino.tipo.slice(1);
 
     lista.innerHTML += `
@@ -583,7 +719,7 @@ function abrirModalTreino(id) {
   treinoAtualModalId = id;
 
   document.getElementById('modalTituloTreino').innerText =
-    `${treino.tipo === 'corrida' ? '🏃 Corrida' : '🚶 Caminhada'} - ${treino.data}`;
+    `${treino.tipo === 'corrida' ? 'Corrida' : 'Caminhada'} - ${treino.data}`;
 
   document.getElementById('modalDistancia').innerText = treino.distancia;
   document.getElementById('modalTempo').innerText = treino.tempo;
@@ -809,11 +945,11 @@ async function salvarRefeicoes() {
   const dataSelect = document.getElementById('dataAlimentacaoInput').value;
   const historico = JSON.parse(localStorage.getItem('historicoAlimentacao') || '{}');
   const btn = document.getElementById('btnSalvarAlimentacao');
-  const textoOriginal = btn.innerText;
+  const textoOriginal = btn.innerHTML;
   const corOriginal = btn.style.backgroundColor;
 
   btn.disabled = true;
-  btn.innerText = "⏳ Salvando e calculando kcal...";
+  btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Salvando e calculando kcal...';
   btn.style.backgroundColor = "#f97316";
 
   const assinaturaAtual = obterAssinaturaRefeicoes();
@@ -855,7 +991,7 @@ async function salvarRefeicoes() {
 
     renderizarCalorias();
 
-    btn.innerText = "✅ Diário salvo com kcal!";
+    btn.innerHTML = '<i class="bi bi-check-circle"></i> Diário salvo com kcal!';
     btn.style.backgroundColor = "#10b981";
 
   } catch (erro) {
@@ -864,26 +1000,27 @@ async function salvarRefeicoes() {
     historico[dataSelect] = refeicoesAtuais;
     localStorage.setItem('historicoAlimentacao', JSON.stringify(historico));
 
-    btn.innerText = "✅ Salvo sem kcal";
+    btn.innerHTML = '<i class="bi bi-check-circle"></i> Salvo sem kcal';
     btn.style.backgroundColor = "#10b981";
 
     alert("Diário salvo, mas não consegui calcular as calorias agora.");
   } finally {
     setTimeout(() => {
       btn.disabled = false;
-      btn.innerText = textoOriginal;
+      btn.innerHTML = textoOriginal;
       btn.style.backgroundColor = corOriginal;
     }, 2200);
   }
 }
 
 async function calcularCaloriasComIA() {
-  const resposta = await fetch("https://luma-gemini-api.onrender.com/calcular-calorias", {
+  const resposta = await fetch(`${API_BASE_URL}/calcular-calorias`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json"
     },
     body: JSON.stringify({
+      perfilUsuario: obterPerfilUsuario(),
       cafe: refeicoesAtuais.cafe || [],
       almoco: refeicoesAtuais.almoco || [],
       jantar: refeicoesAtuais.jantar || [],
@@ -914,7 +1051,7 @@ function carregarTema() {
 
   if (temaSalvo === 'dark') {
     document.documentElement.setAttribute('data-theme', 'dark');
-    document.getElementById('btnTema').innerText = '☀️ Claro';
+    document.getElementById('btnTema').innerHTML = '<i class="bi bi-sun"></i> Claro';
     document.getElementById('metaThemeColor').setAttribute('content', '#0f172a');
   }
 }
@@ -926,12 +1063,12 @@ function alternarTema() {
   if (temaAtual === 'dark') {
     document.documentElement.removeAttribute('data-theme');
     localStorage.setItem('usuarioTema', 'light');
-    document.getElementById('btnTema').innerText = '🌙 Escuro';
+    document.getElementById('btnTema').innerHTML = '<i class="bi bi-moon-stars"></i> Escuro';
     metaColor.setAttribute('content', '#ffffff');
   } else {
     document.documentElement.setAttribute('data-theme', 'dark');
     localStorage.setItem('usuarioTema', 'dark');
-    document.getElementById('btnTema').innerText = '☀️ Claro';
+    document.getElementById('btnTema').innerHTML = '<i class="bi bi-sun"></i> Claro';
     metaColor.setAttribute('content', '#0f172a');
   }
 

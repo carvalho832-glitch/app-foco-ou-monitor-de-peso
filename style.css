@@ -103,6 +103,11 @@ button {
 
 button:hover { background-color: #1d4ed8; }
 
+button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
 .btn-secondary {
   background-color: var(--btn-sec-bg);
   color: var(--btn-sec-text);
@@ -503,6 +508,45 @@ button:hover { background-color: #1d4ed8; }
 
 .btn-parar-treino:hover { background-color: #dc2626; }
 
+/* --- TREINO COM IA --- */
+
+.btn-ia-treino {
+  width: 100%;
+  margin-top: 14px;
+  padding: 18px 20px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #7c3aed, #a855f7, #ec4899);
+  color: #ffffff;
+  font-size: 17px;
+  font-weight: 800;
+  letter-spacing: -0.2px;
+  box-shadow: 0 8px 20px rgba(168, 85, 247, 0.30);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+}
+
+.btn-ia-treino:hover {
+  background: linear-gradient(135deg, #6d28d9, #9333ea, #db2777);
+  transform: translateY(-1px);
+}
+
+.card-treino-ia {
+  margin-top: 18px;
+  text-align: left;
+  border-left: 4px solid #a855f7;
+  background: linear-gradient(135deg, rgba(168, 85, 247, 0.10), rgba(14, 165, 233, 0.06));
+  animation: fadeIn 0.5s ease;
+}
+
+[data-theme="dark"] .card-treino-ia {
+  background: linear-gradient(135deg, rgba(168, 85, 247, 0.16), rgba(14, 165, 233, 0.08));
+  border-color: rgba(168, 85, 247, 0.55);
+}
+
+[data-theme="dark"] .btn-ia-treino {
+  box-shadow: 0 8px 24px rgba(168, 85, 247, 0.22);
+}
+
+/* Leaflet Dark Mode Fix */
 [data-theme="dark"] .leaflet-layer,
 [data-theme="dark"] .leaflet-control-zoom-in,
 [data-theme="dark"] .leaflet-control-zoom-out,
@@ -625,6 +669,11 @@ button:hover { background-color: #1d4ed8; }
 
   .total-kcal-value {
     font-size: 26px;
+  }
+
+  .btn-ia-treino {
+    font-size: 15px;
+    padding: 16px;
   }
 }
 

@@ -16,6 +16,7 @@ document.getElementById('btnExportar').addEventListener('click', exportarParaExc
 // Listeners Diário
 document.getElementById('dataAlimentacaoInput').addEventListener('change', carregarRefeicoesDoDia);
 document.getElementById('btnSalvarAlimentacao').addEventListener('click', salvarRefeicoes);
+document.getElementById('btnAtualizarMetaKcal').addEventListener('click', atualizarMetaKcalComIA);
 
 // Listeners Treino
 document.getElementById('btnIniciarTreino').addEventListener('click', iniciarTreino);
@@ -54,6 +55,7 @@ function iniciarApp() {
   verificarExibicaoAltura();
   carregarMeta();
   carregarPerfilUsuario();
+  carregarMetaKcalSalva();
   carregarDados();
   carregarRefeicoesDoDia();
   carregarHistoricoTreinos();
@@ -83,6 +85,7 @@ function trocarAba(abaId, elementoBotao) {
     const inputData = document.getElementById('dataAlimentacaoInput');
     if (!inputData.value) inputData.value = new Date().toISOString().split('T')[0];
     carregarRefeicoesDoDia();
+    carregarMetaKcalSalva();
   }
 
   if (abaId === 'exercicio') {
@@ -146,8 +149,10 @@ function salvarPerfilUsuario() {
   };
 
   localStorage.setItem('usuarioPerfil', JSON.stringify(perfil));
+  localStorage.removeItem('usuarioMetaKcal');
 
   atualizarStatusPerfil(perfil);
+  carregarMetaKcalSalva();
 
   const btn = document.getElementById('btnSalvarPerfil');
   const textoOriginal = btn.innerHTML;
@@ -184,6 +189,155 @@ function formatarTextoPerfil(texto) {
     .replace(/_/g, ' ')
     .replace('nao informar', 'prefere não informar')
     .replace(/\b\w/g, letra => letra.toUpperCase());
+}
+
+// ==========================================
+// META KCAL DA LUMA
+// ==========================================
+
+function obterMetaKcalSalva() {
+  return JSON.parse(localStorage.getItem('usuarioMetaKcal') || 'null');
+}
+
+function carregarMetaKcalSalva() {
+  renderizarCalorias();
+}
+
+async function atualizarMetaKcalComIA() {
+  const btn = document.getElementById('btnAtualizarMetaKcal');
+  const textoOriginal = btn.innerHTML;
+
+  btn.disabled = true;
+  btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Calculando meta...';
+
+  try {
+    const dados = montarDadosMetaKcal();
+
+    const resposta = await fetch(`${API_BASE_URL}/calcular-meta-kcal`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(dados)
+    });
+
+    if (!resposta.ok) {
+      throw new Error("Erro ao conectar com a Luma. Status: " + resposta.status);
+    }
+
+    const resultado = await resposta.json();
+
+    if (!resultado.sucesso) {
+      throw new Error(resultado.erro || "Erro ao calcular meta de kcal.");
+    }
+
+    const meta = resultado.meta || {};
+
+    const metaNormalizada = {
+      metaKcal: Number(meta.metaKcal) || 1800,
+      faixaMin: Number(meta.faixaMin) || 1700,
+      faixaMax: Number(meta.faixaMax) || 2000,
+      status: meta.status || "Meta estimada pela Luma",
+      observacao: meta.observacao || "Meta aproximada calculada pela Luma.",
+      atualizadoEm: new Date().toLocaleString('pt-BR')
+    };
+
+    localStorage.setItem('usuarioMetaKcal', JSON.stringify(metaNormalizada));
+
+    renderizarCalorias();
+
+    btn.innerHTML = '<i class="bi bi-check2-circle"></i> Meta atualizada!';
+    btn.style.background = '#10b981';
+    btn.style.color = '#ffffff';
+
+    setTimeout(() => {
+      btn.innerHTML = textoOriginal;
+      btn.style.background = '';
+      btn.style.color = '';
+    }, 1800);
+
+  } catch (erro) {
+    console.error("Erro meta kcal:", erro);
+
+    alert(
+      "Não consegui calcular a meta de kcal agora.\n\n" +
+      erro.message
+    );
+
+    btn.innerHTML = textoOriginal;
+
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+function montarDadosMetaKcal() {
+  const historicoPeso = JSON.parse(localStorage.getItem('historicoPeso') || '[]');
+  const historicoAlimentacao = JSON.parse(localStorage.getItem('historicoAlimentacao') || '{}');
+  const historicoTreinos = JSON.parse(localStorage.getItem('historicoTreinos') || '[]');
+
+  const hojeISO = new Date().toISOString().split('T')[0];
+  const altura = parseFloat(localStorage.getItem('usuarioAltura'));
+  const metaPeso = localStorage.getItem('usuarioMeta') || "80.0";
+
+  const pesoOrdenado = [...historicoPeso].sort((a, b) => b.id - a.id);
+  const pesoAtual = pesoOrdenado.length > 0 ? pesoOrdenado[0].peso : null;
+
+  let imc = null;
+
+  if (altura && pesoAtual) {
+    imc = pesoAtual / (altura * altura);
+  }
+
+  return {
+    dataHoje: hojeISO,
+    perfilUsuario: obterPerfilUsuario(),
+    altura: altura || null,
+    pesoAtual: pesoAtual,
+    imc: imc ? Number(imc.toFixed(1)) : null,
+    metaPeso: metaPeso,
+    historicoPeso: historicoPeso.slice(-10),
+    diarioHoje: historicoAlimentacao[hojeISO] || null,
+    ultimosTreinos: historicoTreinos.slice(-7)
+  };
+}
+
+function calcularStatusKcal(totalConsumido, metaKcal) {
+  if (!metaKcal || !metaKcal.metaKcal) {
+    return {
+      texto: "Aguardando meta da Luma",
+      classe: ""
+    };
+  }
+
+  const faixaMin = Number(metaKcal.faixaMin) || Number(metaKcal.metaKcal) - 150;
+  const faixaMax = Number(metaKcal.faixaMax) || Number(metaKcal.metaKcal) + 150;
+
+  if (totalConsumido <= 0) {
+    return {
+      texto: "Comece registrando suas refeições",
+      classe: ""
+    };
+  }
+
+  if (totalConsumido < faixaMin) {
+    return {
+      texto: "Abaixo da faixa da Luma",
+      classe: "status-abaixo"
+    };
+  }
+
+  if (totalConsumido <= faixaMax) {
+    return {
+      texto: "Dentro da meta da Luma ✅",
+      classe: "status-dentro"
+    };
+  }
+
+  return {
+    texto: "Acima da faixa da Luma",
+    classe: "status-acima"
+  };
 }
 
 // ==========================================
@@ -306,6 +460,7 @@ function montarDadosParaIA() {
   return {
     dataHoje: hojeISO,
     perfilUsuario: obterPerfilUsuario(),
+    metaKcalLuma: obterMetaKcalSalva(),
     altura: localStorage.getItem('usuarioAltura'),
     metaPeso: localStorage.getItem('usuarioMeta') || "80.0",
     historicoPeso: historicoPeso.slice(-10),
@@ -440,6 +595,7 @@ function montarDadosTreinoIA() {
   return {
     dataHoje: hojeISO,
     perfilUsuario: obterPerfilUsuario(),
+    metaKcalLuma: obterMetaKcalSalva(),
     tipoAtividadeEscolhida: tipoAtividadeEscolhida,
     altura: altura || null,
     pesoAtual: pesoAtual,
@@ -942,22 +1098,57 @@ function marcarCaloriasComoDesatualizadas() {
 
 function renderizarCalorias() {
   const kcal = refeicoesAtuais.kcal || null;
+  const metaKcal = obterMetaKcalSalva();
+
+  const totalConsumido = kcal && typeof kcal.total !== 'undefined'
+    ? Number(kcal.total) || 0
+    : 0;
 
   document.getElementById('kcal-cafe').innerText = kcal && typeof kcal.cafe !== 'undefined' ? kcal.cafe : '--';
   document.getElementById('kcal-almoco').innerText = kcal && typeof kcal.almoco !== 'undefined' ? kcal.almoco : '--';
   document.getElementById('kcal-jantar').innerText = kcal && typeof kcal.jantar !== 'undefined' ? kcal.jantar : '--';
   document.getElementById('kcal-total').innerText = kcal && typeof kcal.total !== 'undefined' ? kcal.total : '--';
 
+  const metaDisplay = document.getElementById('kcal-meta-luma');
+  const restanteDisplay = document.getElementById('kcal-restante');
+  const statusDisplay = document.getElementById('kcal-status-dia');
+
+  if (metaKcal && metaKcal.metaKcal) {
+    const metaValor = Number(metaKcal.metaKcal) || 0;
+    const restante = Math.max(metaValor - totalConsumido, 0);
+
+    metaDisplay.innerText = metaValor;
+    restanteDisplay.innerText = restante;
+
+    const status = calcularStatusKcal(totalConsumido, metaKcal);
+
+    statusDisplay.innerText = status.texto;
+    statusDisplay.className = `kcal-status-pill ${status.classe}`;
+
+  } else {
+    metaDisplay.innerText = '--';
+    restanteDisplay.innerText = '--';
+    statusDisplay.innerText = "Aguardando meta da Luma";
+    statusDisplay.className = "kcal-status-pill";
+  }
+
   const observacao = document.getElementById('kcal-observacao');
   const assinaturaAtual = obterAssinaturaRefeicoes();
 
   if (!kcal) {
-    observacao.innerText = "As calorias serão estimadas ao salvar o diário.";
+    observacao.innerText = metaKcal
+      ? "As calorias serão estimadas ao salvar o diário."
+      : "Atualize a meta de kcal para a Luma comparar seu consumo.";
     return;
   }
 
   if (refeicoesAtuais.assinaturaKcal !== assinaturaAtual) {
     observacao.innerText = "Você alterou alimentos. Salve o diário para recalcular as kcal.";
+    return;
+  }
+
+  if (metaKcal && metaKcal.observacao) {
+    observacao.innerText = metaKcal.observacao;
     return;
   }
 
@@ -1044,6 +1235,7 @@ async function calcularCaloriasComIA() {
     },
     body: JSON.stringify({
       perfilUsuario: obterPerfilUsuario(),
+      metaKcalLuma: obterMetaKcalSalva(),
       cafe: refeicoesAtuais.cafe || [],
       almoco: refeicoesAtuais.almoco || [],
       jantar: refeicoesAtuais.jantar || [],
@@ -1132,9 +1324,11 @@ function salvarAltura() {
   }
 
   localStorage.setItem('usuarioAltura', altura.toFixed(2));
+  localStorage.removeItem('usuarioMetaKcal');
 
   verificarExibicaoAltura();
   carregarDados();
+  carregarMetaKcalSalva();
 }
 
 function obterMeta() {
@@ -1163,12 +1357,14 @@ function salvarMeta() {
   }
 
   localStorage.setItem('usuarioMeta', meta.toFixed(1));
+  localStorage.removeItem('usuarioMetaKcal');
 
   carregarMeta();
 
   document.getElementById('cardMeta').style.display = 'none';
 
   carregarDados();
+  carregarMetaKcalSalva();
 }
 
 function obterHistorico() {
@@ -1275,8 +1471,10 @@ function adicionarRegistro() {
   });
 
   localStorage.setItem('historicoPeso', JSON.stringify(historico));
+  localStorage.removeItem('usuarioMetaKcal');
 
   carregarDados();
+  carregarMetaKcalSalva();
 
   document.getElementById('pesoInput').value = '';
   document.getElementById('cinturaInput').value = '';
@@ -1291,7 +1489,10 @@ function deletarRegistro(id) {
     JSON.stringify(obterHistorico().filter(i => i.id !== id))
   );
 
+  localStorage.removeItem('usuarioMetaKcal');
+
   carregarDados();
+  carregarMetaKcalSalva();
 }
 
 function exportarParaExcel() {

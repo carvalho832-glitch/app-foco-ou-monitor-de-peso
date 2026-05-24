@@ -6,16 +6,17 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="theme-color" content="#ffffff" id="metaThemeColor">
-  <title>Monitor de Peso</title>
+  <title>Luma - Jornada Saudável</title>
   
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
   <link rel="manifest" href="manifest.json">
 </head>
 
 <body>
-  <div class="app-container" style="padding-bottom: 80px;">
+  <div class="app-container" style="padding-bottom: 110px;">
     
     <div id="aba-dashboard" class="aba-conteudo" style="display: block;">
       <header style="display: flex; justify-content: space-between; align-items: flex-start;">
@@ -25,11 +26,18 @@
         </div>
 
         <div style="display: flex; flex-direction: column; gap: 8px; align-items: flex-end;">
-          <button id="btnTema" class="btn-secondary">🌙 Escuro</button>
+          <button id="btnTema" class="btn-secondary">
+            <i class="bi bi-moon-stars"></i> Escuro
+          </button>
 
           <div style="display: flex; gap: 8px;">
-            <button id="btnModificarMeta" class="btn-secondary">Editar Meta</button>
-            <button id="btnModificarAltura" class="btn-secondary" style="display: none;">Editar Altura</button>
+            <button id="btnModificarMeta" class="btn-secondary">
+              <i class="bi bi-bullseye"></i> Meta
+            </button>
+
+            <button id="btnModificarAltura" class="btn-secondary" style="display: none;">
+              <i class="bi bi-person-lines-fill"></i> Altura
+            </button>
           </div>
         </div>
       </header>
@@ -76,12 +84,12 @@
         </div>
 
         <button id="btnCompartilharProgresso" class="btn-compartilhar-conquista">
-          🚀 Compartilhar Conquista
+          <i class="bi bi-share"></i> Compartilhar Conquista
         </button>
       </div>
 
       <div class="card" id="cardMeta" style="display: none;">
-        <h3>Configurar Meta de Peso</h3>
+        <h3><i class="bi bi-bullseye"></i> Configurar Meta de Peso</h3>
 
         <div class="input-group">
           <div class="row-input">
@@ -92,7 +100,7 @@
       </div>
 
       <div class="card" id="cardAltura">
-        <h3>Configurar Perfil (Altura)</h3>
+        <h3><i class="bi bi-person-lines-fill"></i> Configurar Perfil Inicial</h3>
 
         <div class="input-group">
           <div class="row-input">
@@ -103,7 +111,7 @@
       </div>
 
       <div class="card">
-        <h3>Registrar Medidas</h3>
+        <h3><i class="bi bi-clipboard2-pulse"></i> Registrar Medidas</h3>
 
         <div class="input-group" style="gap: 12px;">
           <div class="row-input">
@@ -130,7 +138,9 @@
             </div>
           </div>
 
-          <button id="btnSalvar" style="width: 100%; margin-top: 8px;">Salvar Registro</button>
+          <button id="btnSalvar" style="width: 100%; margin-top: 8px;">
+            <i class="bi bi-check-circle"></i> Salvar Registro
+          </button>
         </div>
       </div>
 
@@ -144,7 +154,9 @@
       <div class="history-section">
         <div class="history-header">
           <div class="history-title">Registros anteriores</div>
-          <button id="btnExportar" class="btn-secondary">⬇️ Excel (CSV)</button>
+          <button id="btnExportar" class="btn-secondary">
+            <i class="bi bi-download"></i> CSV
+          </button>
         </div>
 
         <div class="history-list" id="historicoLista"></div>
@@ -165,7 +177,7 @@
       </div>
 
       <div class="card card-water">
-        <h3>💧 Meta de Água</h3>
+        <h3><i class="bi bi-droplet-half"></i> Meta de Água</h3>
 
         <div class="water-status">
           <span id="aguaAtualDisplay">0</span> / <span id="aguaMetaDisplay">2000</span>
@@ -185,53 +197,61 @@
 
       <div class="card meal-card">
         <div class="meal-title-row">
-          <h3>☕ Café da Manhã</h3>
-          <span class="kcal-refeicao">🔥 <span id="kcal-cafe">--</span> kcal</span>
+          <h3><i class="bi bi-cup-hot"></i> Café da Manhã</h3>
+          <span class="kcal-refeicao"><i class="bi bi-fire"></i> <span id="kcal-cafe">--</span> kcal</span>
         </div>
 
         <div class="food-tags" id="tags-cafe"></div>
 
         <div class="custom-food-input">
           <input type="text" id="custom-cafe" placeholder="Outro item... (Ex: Mamão)">
-          <button type="button" class="btn-add-food" onclick="adicionarComidaCustomizada('cafe')">+</button>
+          <button type="button" class="btn-add-food" onclick="adicionarComidaCustomizada('cafe')">
+            <i class="bi bi-plus-lg"></i>
+          </button>
         </div>
       </div>
 
       <div class="card meal-card">
         <div class="meal-title-row">
-          <h3>🍽️ Almoço</h3>
-          <span class="kcal-refeicao">🔥 <span id="kcal-almoco">--</span> kcal</span>
+          <h3><i class="bi bi-egg-fried"></i> Almoço</h3>
+          <span class="kcal-refeicao"><i class="bi bi-fire"></i> <span id="kcal-almoco">--</span> kcal</span>
         </div>
 
         <div class="food-tags" id="tags-almoco"></div>
 
         <div class="custom-food-input">
           <input type="text" id="custom-almoco" placeholder="Outro item... (Ex: Lasanha)">
-          <button type="button" class="btn-add-food" onclick="adicionarComidaCustomizada('almoco')">+</button>
+          <button type="button" class="btn-add-food" onclick="adicionarComidaCustomizada('almoco')">
+            <i class="bi bi-plus-lg"></i>
+          </button>
         </div>
       </div>
 
       <div class="card meal-card">
         <div class="meal-title-row">
-          <h3>🌙 Jantar</h3>
-          <span class="kcal-refeicao">🔥 <span id="kcal-jantar">--</span> kcal</span>
+          <h3><i class="bi bi-moon-stars"></i> Jantar</h3>
+          <span class="kcal-refeicao"><i class="bi bi-fire"></i> <span id="kcal-jantar">--</span> kcal</span>
         </div>
 
         <div class="food-tags" id="tags-jantar"></div>
 
         <div class="custom-food-input">
           <input type="text" id="custom-jantar" placeholder="Outro item... (Ex: Sopa)">
-          <button type="button" class="btn-add-food" onclick="adicionarComidaCustomizada('jantar')">+</button>
+          <button type="button" class="btn-add-food" onclick="adicionarComidaCustomizada('jantar')">
+            <i class="bi bi-plus-lg"></i>
+          </button>
         </div>
       </div>
 
       <div class="card card-total-kcal">
-        <div class="total-kcal-label">📊 Total estimado do dia</div>
+        <div class="total-kcal-label"><i class="bi bi-bar-chart-line"></i> Total estimado do dia</div>
         <div class="total-kcal-value"><span id="kcal-total">--</span> kcal</div>
         <div class="total-kcal-note" id="kcal-observacao">As calorias serão estimadas ao salvar o diário.</div>
       </div>
       
-      <button id="btnSalvarAlimentacao" style="width: 100%; margin-top: 8px;">Salvar Diário do Dia</button>
+      <button id="btnSalvarAlimentacao" style="width: 100%; margin-top: 8px;">
+        <i class="bi bi-check-circle"></i> Salvar Diário do Dia
+      </button>
     </div>
 
     <div id="aba-exercicio" class="aba-conteudo" style="display: none;">
@@ -243,8 +263,8 @@
       <div class="card" style="text-align: center;">
         <div style="margin-bottom: 20px;">
           <select id="tipoAtividade" class="select-treino">
-            <option value="caminhada">🚶 Caminhada</option>
-            <option value="corrida">🏃 Corrida</option>
+            <option value="caminhada">Caminhada</option>
+            <option value="corrida">Corrida</option>
           </select>
         </div>
 
@@ -275,15 +295,20 @@
           Aguardando sinal do GPS... Ative a localização.
         </div>
 
-        <button id="btnIniciarTreino" class="btn-iniciar-treino">▶ Iniciar Treino</button>
-        <button id="btnPararTreino" class="btn-parar-treino" style="display: none;">⏹ Encerrar e Salvar</button>
+        <button id="btnIniciarTreino" class="btn-iniciar-treino">
+          <i class="bi bi-play-fill"></i> Iniciar Treino
+        </button>
+
+        <button id="btnPararTreino" class="btn-parar-treino" style="display: none;">
+          <i class="bi bi-stop-fill"></i> Encerrar e Salvar
+        </button>
 
         <button id="btnGerarTreinoIA" class="btn-ia-treino">
-          ✨ Treinar com I.A
+          <i class="bi bi-stars"></i> Treinar com I.A
         </button>
 
         <div id="treinoIAContainer" class="card card-treino-ia" style="display: none;">
-          <div class="ia-secao-titulo">🧠 TREINO PERSONALIZADO</div>
+          <div class="ia-secao-titulo"><i class="bi bi-lightning-charge"></i> TREINO PERSONALIZADO</div>
           <div id="treinoIATexto" class="ia-texto-conteudo"></div>
         </div>
 
@@ -304,25 +329,94 @@
 
     <div id="aba-ia" class="aba-conteudo" style="display: none;">
       <header>
-        <h1>Treinador I.A.</h1>
-        <p>Sua análise de performance personalizada</p>
+        <h1>Luma I.A.</h1>
+        <p>Personalize sua assistente e receba orientações melhores</p>
       </header>
+
+      <div class="card card-perfil-luma">
+        <div class="perfil-header">
+          <div>
+            <h3><i class="bi bi-person-hearts"></i> Perfil da Luma</h3>
+            <p>Esses dados ajudam a Luma a orientar melhor seus treinos e análises.</p>
+          </div>
+        </div>
+
+        <div class="perfil-grid">
+          <div class="input-field">
+            <span>Nome</span>
+            <input type="text" id="perfilNome" placeholder="Ex: Julio">
+          </div>
+
+          <div class="input-field">
+            <span>Idade</span>
+            <input type="number" id="perfilIdade" placeholder="Ex: 38">
+          </div>
+        </div>
+
+        <div class="perfil-grid">
+          <div class="input-field">
+            <span>Sexo</span>
+            <select id="perfilSexo" class="perfil-select">
+              <option value="">Selecione</option>
+              <option value="masculino">Masculino</option>
+              <option value="feminino">Feminino</option>
+              <option value="nao_informar">Prefiro não informar</option>
+            </select>
+          </div>
+
+          <div class="input-field">
+            <span>Nível</span>
+            <select id="perfilNivel" class="perfil-select">
+              <option value="">Selecione</option>
+              <option value="iniciante">Iniciante</option>
+              <option value="intermediario">Intermediário</option>
+              <option value="avancado">Avançado</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="input-field">
+          <span>Objetivo principal</span>
+          <select id="perfilObjetivo" class="perfil-select">
+            <option value="">Selecione</option>
+            <option value="emagrecimento">Emagrecimento</option>
+            <option value="condicionamento">Melhorar condicionamento</option>
+            <option value="manter_peso">Manter peso</option>
+            <option value="saude">Saúde e bem-estar</option>
+          </select>
+        </div>
+
+        <div class="input-field">
+          <span>Observações ou restrições</span>
+          <input type="text" id="perfilObservacoes" placeholder="Ex: cuidado com joelho, pressão alta...">
+        </div>
+
+        <button id="btnSalvarPerfil" class="btn-perfil-salvar">
+          <i class="bi bi-check2-circle"></i> Salvar Perfil
+        </button>
+
+        <div id="perfilStatus" class="perfil-status">
+          Perfil ainda não configurado.
+        </div>
+      </div>
 
       <div class="card card-ia-status">
         <div class="ia-status-info">
           <span id="iaStatusData">Aguardando primeira análise</span>
         </div>
 
-        <button id="btnAnalisarDia" class="btn-ia-action">🧠 Analisar meu dia e montar plano</button>
+        <button id="btnAnalisarDia" class="btn-ia-action">
+          <i class="bi bi-cpu"></i> Analisar meu dia e montar plano
+        </button>
       </div>
 
       <div id="iaRespostaContainer" class="card card-ia-resposta" style="display: none;">
-        <div class="ia-secao-titulo">📋 PLANO DE HOJE</div>
+        <div class="ia-secao-titulo"><i class="bi bi-clipboard-heart"></i> PLANO DE HOJE</div>
         <div id="iaTextoPlano" class="ia-texto-conteudo"></div>
         
         <div class="card-divider" style="background: rgba(0,0,0,0.05);"></div>
         
-        <div class="ia-secao-titulo">💡 DICA DO TREINADOR</div>
+        <div class="ia-secao-titulo"><i class="bi bi-lightbulb"></i> DICA DA LUMA</div>
         <div id="iaTextoDica" class="ia-texto-conteudo"></div>
       </div>
 
@@ -357,29 +451,37 @@
           </div>
         </div>
 
-        <button id="btnCompartilharTreino" onclick="compartilharTreinoModal()" style="width: 100%; background-color: #10b981;">📲 Compartilhar Treino</button>
+        <button id="btnCompartilharTreino" onclick="compartilharTreinoModal()" style="width: 100%; background-color: #10b981;">
+          <i class="bi bi-share"></i> Compartilhar Treino
+        </button>
       </div>
     </div>
 
-    <nav class="bottom-nav">
-      <button class="nav-item active" onclick="trocarAba('dashboard', this)">
-        <span style="font-size: 20px;">📊</span>
-        <span>Evolução</span>
-      </button>
+    <nav class="floating-nav" id="floatingNav">
+      <div class="floating-menu" id="floatingMenu">
+        <button class="floating-item active" data-aba="dashboard" onclick="trocarAba('dashboard', this)">
+          <i class="bi bi-graph-up-arrow"></i>
+          <span>Evolução</span>
+        </button>
 
-      <button class="nav-item" onclick="trocarAba('alimentacao', this)">
-        <span style="font-size: 20px;">🍎</span>
-        <span>Diário</span>
-      </button>
+        <button class="floating-item" data-aba="alimentacao" onclick="trocarAba('alimentacao', this)">
+          <i class="bi bi-journal-heart"></i>
+          <span>Diário</span>
+        </button>
 
-      <button class="nav-item" onclick="trocarAba('exercicio', this)">
-        <span style="font-size: 20px;">👟</span>
-        <span>Treino</span>
-      </button>
+        <button class="floating-item" data-aba="exercicio" onclick="trocarAba('exercicio', this)">
+          <i class="bi bi-activity"></i>
+          <span>Treino</span>
+        </button>
 
-      <button class="nav-item" onclick="trocarAba('ia', this)">
-        <span style="font-size: 20px;">🤖</span>
-        <span>I.A.</span>
+        <button class="floating-item" data-aba="ia" onclick="trocarAba('ia', this)">
+          <i class="bi bi-cpu"></i>
+          <span>I.A.</span>
+        </button>
+      </div>
+
+      <button id="btnMenuLuma" class="floating-main" type="button" aria-label="Abrir menu da Luma">
+        <i class="bi bi-stars"></i>
       </button>
     </nav>
   </div>

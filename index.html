@@ -244,9 +244,40 @@
       </div>
 
       <div class="card card-total-kcal">
-        <div class="total-kcal-label"><i class="bi bi-bar-chart-line"></i> Total estimado do dia</div>
-        <div class="total-kcal-value"><span id="kcal-total">--</span> kcal</div>
-        <div class="total-kcal-note" id="kcal-observacao">As calorias serão estimadas ao salvar o diário.</div>
+        <div class="total-kcal-label">
+          <i class="bi bi-bar-chart-line"></i> Calorias do dia
+        </div>
+
+        <div class="kcal-dashboard">
+          <div class="kcal-main-box">
+            <span class="kcal-box-label">Consumido</span>
+            <strong><span id="kcal-total">--</span> kcal</strong>
+          </div>
+
+          <div class="kcal-mini-grid">
+            <div class="kcal-mini-box">
+              <span>Meta da Luma</span>
+              <strong><span id="kcal-meta-luma">--</span> kcal</strong>
+            </div>
+
+            <div class="kcal-mini-box">
+              <span>Restante</span>
+              <strong><span id="kcal-restante">--</span> kcal</strong>
+            </div>
+          </div>
+        </div>
+
+        <div class="kcal-status-pill" id="kcal-status-dia">
+          Aguardando meta da Luma
+        </div>
+
+        <button id="btnAtualizarMetaKcal" class="btn-meta-kcal" type="button">
+          <i class="bi bi-stars"></i> Atualizar meta de kcal
+        </button>
+
+        <div class="total-kcal-note" id="kcal-observacao">
+          As calorias serão estimadas ao salvar o diário.
+        </div>
       </div>
       
       <button id="btnSalvarAlimentacao" style="width: 100%; margin-top: 8px;">

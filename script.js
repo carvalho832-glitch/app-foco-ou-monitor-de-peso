@@ -3,48 +3,44 @@ const API_BASE_URL = "https://luma-gemini-api.onrender.com";
 let meuSwiper = null;
 let instanciasGraficos = { peso: null, cintura: null, quadril: null };
 
-document.addEventListener('DOMContentLoaded', iniciarApp);
+document.addEventListener("DOMContentLoaded", iniciarApp);
 
-document.getElementById('btnSalvar').addEventListener('click', adicionarRegistro);
-document.getElementById('btnSalvarAltura').addEventListener('click', salvarAltura);
-document.getElementById('btnModificarAltura').addEventListener('click', abrirEdicaoAltura);
-document.getElementById('btnModificarMeta').addEventListener('click', abrirEdicaoMeta);
-document.getElementById('btnSalvarMeta').addEventListener('click', salvarMeta);
-document.getElementById('btnTema').addEventListener('click', alternarTema);
-document.getElementById('btnExportar').addEventListener('click', exportarParaExcel);
+document.getElementById("btnSalvar").addEventListener("click", adicionarRegistro);
+document.getElementById("btnSalvarAltura").addEventListener("click", salvarAltura);
+document.getElementById("btnModificarAltura").addEventListener("click", abrirEdicaoAltura);
+document.getElementById("btnModificarMeta").addEventListener("click", abrirEdicaoMeta);
+document.getElementById("btnSalvarMeta").addEventListener("click", salvarMeta);
+document.getElementById("btnTema").addEventListener("click", alternarTema);
+document.getElementById("btnExportar").addEventListener("click", exportarParaExcel);
 
-// Listeners Diário
-document.getElementById('dataAlimentacaoInput').addEventListener('change', carregarRefeicoesDoDia);
-document.getElementById('btnSalvarAlimentacao').addEventListener('click', salvarRefeicoes);
-document.getElementById('btnAtualizarMetaKcal').addEventListener('click', atualizarMetaKcalComIA);
+document.getElementById("dataAlimentacaoInput").addEventListener("change", carregarRefeicoesDoDia);
+document.getElementById("btnSalvarAlimentacao").addEventListener("click", salvarRefeicoes);
+document.getElementById("btnAtualizarMetaKcal").addEventListener("click", atualizarMetaKcalComIA);
 
-// Listeners Treino
-document.getElementById('btnIniciarTreino').addEventListener('click', iniciarTreino);
-document.getElementById('btnPararTreino').addEventListener('click', encerrarTreino);
-document.getElementById('btnGerarTreinoIA').addEventListener('click', gerarTreinoIA);
+document.getElementById("btnIniciarTreino").addEventListener("click", iniciarTreino);
+document.getElementById("btnPararTreino").addEventListener("click", encerrarTreino);
+document.getElementById("btnGerarTreinoIA").addEventListener("click", gerarTreinoIA);
 
-// Listener Treino IA Recolhível
-document.getElementById('treinoIAHeader').addEventListener('click', alternarCardTreinoIA);
-document.getElementById('btnRecolherTreinoIA').addEventListener('click', recolherCardTreinoIA);
+document.getElementById("treinoIAHeader").addEventListener("click", alternarCardTreinoIA);
+document.getElementById("btnRecolherTreinoIA").addEventListener("click", recolherCardTreinoIA);
 
-// Listener Compartilhamento
-document.getElementById('btnCompartilharProgresso').addEventListener('click', compartilharProgresso);
+document.getElementById("btnCompartilharProgresso").addEventListener("click", compartilharProgresso);
 
-// Listener IA
-document.getElementById('btnAnalisarDia').addEventListener('click', solicitarAnaliseIA);
+document.getElementById("btnAnalisarDia").addEventListener("click", solicitarAnaliseIA);
 
-// Listener Perfil
-document.getElementById('btnSalvarPerfil').addEventListener('click', salvarPerfilUsuario);
+document.getElementById("btnSalvarPerfil").addEventListener("click", salvarPerfilUsuario);
 
-// Listener Menu Flutuante
-document.getElementById('btnMenuLuma').addEventListener('click', alternarMenuLuma);
+document.getElementById("btnMenuLuma").addEventListener("click", alternarMenuLuma);
 
-document.addEventListener('click', function(event) {
-  const nav = document.getElementById('floatingNav');
+document.addEventListener("click", function(event) {
+  const nav = document.getElementById("floatingNav");
+
+  if (!nav) return;
+
   const clicouNoMenu = nav.contains(event.target);
 
-  if (!clicouNoMenu && nav.classList.contains('open')) {
-    nav.classList.remove('open');
+  if (!clicouNoMenu && nav.classList.contains("open")) {
+    nav.classList.remove("open");
   }
 });
 
@@ -66,37 +62,42 @@ function iniciarApp() {
 }
 
 function trocarAba(abaId, elementoBotao) {
-  document.getElementById('aba-dashboard').style.display = abaId === 'dashboard' ? 'block' : 'none';
-  document.getElementById('aba-alimentacao').style.display = abaId === 'alimentacao' ? 'block' : 'none';
-  document.getElementById('aba-exercicio').style.display = abaId === 'exercicio' ? 'block' : 'none';
-  document.getElementById('aba-ia').style.display = abaId === 'ia' ? 'block' : 'none';
+  document.getElementById("aba-dashboard").style.display = abaId === "dashboard" ? "block" : "none";
+  document.getElementById("aba-alimentacao").style.display = abaId === "alimentacao" ? "block" : "none";
+  document.getElementById("aba-exercicio").style.display = abaId === "exercicio" ? "block" : "none";
+  document.getElementById("aba-ia").style.display = abaId === "ia" ? "block" : "none";
 
-  document.querySelectorAll('.floating-item').forEach(btn => {
-    btn.classList.remove('active');
+  document.querySelectorAll(".floating-item").forEach(btn => {
+    btn.classList.remove("active");
   });
 
   if (elementoBotao) {
-    elementoBotao.classList.add('active');
+    elementoBotao.classList.add("active");
   } else {
     const botaoAba = document.querySelector(`.floating-item[data-aba="${abaId}"]`);
-    if (botaoAba) botaoAba.classList.add('active');
+    if (botaoAba) botaoAba.classList.add("active");
   }
 
-  document.getElementById('floatingNav').classList.remove('open');
+  const floatingNav = document.getElementById("floatingNav");
+  if (floatingNav) floatingNav.classList.remove("open");
 
-  if (abaId === 'alimentacao') {
-    const inputData = document.getElementById('dataAlimentacaoInput');
-    if (!inputData.value) inputData.value = new Date().toISOString().split('T')[0];
+  if (abaId === "alimentacao") {
+    const inputData = document.getElementById("dataAlimentacaoInput");
+
+    if (!inputData.value) {
+      inputData.value = new Date().toISOString().split("T")[0];
+    }
+
     carregarRefeicoesDoDia();
     carregarMetaKcalSalva();
   }
 
-  if (abaId === 'exercicio') {
+  if (abaId === "exercicio") {
     setTimeout(iniciarMapaTreino, 200);
     carregarTreinoIASalvo();
   }
 
-  if (abaId === 'ia') {
+  if (abaId === "ia") {
     carregarPerfilUsuario();
     carregarAnaliseSalva();
   }
@@ -104,7 +105,7 @@ function trocarAba(abaId, elementoBotao) {
 
 function alternarMenuLuma(event) {
   event.stopPropagation();
-  document.getElementById('floatingNav').classList.toggle('open');
+  document.getElementById("floatingNav").classList.toggle("open");
 }
 
 // ==========================================
@@ -112,7 +113,7 @@ function alternarMenuLuma(event) {
 // ==========================================
 
 function obterPerfilUsuario() {
-  return JSON.parse(localStorage.getItem('usuarioPerfil') || 'null');
+  return JSON.parse(localStorage.getItem("usuarioPerfil") || "null");
 }
 
 function carregarPerfilUsuario() {
@@ -123,23 +124,23 @@ function carregarPerfilUsuario() {
     return;
   }
 
-  document.getElementById('perfilNome').value = perfil.nome || '';
-  document.getElementById('perfilIdade').value = perfil.idade || '';
-  document.getElementById('perfilSexo').value = perfil.sexo || '';
-  document.getElementById('perfilNivel').value = perfil.nivel || '';
-  document.getElementById('perfilObjetivo').value = perfil.objetivo || '';
-  document.getElementById('perfilObservacoes').value = perfil.observacoes || '';
+  document.getElementById("perfilNome").value = perfil.nome || "";
+  document.getElementById("perfilIdade").value = perfil.idade || "";
+  document.getElementById("perfilSexo").value = perfil.sexo || "";
+  document.getElementById("perfilNivel").value = perfil.nivel || "";
+  document.getElementById("perfilObjetivo").value = perfil.objetivo || "";
+  document.getElementById("perfilObservacoes").value = perfil.observacoes || "";
 
   atualizarStatusPerfil(perfil);
 }
 
 function salvarPerfilUsuario() {
-  const nome = document.getElementById('perfilNome').value.trim();
-  const idade = document.getElementById('perfilIdade').value.trim();
-  const sexo = document.getElementById('perfilSexo').value;
-  const nivel = document.getElementById('perfilNivel').value;
-  const objetivo = document.getElementById('perfilObjetivo').value;
-  const observacoes = document.getElementById('perfilObservacoes').value.trim();
+  const nome = document.getElementById("perfilNome").value.trim();
+  const idade = document.getElementById("perfilIdade").value.trim();
+  const sexo = document.getElementById("perfilSexo").value;
+  const nivel = document.getElementById("perfilNivel").value;
+  const objetivo = document.getElementById("perfilObjetivo").value;
+  const observacoes = document.getElementById("perfilObservacoes").value.trim();
 
   const perfil = {
     nome: nome,
@@ -148,29 +149,29 @@ function salvarPerfilUsuario() {
     nivel: nivel,
     objetivo: objetivo,
     observacoes: observacoes,
-    atualizadoEm: new Date().toLocaleString('pt-BR')
+    atualizadoEm: new Date().toLocaleString("pt-BR")
   };
 
-  localStorage.setItem('usuarioPerfil', JSON.stringify(perfil));
-  localStorage.removeItem('usuarioMetaKcal');
+  localStorage.setItem("usuarioPerfil", JSON.stringify(perfil));
+  localStorage.removeItem("usuarioMetaKcal");
 
   atualizarStatusPerfil(perfil);
   carregarMetaKcalSalva();
 
-  const btn = document.getElementById('btnSalvarPerfil');
+  const btn = document.getElementById("btnSalvarPerfil");
   const textoOriginal = btn.innerHTML;
 
   btn.innerHTML = '<i class="bi bi-check2-circle"></i> Perfil salvo!';
-  btn.style.background = '#10b981';
+  btn.style.background = "#10b981";
 
   setTimeout(() => {
     btn.innerHTML = textoOriginal;
-    btn.style.background = '';
+    btn.style.background = "";
   }, 1800);
 }
 
 function atualizarStatusPerfil(perfil) {
-  const status = document.getElementById('perfilStatus');
+  const status = document.getElementById("perfilStatus");
 
   if (!status) return;
 
@@ -188,9 +189,9 @@ function atualizarStatusPerfil(perfil) {
 }
 
 function formatarTextoPerfil(texto) {
-  return String(texto || '')
-    .replace(/_/g, ' ')
-    .replace('nao informar', 'prefere não informar')
+  return String(texto || "")
+    .replace(/_/g, " ")
+    .replace("nao informar", "prefere não informar")
     .replace(/\b\w/g, letra => letra.toUpperCase());
 }
 
@@ -199,7 +200,7 @@ function formatarTextoPerfil(texto) {
 // ==========================================
 
 function obterMetaKcalSalva() {
-  return JSON.parse(localStorage.getItem('usuarioMetaKcal') || 'null');
+  return JSON.parse(localStorage.getItem("usuarioMetaKcal") || "null");
 }
 
 function carregarMetaKcalSalva() {
@@ -207,7 +208,7 @@ function carregarMetaKcalSalva() {
 }
 
 async function atualizarMetaKcalComIA() {
-  const btn = document.getElementById('btnAtualizarMetaKcal');
+  const btn = document.getElementById("btnAtualizarMetaKcal");
   const textoOriginal = btn.innerHTML;
 
   btn.disabled = true;
@@ -242,21 +243,21 @@ async function atualizarMetaKcalComIA() {
       faixaMax: Number(meta.faixaMax) || 2000,
       status: meta.status || "Meta estimada pela Luma",
       observacao: meta.observacao || "Meta aproximada calculada pela Luma.",
-      atualizadoEm: new Date().toLocaleString('pt-BR')
+      atualizadoEm: new Date().toLocaleString("pt-BR")
     };
 
-    localStorage.setItem('usuarioMetaKcal', JSON.stringify(metaNormalizada));
+    localStorage.setItem("usuarioMetaKcal", JSON.stringify(metaNormalizada));
 
     renderizarCalorias();
 
     btn.innerHTML = '<i class="bi bi-check2-circle"></i> Meta atualizada!';
-    btn.style.background = '#10b981';
-    btn.style.color = '#ffffff';
+    btn.style.background = "#10b981";
+    btn.style.color = "#ffffff";
 
     setTimeout(() => {
       btn.innerHTML = textoOriginal;
-      btn.style.background = '';
-      btn.style.color = '';
+      btn.style.background = "";
+      btn.style.color = "";
     }, 1800);
 
   } catch (erro) {
@@ -275,13 +276,13 @@ async function atualizarMetaKcalComIA() {
 }
 
 function montarDadosMetaKcal() {
-  const historicoPeso = JSON.parse(localStorage.getItem('historicoPeso') || '[]');
-  const historicoAlimentacao = JSON.parse(localStorage.getItem('historicoAlimentacao') || '{}');
-  const historicoTreinos = JSON.parse(localStorage.getItem('historicoTreinos') || '[]');
+  const historicoPeso = JSON.parse(localStorage.getItem("historicoPeso") || "[]");
+  const historicoAlimentacao = JSON.parse(localStorage.getItem("historicoAlimentacao") || "{}");
+  const historicoTreinos = JSON.parse(localStorage.getItem("historicoTreinos") || "[]");
 
-  const hojeISO = new Date().toISOString().split('T')[0];
-  const altura = parseFloat(localStorage.getItem('usuarioAltura'));
-  const metaPeso = localStorage.getItem('usuarioMeta') || "80.0";
+  const hojeISO = new Date().toISOString().split("T")[0];
+  const altura = parseFloat(localStorage.getItem("usuarioAltura"));
+  const metaPeso = localStorage.getItem("usuarioMeta") || "80.0";
 
   const pesoOrdenado = [...historicoPeso].sort((a, b) => b.id - a.id);
   const pesoAtual = pesoOrdenado.length > 0 ? pesoOrdenado[0].peso : null;
@@ -348,14 +349,14 @@ function calcularStatusKcal(totalConsumido, metaKcal) {
 // ==========================================
 
 function compartilharProgresso() {
-  const pesoAtual = document.getElementById('pesoAtualCard').innerText.replace('kg', '').trim();
-  const eliminado = document.getElementById('totalEliminadoCard').innerText;
+  const pesoAtual = document.getElementById("pesoAtualCard").innerText.replace("kg", "").trim();
+  const eliminado = document.getElementById("totalEliminadoCard").innerText;
 
   const texto = `Bora focar! 🚀 Já eliminei ${eliminado} e estou pesando ${pesoAtual} kg. 💪 Acompanhando tudo pelo meu app Luma!`;
 
   if (navigator.share) {
     navigator.share({
-      title: 'Minha Evolução',
+      title: "Minha Evolução",
       text: texto
     }).catch(console.error);
   } else {
@@ -366,7 +367,7 @@ function compartilharProgresso() {
 let treinoAtualModalId = null;
 
 function compartilharTreinoModal() {
-  const treinos = JSON.parse(localStorage.getItem('historicoTreinos') || '[]');
+  const treinos = JSON.parse(localStorage.getItem("historicoTreinos") || "[]");
   const treino = treinos.find(t => t.id === treinoAtualModalId);
 
   if (!treino) return;
@@ -377,7 +378,7 @@ function compartilharTreinoModal() {
 
   if (navigator.share) {
     navigator.share({
-      title: 'Meu Treino',
+      title: "Meu Treino",
       text: texto
     }).catch(console.error);
   } else {
@@ -386,28 +387,28 @@ function compartilharTreinoModal() {
 }
 
 // ==========================================
-// LÓGICA DO TREINADOR IA - GEMINI REAL
+// LÓGICA DO TREINADOR IA
 // ==========================================
 
 function carregarAnaliseSalva() {
-  const analise = JSON.parse(localStorage.getItem('iaAnaliseCache') || 'null');
-  const hoje = new Date().toLocaleDateString('pt-BR');
+  const analise = JSON.parse(localStorage.getItem("iaAnaliseCache") || "null");
+  const hoje = new Date().toLocaleDateString("pt-BR");
 
   if (analise && analise.data === hoje) {
     exibirRespostaIA(analise.plano, analise.dica);
-    document.getElementById('iaStatusData').innerText = `Análise de hoje concluída ✅`;
-    document.getElementById('btnAnalisarDia').innerHTML = '<i class="bi bi-arrow-clockwise"></i> Atualizar análise';
+    document.getElementById("iaStatusData").innerText = "Análise de hoje concluída ✅";
+    document.getElementById("btnAnalisarDia").innerHTML = '<i class="bi bi-arrow-clockwise"></i> Atualizar análise';
   }
 }
 
 async function solicitarAnaliseIA() {
-  const btnIA = document.getElementById('btnAnalisarDia');
-  const containerResposta = document.getElementById('iaRespostaContainer');
-  const loading = document.getElementById('iaLoading');
+  const btnIA = document.getElementById("btnAnalisarDia");
+  const containerResposta = document.getElementById("iaRespostaContainer");
+  const loading = document.getElementById("iaLoading");
 
-  btnIA.style.display = 'none';
-  containerResposta.style.display = 'none';
-  loading.style.display = 'block';
+  btnIA.style.display = "none";
+  containerResposta.style.display = "none";
+  loading.style.display = "block";
 
   try {
     const dadosParaIA = montarDadosParaIA();
@@ -435,12 +436,12 @@ async function solicitarAnaliseIA() {
     const dica = extrairBlocoIA(textoIA, "DICA:", null);
 
     const cache = {
-      data: new Date().toLocaleDateString('pt-BR'),
+      data: new Date().toLocaleDateString("pt-BR"),
       plano: plano || textoIA,
       dica: dica || "Continue firme!"
     };
 
-    localStorage.setItem('iaAnaliseCache', JSON.stringify(cache));
+    localStorage.setItem("iaAnaliseCache", JSON.stringify(cache));
 
     exibirRespostaIA(cache.plano, cache.dica);
     btnIA.innerHTML = '<i class="bi bi-arrow-clockwise"></i> Atualizar análise';
@@ -449,23 +450,23 @@ async function solicitarAnaliseIA() {
     console.error(erro);
     alert("Erro ao gerar análise da IA:\n\n" + erro.message);
   } finally {
-    loading.style.display = 'none';
-    btnIA.style.display = 'block';
+    loading.style.display = "none";
+    btnIA.style.display = "block";
   }
 }
 
 function montarDadosParaIA() {
-  const historicoPeso = JSON.parse(localStorage.getItem('historicoPeso') || '[]');
-  const historicoAlimentacao = JSON.parse(localStorage.getItem('historicoAlimentacao') || '{}');
-  const historicoTreinos = JSON.parse(localStorage.getItem('historicoTreinos') || '[]');
-  const hojeISO = new Date().toISOString().split('T')[0];
+  const historicoPeso = JSON.parse(localStorage.getItem("historicoPeso") || "[]");
+  const historicoAlimentacao = JSON.parse(localStorage.getItem("historicoAlimentacao") || "{}");
+  const historicoTreinos = JSON.parse(localStorage.getItem("historicoTreinos") || "[]");
+  const hojeISO = new Date().toISOString().split("T")[0];
 
   return {
     dataHoje: hojeISO,
     perfilUsuario: obterPerfilUsuario(),
     metaKcalLuma: obterMetaKcalSalva(),
-    altura: localStorage.getItem('usuarioAltura'),
-    metaPeso: localStorage.getItem('usuarioMeta') || "80.0",
+    altura: localStorage.getItem("usuarioAltura"),
+    metaPeso: localStorage.getItem("usuarioMeta") || "80.0",
     historicoPeso: historicoPeso.slice(-10),
     diarioHoje: historicoAlimentacao[hojeISO] || null,
     ultimosTreinos: historicoTreinos.slice(-5)
@@ -487,14 +488,14 @@ function extrairBlocoIA(texto, inicio, fim) {
 }
 
 function exibirRespostaIA(plano, dica) {
-  document.getElementById('iaTextoPlano').innerText = plano;
-  document.getElementById('iaTextoDica').innerText = dica;
-  document.getElementById('iaRespostaContainer').style.display = 'block';
+  document.getElementById("iaTextoPlano").innerText = plano;
+  document.getElementById("iaTextoDica").innerText = dica;
+  document.getElementById("iaRespostaContainer").style.display = "block";
 
-  document.getElementById('iaStatusData').innerText =
-    `Última análise: Hoje às ${new Date().toLocaleTimeString('pt-BR', {
-      hour: '2-digit',
-      minute: '2-digit'
+  document.getElementById("iaStatusData").innerText =
+    `Última análise: Hoje às ${new Date().toLocaleTimeString("pt-BR", {
+      hour: "2-digit",
+      minute: "2-digit"
     })}`;
 }
 
@@ -503,26 +504,26 @@ function exibirRespostaIA(plano, dica) {
 // ==========================================
 
 function carregarTreinoIASalvo() {
-  const cache = JSON.parse(localStorage.getItem('treinoIACache') || 'null');
-  const hoje = new Date().toLocaleDateString('pt-BR');
+  const cache = JSON.parse(localStorage.getItem("treinoIACache") || "null");
+  const hoje = new Date().toLocaleDateString("pt-BR");
 
   if (cache && cache.data === hoje && cache.treino) {
     exibirTreinoIA(cache.treino, true);
-    document.getElementById('btnGerarTreinoIA').innerHTML = '<i class="bi bi-arrow-clockwise"></i> Atualizar treino com I.A';
+    document.getElementById("btnGerarTreinoIA").innerHTML = '<i class="bi bi-arrow-clockwise"></i> Atualizar treino com I.A';
   }
 }
 
 async function gerarTreinoIA() {
-  const btn = document.getElementById('btnGerarTreinoIA');
-  const container = document.getElementById('treinoIAContainer');
-  const loading = document.getElementById('treinoIALoading');
+  const btn = document.getElementById("btnGerarTreinoIA");
+  const container = document.getElementById("treinoIAContainer");
+  const loading = document.getElementById("treinoIALoading");
 
   const textoOriginal = btn.innerHTML;
 
   btn.disabled = true;
   btn.innerHTML = '<i class="bi bi-cpu"></i> Gerando treino...';
-  container.style.display = 'none';
-  loading.style.display = 'block';
+  container.style.display = "none";
+  loading.style.display = "block";
 
   try {
     const dadosTreino = montarDadosTreinoIA();
@@ -548,11 +549,11 @@ async function gerarTreinoIA() {
     const treino = resultado.resposta || "Não consegui montar o treino agora.";
 
     const cache = {
-      data: new Date().toLocaleDateString('pt-BR'),
+      data: new Date().toLocaleDateString("pt-BR"),
       treino: treino
     };
 
-    localStorage.setItem('treinoIACache', JSON.stringify(cache));
+    localStorage.setItem("treinoIACache", JSON.stringify(cache));
 
     exibirTreinoIA(treino, true);
 
@@ -570,19 +571,19 @@ async function gerarTreinoIA() {
     btn.innerHTML = textoOriginal;
 
   } finally {
-    loading.style.display = 'none';
+    loading.style.display = "none";
     btn.disabled = false;
   }
 }
 
 function montarDadosTreinoIA() {
-  const historicoPeso = JSON.parse(localStorage.getItem('historicoPeso') || '[]');
-  const historicoAlimentacao = JSON.parse(localStorage.getItem('historicoAlimentacao') || '{}');
-  const historicoTreinos = JSON.parse(localStorage.getItem('historicoTreinos') || '[]');
+  const historicoPeso = JSON.parse(localStorage.getItem("historicoPeso") || "[]");
+  const historicoAlimentacao = JSON.parse(localStorage.getItem("historicoAlimentacao") || "{}");
+  const historicoTreinos = JSON.parse(localStorage.getItem("historicoTreinos") || "[]");
 
-  const hojeISO = new Date().toISOString().split('T')[0];
-  const altura = parseFloat(localStorage.getItem('usuarioAltura'));
-  const metaPeso = localStorage.getItem('usuarioMeta') || "80.0";
+  const hojeISO = new Date().toISOString().split("T")[0];
+  const altura = parseFloat(localStorage.getItem("usuarioAltura"));
+  const metaPeso = localStorage.getItem("usuarioMeta") || "80.0";
 
   const pesoOrdenado = [...historicoPeso].sort((a, b) => b.id - a.id);
   const pesoAtual = pesoOrdenado.length > 0 ? pesoOrdenado[0].peso : null;
@@ -593,7 +594,7 @@ function montarDadosTreinoIA() {
     imc = pesoAtual / (altura * altura);
   }
 
-  const tipoAtividadeEscolhida = document.getElementById('tipoAtividade').value;
+  const tipoAtividadeEscolhida = document.getElementById("tipoAtividade").value;
 
   return {
     dataHoje: hojeISO,
@@ -611,31 +612,31 @@ function montarDadosTreinoIA() {
 }
 
 function exibirTreinoIA(treino, recolhido = true) {
-  const container = document.getElementById('treinoIAContainer');
-  const texto = document.getElementById('treinoIATexto');
+  const container = document.getElementById("treinoIAContainer");
+  const texto = document.getElementById("treinoIATexto");
 
   texto.innerText = treino;
-  container.style.display = 'block';
+  container.style.display = "block";
 
   if (recolhido) {
-    container.classList.add('treino-ia-collapsed');
+    container.classList.add("treino-ia-collapsed");
   } else {
-    container.classList.remove('treino-ia-collapsed');
+    container.classList.remove("treino-ia-collapsed");
   }
 }
 
 function alternarCardTreinoIA() {
-  const container = document.getElementById('treinoIAContainer');
-  container.classList.toggle('treino-ia-collapsed');
+  const container = document.getElementById("treinoIAContainer");
+  container.classList.toggle("treino-ia-collapsed");
 }
 
 function recolherCardTreinoIA() {
-  const container = document.getElementById('treinoIAContainer');
-  container.classList.add('treino-ia-collapsed');
+  const container = document.getElementById("treinoIAContainer");
+  container.classList.add("treino-ia-collapsed");
 }
 
 // ==========================================
-// LÓGICA DE TREINO, GPS E MAPAS
+// TREINO, GPS E MAPAS
 // ==========================================
 
 let isTreinando = false;
@@ -659,22 +660,22 @@ function iniciarMapaTreino() {
     return;
   }
 
-  mapaTreino = L.map('mapaTreinoContainer').setView([-14.235, -51.925], 4);
+  mapaTreino = L.map("mapaTreinoContainer").setView([-14.235, -51.925], 4);
 
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
     maxZoom: 19,
-    attribution: '© OpenStreetMap'
+    attribution: "© OpenStreetMap"
   }).addTo(mapaTreino);
 
   if (navigator.geolocation) {
     navigator.geolocation.getCurrentPosition(
-      (pos) => {
+      pos => {
         const latLng = [pos.coords.latitude, pos.coords.longitude];
 
         mapaTreino.setView(latLng, 16);
 
         marcadorGPS = L.circleMarker(latLng, {
-          color: '#0ea5e9',
+          color: "#0ea5e9",
           radius: 8,
           fillOpacity: 1
         }).addTo(mapaTreino);
@@ -697,19 +698,19 @@ function iniciarTreino() {
   coordenadasRota = [];
   tempoInicio = Date.now();
 
-  document.getElementById('displayDistancia').innerText = "0.00";
-  document.getElementById('displayVelocidade').innerText = "0.0";
-  document.getElementById('displayCalorias').innerText = "0";
-  document.getElementById('displayTempo').innerText = "00:00:00";
+  document.getElementById("displayDistancia").innerText = "0.00";
+  document.getElementById("displayVelocidade").innerText = "0.0";
+  document.getElementById("displayCalorias").innerText = "0";
+  document.getElementById("displayTempo").innerText = "00:00:00";
 
-  document.getElementById('btnIniciarTreino').style.display = 'none';
-  document.getElementById('btnPararTreino').style.display = 'block';
-  document.getElementById('msgGpsErro').style.display = 'none';
+  document.getElementById("btnIniciarTreino").style.display = "none";
+  document.getElementById("btnPararTreino").style.display = "block";
+  document.getElementById("msgGpsErro").style.display = "none";
 
   if (rotaPolyline && mapaTreino) mapaTreino.removeLayer(rotaPolyline);
 
   rotaPolyline = L.polyline([], {
-    color: '#ef4444',
+    color: "#ef4444",
     weight: 5
   }).addTo(mapaTreino);
 
@@ -735,7 +736,7 @@ function processarPosicaoGps(posicao) {
     marcadorGPS.setLatLng(latLng);
   } else {
     marcadorGPS = L.circleMarker(latLng, {
-      color: '#0ea5e9',
+      color: "#0ea5e9",
       radius: 8,
       fillOpacity: 1
     }).addTo(mapaTreino);
@@ -764,7 +765,7 @@ function processarPosicaoGps(posicao) {
 
 function erroGps(erro) {
   console.warn("Erro no GPS:", erro);
-  document.getElementById('msgGpsErro').style.display = 'block';
+  document.getElementById("msgGpsErro").style.display = "block";
 }
 
 function calcularDistanciaHaversine(pos1, pos2) {
@@ -789,10 +790,10 @@ function atualizarCronometro() {
   const minutos = Math.floor((diferenca % (1000 * 60 * 60)) / (1000 * 60));
   const segundos = Math.floor((diferenca % (1000 * 60)) / 1000);
 
-  document.getElementById('displayTempo').innerText =
-    String(horas).padStart(2, '0') + ":" +
-    String(minutos).padStart(2, '0') + ":" +
-    String(segundos).padStart(2, '0');
+  document.getElementById("displayTempo").innerText =
+    String(horas).padStart(2, "0") + ":" +
+    String(minutos).padStart(2, "0") + ":" +
+    String(segundos).padStart(2, "0");
 
   atualizarTelaTreino();
 }
@@ -801,18 +802,18 @@ function atualizarTelaTreino() {
   if (!isTreinando) return;
 
   const tempoHoras = (Date.now() - tempoInicio) / (1000 * 60 * 60);
-  const velocidade = tempoHoras > 0 ? (distanciaTotalKm / tempoHoras) : 0;
+  const velocidade = tempoHoras > 0 ? distanciaTotalKm / tempoHoras : 0;
 
   const historico = obterHistorico();
   const ordenado = [...historico].sort((a, b) => b.id - a.id);
   const pesoAtual = ordenado.length > 0 ? ordenado[0].peso : 80;
 
-  const tipo = document.getElementById('tipoAtividade').value;
-  const fatorCalorico = tipo === 'corrida' ? 1.03 : 0.75;
+  const tipo = document.getElementById("tipoAtividade").value;
+  const fatorCalorico = tipo === "corrida" ? 1.03 : 0.75;
 
-  document.getElementById('displayDistancia').innerText = distanciaTotalKm.toFixed(2);
-  document.getElementById('displayVelocidade').innerText = velocidade.toFixed(1);
-  document.getElementById('displayCalorias').innerText = Math.round(pesoAtual * distanciaTotalKm * fatorCalorico);
+  document.getElementById("displayDistancia").innerText = distanciaTotalKm.toFixed(2);
+  document.getElementById("displayVelocidade").innerText = velocidade.toFixed(1);
+  document.getElementById("displayCalorias").innerText = Math.round(pesoAtual * distanciaTotalKm * fatorCalorico);
 }
 
 function encerrarTreino() {
@@ -826,22 +827,22 @@ function encerrarTreino() {
     navigator.geolocation.clearWatch(gpsWatchId);
   }
 
-  document.getElementById('btnIniciarTreino').style.display = 'block';
-  document.getElementById('btnPararTreino').style.display = 'none';
+  document.getElementById("btnIniciarTreino").style.display = "block";
+  document.getElementById("btnPararTreino").style.display = "none";
 
-  const treinos = JSON.parse(localStorage.getItem('historicoTreinos') || '[]');
+  const treinos = JSON.parse(localStorage.getItem("historicoTreinos") || "[]");
 
   treinos.push({
     id: Date.now(),
-    data: new Date().toLocaleDateString('pt-BR'),
-    tipo: document.getElementById('tipoAtividade').value,
-    tempo: document.getElementById('displayTempo').innerText,
-    distancia: document.getElementById('displayDistancia').innerText,
-    calorias: document.getElementById('displayCalorias').innerText,
+    data: new Date().toLocaleDateString("pt-BR"),
+    tipo: document.getElementById("tipoAtividade").value,
+    tempo: document.getElementById("displayTempo").innerText,
+    distancia: document.getElementById("displayDistancia").innerText,
+    calorias: document.getElementById("displayCalorias").innerText,
     rota: coordenadasRota
   });
 
-  localStorage.setItem('historicoTreinos', JSON.stringify(treinos));
+  localStorage.setItem("historicoTreinos", JSON.stringify(treinos));
 
   carregarHistoricoTreinos();
 
@@ -849,15 +850,15 @@ function encerrarTreino() {
 }
 
 function carregarHistoricoTreinos() {
-  const treinos = JSON.parse(localStorage.getItem('historicoTreinos') || '[]');
-  const lista = document.getElementById('historicoTreinosLista');
+  const treinos = JSON.parse(localStorage.getItem("historicoTreinos") || "[]");
+  const lista = document.getElementById("historicoTreinosLista");
 
-  lista.innerHTML = '';
+  lista.innerHTML = "";
 
   const ordenado = [...treinos].sort((a, b) => b.id - a.id);
 
   ordenado.forEach(treino => {
-    const icone = treino.tipo === 'corrida'
+    const icone = treino.tipo === "corrida"
       ? '<i class="bi bi-lightning-charge"></i>'
       : '<i class="bi bi-person-walking"></i>';
 
@@ -882,10 +883,10 @@ function carregarHistoricoTreinos() {
 function deletarTreino(id) {
   if (!confirm("Excluir este treino definitivamente?")) return;
 
-  const treinos = JSON.parse(localStorage.getItem('historicoTreinos') || '[]');
+  const treinos = JSON.parse(localStorage.getItem("historicoTreinos") || "[]");
 
   localStorage.setItem(
-    'historicoTreinos',
+    "historicoTreinos",
     JSON.stringify(treinos.filter(t => t.id !== id))
   );
 
@@ -893,31 +894,31 @@ function deletarTreino(id) {
 }
 
 function abrirModalTreino(id) {
-  const treinos = JSON.parse(localStorage.getItem('historicoTreinos') || '[]');
+  const treinos = JSON.parse(localStorage.getItem("historicoTreinos") || "[]");
   const treino = treinos.find(t => t.id === id);
 
   if (!treino) return;
 
   treinoAtualModalId = id;
 
-  document.getElementById('modalTituloTreino').innerText =
-    `${treino.tipo === 'corrida' ? 'Corrida' : 'Caminhada'} - ${treino.data}`;
+  document.getElementById("modalTituloTreino").innerText =
+    `${treino.tipo === "corrida" ? "Corrida" : "Caminhada"} - ${treino.data}`;
 
-  document.getElementById('modalDistancia').innerText = treino.distancia;
-  document.getElementById('modalTempo').innerText = treino.tempo;
-  document.getElementById('modalCalorias').innerText = treino.calorias;
-  document.getElementById('modalTreino').style.display = 'flex';
+  document.getElementById("modalDistancia").innerText = treino.distancia;
+  document.getElementById("modalTempo").innerText = treino.tempo;
+  document.getElementById("modalCalorias").innerText = treino.calorias;
+  document.getElementById("modalTreino").style.display = "flex";
 
   setTimeout(() => {
     if (!mapaDetalhe) {
-      mapaDetalhe = L.map('mapaDetalheContainer');
+      mapaDetalhe = L.map("mapaDetalheContainer");
 
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
         maxZoom: 19
       }).addTo(mapaDetalhe);
 
       detalhePolyline = L.polyline([], {
-        color: '#ef4444',
+        color: "#ef4444",
         weight: 5
       }).addTo(mapaDetalhe);
     }
@@ -935,11 +936,11 @@ function abrirModalTreino(id) {
 }
 
 function fecharModalTreino() {
-  document.getElementById('modalTreino').style.display = 'none';
+  document.getElementById("modalTreino").style.display = "none";
 }
 
 // ==========================================
-// LÓGICA DO DIÁRIO - ALIMENTAÇÃO, ÁGUA E KCAL
+// DIÁRIO, ÁGUA E KCAL
 // ==========================================
 
 const itensPreProgramados = {
@@ -958,22 +959,22 @@ let refeicoesAtuais = {
 };
 
 function configurarDataAlimentacaoPadrao() {
-  document.getElementById('dataAlimentacaoInput').value = new Date().toISOString().split('T')[0];
+  document.getElementById("dataAlimentacaoInput").value = new Date().toISOString().split("T")[0];
 }
 
 function carregarRefeicoesDoDia() {
-  const dataSelect = document.getElementById('dataAlimentacaoInput').value;
-  const historico = JSON.parse(localStorage.getItem('historicoAlimentacao') || '{}');
+  const dataSelect = document.getElementById("dataAlimentacaoInput").value;
+  const historico = JSON.parse(localStorage.getItem("historicoAlimentacao") || "{}");
 
   if (historico[dataSelect]) {
     refeicoesAtuais = JSON.parse(JSON.stringify(historico[dataSelect]));
 
-    if (typeof refeicoesAtuais.agua === 'undefined') refeicoesAtuais.agua = 0;
+    if (typeof refeicoesAtuais.agua === "undefined") refeicoesAtuais.agua = 0;
     if (!Array.isArray(refeicoesAtuais.cafe)) refeicoesAtuais.cafe = [];
     if (!Array.isArray(refeicoesAtuais.almoco)) refeicoesAtuais.almoco = [];
     if (!Array.isArray(refeicoesAtuais.jantar)) refeicoesAtuais.jantar = [];
-    if (typeof refeicoesAtuais.kcal === 'undefined') refeicoesAtuais.kcal = null;
-    if (typeof refeicoesAtuais.assinaturaKcal === 'undefined') refeicoesAtuais.assinaturaKcal = null;
+    if (typeof refeicoesAtuais.kcal === "undefined") refeicoesAtuais.kcal = null;
+    if (typeof refeicoesAtuais.assinaturaKcal === "undefined") refeicoesAtuais.assinaturaKcal = null;
 
   } else {
     refeicoesAtuais = {
@@ -1013,24 +1014,24 @@ function renderizarAgua() {
   const atual = refeicoesAtuais.agua;
   const metaAgua = obterMetaAguaDinamica();
 
-  document.getElementById('aguaAtualDisplay').innerText = atual;
-  document.getElementById('aguaMetaDisplay').innerText = metaAgua;
+  document.getElementById("aguaAtualDisplay").innerText = atual;
+  document.getElementById("aguaMetaDisplay").innerText = metaAgua;
 
   let porcentagem = (atual / metaAgua) * 100;
 
   if (porcentagem > 100) porcentagem = 100;
 
-  const progressFill = document.getElementById('aguaProgressFill');
+  const progressFill = document.getElementById("aguaProgressFill");
 
   progressFill.style.width = `${porcentagem}%`;
-  progressFill.style.backgroundColor = atual >= metaAgua ? '#10b981' : '#0ea5e9';
+  progressFill.style.backgroundColor = atual >= metaAgua ? "#10b981" : "#0ea5e9";
 }
 
 function renderizarTagsDeComida() {
-  ['cafe', 'almoco', 'jantar'].forEach(refeicao => {
+  ["cafe", "almoco", "jantar"].forEach(refeicao => {
     const container = document.getElementById(`tags-${refeicao}`);
 
-    container.innerHTML = '';
+    container.innerHTML = "";
 
     if (!Array.isArray(refeicoesAtuais[refeicao])) {
       refeicoesAtuais[refeicao] = [];
@@ -1044,13 +1045,13 @@ function renderizarTagsDeComida() {
     itensUnicos.forEach(item => {
       const isSelected = refeicoesAtuais[refeicao].includes(item);
 
-      const tag = document.createElement('button');
+      const tag = document.createElement("button");
 
-      tag.type = 'button';
-      tag.className = `food-tag ${isSelected ? 'selected' : ''}`;
+      tag.type = "button";
+      tag.className = `food-tag ${isSelected ? "selected" : ""}`;
       tag.innerText = item;
 
-      tag.addEventListener('click', function(event) {
+      tag.addEventListener("click", function(event) {
         event.preventDefault();
 
         const index = refeicoesAtuais[refeicao].indexOf(item);
@@ -1078,7 +1079,7 @@ function adicionarComidaCustomizada(refeicao) {
 
   if (valorFormatado && !refeicoesAtuais[refeicao].includes(valorFormatado)) {
     refeicoesAtuais[refeicao].push(valorFormatado);
-    input.value = '';
+    input.value = "";
     marcarCaloriasComoDesatualizadas();
     renderizarTagsDeComida();
     renderizarCalorias();
@@ -1103,18 +1104,18 @@ function renderizarCalorias() {
   const kcal = refeicoesAtuais.kcal || null;
   const metaKcal = obterMetaKcalSalva();
 
-  const totalConsumido = kcal && typeof kcal.total !== 'undefined'
+  const totalConsumido = kcal && typeof kcal.total !== "undefined"
     ? Number(kcal.total) || 0
     : 0;
 
-  document.getElementById('kcal-cafe').innerText = kcal && typeof kcal.cafe !== 'undefined' ? kcal.cafe : '--';
-  document.getElementById('kcal-almoco').innerText = kcal && typeof kcal.almoco !== 'undefined' ? kcal.almoco : '--';
-  document.getElementById('kcal-jantar').innerText = kcal && typeof kcal.jantar !== 'undefined' ? kcal.jantar : '--';
-  document.getElementById('kcal-total').innerText = kcal && typeof kcal.total !== 'undefined' ? kcal.total : '--';
+  document.getElementById("kcal-cafe").innerText = kcal && typeof kcal.cafe !== "undefined" ? kcal.cafe : "--";
+  document.getElementById("kcal-almoco").innerText = kcal && typeof kcal.almoco !== "undefined" ? kcal.almoco : "--";
+  document.getElementById("kcal-jantar").innerText = kcal && typeof kcal.jantar !== "undefined" ? kcal.jantar : "--";
+  document.getElementById("kcal-total").innerText = kcal && typeof kcal.total !== "undefined" ? kcal.total : "--";
 
-  const metaDisplay = document.getElementById('kcal-meta-luma');
-  const restanteDisplay = document.getElementById('kcal-restante');
-  const statusDisplay = document.getElementById('kcal-status-dia');
+  const metaDisplay = document.getElementById("kcal-meta-luma");
+  const restanteDisplay = document.getElementById("kcal-restante");
+  const statusDisplay = document.getElementById("kcal-status-dia");
 
   if (metaKcal && metaKcal.metaKcal) {
     const metaValor = Number(metaKcal.metaKcal) || 0;
@@ -1129,13 +1130,13 @@ function renderizarCalorias() {
     statusDisplay.className = `kcal-status-pill ${status.classe}`;
 
   } else {
-    metaDisplay.innerText = '--';
-    restanteDisplay.innerText = '--';
+    metaDisplay.innerText = "--";
+    restanteDisplay.innerText = "--";
     statusDisplay.innerText = "Aguardando meta da Luma";
     statusDisplay.className = "kcal-status-pill";
   }
 
-  const observacao = document.getElementById('kcal-observacao');
+  const observacao = document.getElementById("kcal-observacao");
   const assinaturaAtual = obterAssinaturaRefeicoes();
 
   if (!kcal) {
@@ -1159,9 +1160,9 @@ function renderizarCalorias() {
 }
 
 async function salvarRefeicoes() {
-  const dataSelect = document.getElementById('dataAlimentacaoInput').value;
-  const historico = JSON.parse(localStorage.getItem('historicoAlimentacao') || '{}');
-  const btn = document.getElementById('btnSalvarAlimentacao');
+  const dataSelect = document.getElementById("dataAlimentacaoInput").value;
+  const historico = JSON.parse(localStorage.getItem("historicoAlimentacao") || "{}");
+  const btn = document.getElementById("btnSalvarAlimentacao");
   const textoOriginal = btn.innerHTML;
   const corOriginal = btn.style.backgroundColor;
 
@@ -1204,7 +1205,7 @@ async function salvarRefeicoes() {
 
     historico[dataSelect] = refeicoesAtuais;
 
-    localStorage.setItem('historicoAlimentacao', JSON.stringify(historico));
+    localStorage.setItem("historicoAlimentacao", JSON.stringify(historico));
 
     renderizarCalorias();
 
@@ -1215,7 +1216,7 @@ async function salvarRefeicoes() {
     console.error("Erro ao calcular calorias:", erro);
 
     historico[dataSelect] = refeicoesAtuais;
-    localStorage.setItem('historicoAlimentacao', JSON.stringify(historico));
+    localStorage.setItem("historicoAlimentacao", JSON.stringify(historico));
 
     btn.innerHTML = '<i class="bi bi-check-circle"></i> Salvo sem kcal';
     btn.style.backgroundColor = "#10b981";
@@ -1243,7 +1244,7 @@ async function calcularCaloriasComIA() {
       almoco: refeicoesAtuais.almoco || [],
       jantar: refeicoesAtuais.jantar || [],
       agua: refeicoesAtuais.agua || 0,
-      data: document.getElementById('dataAlimentacaoInput').value
+      data: document.getElementById("dataAlimentacaoInput").value
     })
   });
 
@@ -1261,73 +1262,73 @@ async function calcularCaloriasComIA() {
 }
 
 // ==========================================
-// LÓGICA DE PESO E GRÁFICOS
+// PESO E GRÁFICOS
 // ==========================================
 
 function carregarTema() {
-  const temaSalvo = localStorage.getItem('usuarioTema');
+  const temaSalvo = localStorage.getItem("usuarioTema");
 
-  if (temaSalvo === 'dark') {
-    document.documentElement.setAttribute('data-theme', 'dark');
-    document.getElementById('btnTema').innerHTML = '<i class="bi bi-sun"></i> Claro';
-    document.getElementById('metaThemeColor').setAttribute('content', '#0f172a');
+  if (temaSalvo === "dark") {
+    document.documentElement.setAttribute("data-theme", "dark");
+    document.getElementById("btnTema").innerHTML = '<i class="bi bi-sun"></i> Claro';
+    document.getElementById("metaThemeColor").setAttribute("content", "#0f172a");
   }
 }
 
 function alternarTema() {
-  const temaAtual = document.documentElement.getAttribute('data-theme');
-  const metaColor = document.getElementById('metaThemeColor');
+  const temaAtual = document.documentElement.getAttribute("data-theme");
+  const metaColor = document.getElementById("metaThemeColor");
 
-  if (temaAtual === 'dark') {
-    document.documentElement.removeAttribute('data-theme');
-    localStorage.setItem('usuarioTema', 'light');
-    document.getElementById('btnTema').innerHTML = '<i class="bi bi-moon-stars"></i> Escuro';
-    metaColor.setAttribute('content', '#ffffff');
+  if (temaAtual === "dark") {
+    document.documentElement.removeAttribute("data-theme");
+    localStorage.setItem("usuarioTema", "light");
+    document.getElementById("btnTema").innerHTML = '<i class="bi bi-moon-stars"></i> Escuro';
+    metaColor.setAttribute("content", "#ffffff");
   } else {
-    document.documentElement.setAttribute('data-theme', 'dark');
-    localStorage.setItem('usuarioTema', 'dark');
-    document.getElementById('btnTema').innerHTML = '<i class="bi bi-sun"></i> Claro';
-    metaColor.setAttribute('content', '#0f172a');
+    document.documentElement.setAttribute("data-theme", "dark");
+    localStorage.setItem("usuarioTema", "dark");
+    document.getElementById("btnTema").innerHTML = '<i class="bi bi-sun"></i> Claro';
+    metaColor.setAttribute("content", "#0f172a");
   }
 
   atualizarGraficos();
 }
 
 function configurarDataPadrao() {
-  document.getElementById('dataInput').value = new Date().toISOString().split('T')[0];
+  document.getElementById("dataInput").value = new Date().toISOString().split("T")[0];
 }
 
 function obterAltura() {
-  return localStorage.getItem('usuarioAltura') || null;
+  return localStorage.getItem("usuarioAltura") || null;
 }
 
 function verificarExibicaoAltura() {
   const altura = obterAltura();
 
   if (altura) {
-    document.getElementById('cardAltura').style.display = 'none';
-    document.getElementById('btnModificarAltura').style.display = 'block';
-    document.getElementById('alturaInput').value = altura;
+    document.getElementById("cardAltura").style.display = "none";
+    document.getElementById("btnModificarAltura").style.display = "block";
+    document.getElementById("alturaInput").value = altura;
   } else {
-    document.getElementById('cardAltura').style.display = 'block';
-    document.getElementById('btnModificarAltura').style.display = 'none';
+    document.getElementById("cardAltura").style.display = "block";
+    document.getElementById("btnModificarAltura").style.display = "none";
   }
 }
 
 function abrirEdicaoAltura() {
-  document.getElementById('cardAltura').style.display = 'block';
-  document.getElementById('btnModificarAltura').style.display = 'none';
+  document.getElementById("cardAltura").style.display = "block";
+  document.getElementById("btnModificarAltura").style.display = "none";
 }
 
 function salvarAltura() {
-  const altura = parseFloat(document.getElementById('alturaInput').value);
+  const altura = parseFloat(document.getElementById("alturaInput").value);
 
   if (!altura || isNaN(altura) || altura <= 0) {
-    return alert('Altura inválida!');
+    return alert("Altura inválida!");
   }
 
-  localStorage.setItem('usuarioAltura', altura.toFixed(2));
-  localStorage.removeItem('usuarioMetaKcal');
+  localStorage.setItem("usuarioAltura", altura.toFixed(2));
+  localStorage.removeItem("usuarioMetaKcal");
 
   verificarExibicaoAltura();
   carregarDados();
@@ -1335,56 +1336,56 @@ function salvarAltura() {
 }
 
 function obterMeta() {
-  return localStorage.getItem('usuarioMeta') || "80.0";
+  return localStorage.getItem("usuarioMeta") || "80.0";
 }
 
 function carregarMeta() {
   const meta = obterMeta();
 
-  document.getElementById('pesoMetaCard').innerHTML =
+  document.getElementById("pesoMetaCard").innerHTML =
     `${parseFloat(meta).toFixed(1)} <span style="font-size: 16px; font-weight: 400;">kg</span>`;
 
-  document.getElementById('metaInput').value = meta;
+  document.getElementById("metaInput").value = meta;
 }
 
 function abrirEdicaoMeta() {
-  const card = document.getElementById('cardMeta');
-  card.style.display = card.style.display === 'none' ? 'block' : 'none';
+  const card = document.getElementById("cardMeta");
+  card.style.display = card.style.display === "none" ? "block" : "none";
 }
 
 function salvarMeta() {
-  const meta = parseFloat(document.getElementById('metaInput').value);
+  const meta = parseFloat(document.getElementById("metaInput").value);
 
   if (!meta || isNaN(meta) || meta <= 0) {
-    return alert('Meta inválida!');
+    return alert("Meta inválida!");
   }
 
-  localStorage.setItem('usuarioMeta', meta.toFixed(1));
-  localStorage.removeItem('usuarioMetaKcal');
+  localStorage.setItem("usuarioMeta", meta.toFixed(1));
+  localStorage.removeItem("usuarioMetaKcal");
 
   carregarMeta();
 
-  document.getElementById('cardMeta').style.display = 'none';
+  document.getElementById("cardMeta").style.display = "none";
 
   carregarDados();
   carregarMetaKcalSalva();
 }
 
 function obterHistorico() {
-  return JSON.parse(localStorage.getItem('historicoPeso') || '[]');
+  return JSON.parse(localStorage.getItem("historicoPeso") || "[]");
 }
 
 function carregarDados() {
   const historico = obterHistorico();
   const altura = obterAltura();
-  const lista = document.getElementById('historicoLista');
+  const lista = document.getElementById("historicoLista");
 
-  lista.innerHTML = '';
+  lista.innerHTML = "";
 
   const ordenado = [...historico].sort((a, b) => b.id - a.id);
   const pesoAtual = ordenado.length > 0 ? ordenado[0].peso : 0;
 
-  document.getElementById('pesoAtualCard').innerHTML =
+  document.getElementById("pesoAtualCard").innerHTML =
     pesoAtual > 0
       ? `${pesoAtual.toFixed(1)} <span style="font-size: 16px; font-weight: 400;">kg</span>`
       : `--.- <span style="font-size: 16px; font-weight: 400;">kg</span>`;
@@ -1392,16 +1393,16 @@ function carregarDados() {
   if (altura && pesoAtual > 0) {
     const imc = pesoAtual / (altura * altura);
 
-    document.getElementById('imcValue').innerText = imc.toFixed(1);
+    document.getElementById("imcValue").innerText = imc.toFixed(1);
 
     if (imc < 18.5) {
-      document.getElementById('imcStatus').innerText = "Abaixo";
+      document.getElementById("imcStatus").innerText = "Abaixo";
     } else if (imc < 25) {
-      document.getElementById('imcStatus').innerText = "Ideal";
+      document.getElementById("imcStatus").innerText = "Ideal";
     } else if (imc < 30) {
-      document.getElementById('imcStatus').innerText = "Sobrepeso";
+      document.getElementById("imcStatus").innerText = "Sobrepeso";
     } else {
-      document.getElementById('imcStatus').innerText = "Obesidade";
+      document.getElementById("imcStatus").innerText = "Obesidade";
     }
   }
 
@@ -1409,7 +1410,7 @@ function carregarDados() {
     const cronologico = [...historico].sort((a, b) => a.id - b.id);
     const dif = cronologico[0].peso - cronologico[cronologico.length - 1].peso;
 
-    document.getElementById('totalEliminadoCard').innerText =
+    document.getElementById("totalEliminadoCard").innerText =
       dif >= 0 ? `${dif.toFixed(1)} kg` : `+${Math.abs(dif).toFixed(1)} kg`;
 
     const dias = Math.round(
@@ -1419,12 +1420,12 @@ function carregarDados() {
       )
     );
 
-    document.getElementById('tempoJornadaCard').innerText =
+    document.getElementById("tempoJornadaCard").innerText =
       dias === 0 ? "1º dia" : `${dias} dias`;
   }
 
   ordenado.forEach(item => {
-    let medidasTxt = '';
+    let medidasTxt = "";
 
     if (item.cintura) medidasTxt += `Cintura: ${item.cintura}cm `;
     if (item.quadril) medidasTxt += `| Quadril: ${item.quadril}cm`;
@@ -1433,7 +1434,7 @@ function carregarDados() {
       <div class="history-item">
         <div class="history-info">
           <span class="history-date">${item.dataTexto}</span>
-          ${medidasTxt ? `<span class="history-medidas">${medidasTxt}</span>` : ''}
+          ${medidasTxt ? `<span class="history-medidas">${medidasTxt}</span>` : ""}
         </div>
 
         <div class="history-actions">
@@ -1449,50 +1450,50 @@ function carregarDados() {
 }
 
 function adicionarRegistro() {
-  const peso = parseFloat(document.getElementById('pesoInput').value);
-  const data = document.getElementById('dataInput').value;
-  const cintura = document.getElementById('cinturaInput').value;
-  const quadril = document.getElementById('quadrilInput').value;
+  const peso = parseFloat(document.getElementById("pesoInput").value);
+  const data = document.getElementById("dataInput").value;
+  const cintura = document.getElementById("cinturaInput").value;
+  const quadril = document.getElementById("quadrilInput").value;
 
-  if (!peso || isNaN(peso)) return alert('Digite o peso!');
+  if (!peso || isNaN(peso)) return alert("Digite o peso!");
 
   const historico = obterHistorico();
-  const partes = data.split('-');
+  const partes = data.split("-");
 
   historico.push({
     id: Date.now(),
     dataTexto: new Date(partes[0], partes[1] - 1, partes[2])
-      .toLocaleDateString('pt-BR', {
-        day: 'numeric',
-        month: 'short'
+      .toLocaleDateString("pt-BR", {
+        day: "numeric",
+        month: "short"
       })
-      .replace('.', ''),
+      .replace(".", ""),
     dataRaw: data,
     peso: peso,
     cintura: cintura ? parseFloat(cintura) : null,
     quadril: quadril ? parseFloat(quadril) : null
   });
 
-  localStorage.setItem('historicoPeso', JSON.stringify(historico));
-  localStorage.removeItem('usuarioMetaKcal');
+  localStorage.setItem("historicoPeso", JSON.stringify(historico));
+  localStorage.removeItem("usuarioMetaKcal");
 
   carregarDados();
   carregarMetaKcalSalva();
 
-  document.getElementById('pesoInput').value = '';
-  document.getElementById('cinturaInput').value = '';
-  document.getElementById('quadrilInput').value = '';
+  document.getElementById("pesoInput").value = "";
+  document.getElementById("cinturaInput").value = "";
+  document.getElementById("quadrilInput").value = "";
 }
 
 function deletarRegistro(id) {
   if (!confirm("Excluir pesagem?")) return;
 
   localStorage.setItem(
-    'historicoPeso',
+    "historicoPeso",
     JSON.stringify(obterHistorico().filter(i => i.id !== id))
   );
 
-  localStorage.removeItem('usuarioMetaKcal');
+  localStorage.removeItem("usuarioMetaKcal");
 
   carregarDados();
   carregarMetaKcalSalva();
@@ -1508,11 +1509,11 @@ function exportarParaExcel() {
   let csv = "Data,Peso (kg),Cintura (cm),Quadril (cm)\n";
 
   historico.forEach(item => {
-    csv += `${item.dataRaw},${item.peso},${item.cintura || ''},${item.quadril || ''}\n`;
+    csv += `${item.dataRaw},${item.peso},${item.cintura || ""},${item.quadril || ""}\n`;
   });
 
   const blob = new Blob([csv], {
-    type: 'text/csv;charset=utf-8;'
+    type: "text/csv;charset=utf-8;"
   });
 
   const link = document.createElement("a");
@@ -1524,10 +1525,10 @@ function exportarParaExcel() {
 
 function atualizarGraficosSlider() {
   const historico = obterHistorico();
-  const cardSlider = document.getElementById('cardGraficosSlider');
-  const wrapper = document.getElementById('graficosWrapper');
+  const cardSlider = document.getElementById("cardGraficosSlider");
+  const wrapper = document.getElementById("graficosWrapper");
 
-  wrapper.innerHTML = '';
+  wrapper.innerHTML = "";
 
   if (meuSwiper) {
     meuSwiper.destroy(true, true);
@@ -1535,33 +1536,33 @@ function atualizarGraficosSlider() {
   }
 
   if (historico.length < 2) {
-    cardSlider.style.display = 'none';
+    cardSlider.style.display = "none";
     return;
   }
 
-  cardSlider.style.display = 'block';
+  cardSlider.style.display = "block";
 
   const dadosHistorico = [...historico].sort((a, b) => a.id - b.id);
 
   if (dadosHistorico.filter(i => i.peso).length >= 2) {
-    adicionarSlideComGrafico(wrapper, 'graficoPeso');
+    adicionarSlideComGrafico(wrapper, "graficoPeso");
   }
 
   if (dadosHistorico.filter(i => i.cintura).length >= 2) {
-    adicionarSlideComGrafico(wrapper, 'graficoCintura');
+    adicionarSlideComGrafico(wrapper, "graficoCintura");
   }
 
   if (dadosHistorico.filter(i => i.quadril).length >= 2) {
-    adicionarSlideComGrafico(wrapper, 'graficoQuadril');
+    adicionarSlideComGrafico(wrapper, "graficoQuadril");
   }
 
-  meuSwiper = new Swiper('.mySwiper', {
+  meuSwiper = new Swiper(".mySwiper", {
     pagination: {
-      el: '.swiper-pagination',
+      el: ".swiper-pagination",
       clickable: true
     },
     on: {
-      slideChangeTransitionEnd: function () {
+      slideChangeTransitionEnd: function() {
         atualizarGraficos();
       }
     }
@@ -1571,10 +1572,10 @@ function atualizarGraficosSlider() {
 }
 
 function adicionarSlideComGrafico(wrapper, canvasId) {
-  const slide = document.createElement('div');
-  slide.className = 'swiper-slide';
+  const slide = document.createElement("div");
+  slide.className = "swiper-slide";
 
-  const canvas = document.createElement('canvas');
+  const canvas = document.createElement("canvas");
   canvas.id = canvasId;
 
   slide.appendChild(canvas);
@@ -1587,38 +1588,38 @@ function atualizarGraficos() {
   if (historico.length < 2) return;
 
   const dadosHistorico = [...historico].sort((a, b) => a.id - b.id);
-  const temaAtual = document.documentElement.getAttribute('data-theme');
-  const corGrid = temaAtual === 'dark' ? '#334155' : '#f1f5f9';
-  const corTexto = temaAtual === 'dark' ? '#94a3b8' : '#64748b';
+  const temaAtual = document.documentElement.getAttribute("data-theme");
+  const corGrid = temaAtual === "dark" ? "#334155" : "#f1f5f9";
+  const corTexto = temaAtual === "dark" ? "#94a3b8" : "#64748b";
 
   renderizarGraficoUnico(
-    'graficoPeso',
-    'Peso (kg)',
+    "graficoPeso",
+    "Peso (kg)",
     dadosHistorico.map(i => i.peso),
     dadosHistorico.map(i => i.dataTexto),
     corGrid,
     corTexto,
-    'peso'
+    "peso"
   );
 
   renderizarGraficoUnico(
-    'graficoCintura',
-    'Cintura (cm)',
+    "graficoCintura",
+    "Cintura (cm)",
     dadosHistorico.filter(i => i.cintura).map(i => i.cintura),
     dadosHistorico.filter(i => i.cintura).map(i => i.dataTexto),
     corGrid,
     corTexto,
-    'cintura'
+    "cintura"
   );
 
   renderizarGraficoUnico(
-    'graficoQuadril',
-    'Quadril (cm)',
+    "graficoQuadril",
+    "Quadril (cm)",
     dadosHistorico.filter(i => i.quadril).map(i => i.quadril),
     dadosHistorico.filter(i => i.quadril).map(i => i.dataTexto),
     corGrid,
     corTexto,
-    'quadril'
+    "quadril"
   );
 }
 
@@ -1631,23 +1632,23 @@ function renderizarGraficoUnico(canvasId, label, dados, labels, corGrid, corText
     instanciasGraficos[metricKey].destroy();
   }
 
-  const ctx = canvas.getContext('2d');
+  const ctx = canvas.getContext("2d");
   const gradiente = ctx.createLinearGradient(0, 0, 0, 180);
 
-  gradiente.addColorStop(0, 'rgba(14, 165, 233, 0.45)');
-  gradiente.addColorStop(1, 'rgba(37, 99, 235, 0.00)');
+  gradiente.addColorStop(0, "rgba(14, 165, 233, 0.45)");
+  gradiente.addColorStop(1, "rgba(37, 99, 235, 0.00)");
 
   instanciasGraficos[metricKey] = new Chart(ctx, {
-    type: 'line',
+    type: "line",
     data: {
       labels: labels,
       datasets: [{
         label: label,
         data: dados,
-        borderColor: '#0ea5e9',
+        borderColor: "#0ea5e9",
         borderWidth: 3,
         tension: 0.4,
-        pointBackgroundColor: '#2563eb',
+        pointBackgroundColor: "#2563eb",
         pointRadius: 4,
         pointHoverRadius: 6,
         fill: true,
@@ -1667,7 +1668,7 @@ function renderizarGraficoUnico(canvasId, label, dados, labels, corGrid, corText
           color: corTexto,
           font: {
             size: 14,
-            weight: '600'
+            weight: "600"
           },
           padding: {
             bottom: 16
@@ -1697,7 +1698,7 @@ function renderizarGraficoUnico(canvasId, label, dados, labels, corGrid, corText
 }
 
 // ==========================================
-// TUTORIAL GUIADO DO EVOLUAFIT IA
+// TUTORIAL GUIADO ROBUSTO
 // ==========================================
 
 const tutorialPassos = [
@@ -1711,13 +1712,13 @@ const tutorialPassos = [
     aba: "dashboard",
     alvo: "#btnSalvar",
     titulo: "Registre suas medidas",
-    texto: "Informe seu peso, cintura e quadril. Esses dados ajudam o app e a IA a entenderem sua evolução."
+    texto: "Informe peso, cintura e quadril. Esses dados ajudam a IA a entender sua evolução."
   },
   {
     aba: "alimentacao",
     alvo: ".card-water",
     titulo: "Diário e hidratação",
-    texto: "Nesta área você registra água, refeições e salva o diário para calcular as calorias do dia."
+    texto: "Aqui você registra água, refeições e salva o diário do dia."
   },
   {
     aba: "alimentacao",
@@ -1729,7 +1730,7 @@ const tutorialPassos = [
     aba: "exercicio",
     alvo: "#btnGerarTreinoIA",
     titulo: "Treino com I.A",
-    texto: "Aqui você registra caminhadas, corridas e também pode pedir um treino personalizado para a IA."
+    texto: "Aqui você registra caminhadas, corridas e também pode pedir um treino personalizado."
   },
   {
     aba: "ia",
@@ -1753,7 +1754,7 @@ function iniciarTutorialSeNecessario() {
   if (!tutorialConcluido) {
     setTimeout(() => {
       abrirTutorial(0);
-    }, 900);
+    }, 1000);
   }
 }
 
@@ -1762,7 +1763,14 @@ function criarBotaoTutorialNoPerfil() {
 
   if (!perfilStatus) return;
 
-  if (document.getElementById("btnVerTutorial")) return;
+  if (document.getElementById("btnVerTutorial")) {
+    document.getElementById("btnVerTutorial").addEventListener("click", () => {
+      localStorage.removeItem("tutorialConcluido");
+      abrirTutorial(0);
+    });
+
+    return;
+  }
 
   const botao = document.createElement("button");
 
@@ -1890,7 +1898,7 @@ function renderizarPassoTutorial() {
       try {
         alvo.scrollIntoView({
           behavior: "smooth",
-          block: "center"
+          block: "nearest"
         });
       } catch (erro) {
         console.log("Não foi possível centralizar o item do tutorial:", erro);
@@ -1944,3 +1952,5 @@ function removerDestaquesTutorial() {
     elemento.classList.remove("tutorial-highlight");
   });
 }
+
+window.abrirTutorial = abrirTutorial;

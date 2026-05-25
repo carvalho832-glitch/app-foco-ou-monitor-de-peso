@@ -58,6 +58,7 @@ function iniciarApp() {
   carregarTreinoIASalvo();
 
   criarBotaoTutorialNoPerfil();
+  configurarBotaoTutorialTopo();
   iniciarTutorialSeNecessario();
 }
 
@@ -1758,13 +1759,26 @@ function iniciarTutorialSeNecessario() {
   }
 }
 
+function configurarBotaoTutorialTopo() {
+  const btnTopo = document.getElementById("btnVerTutorialTopo");
+
+  if (btnTopo) {
+    btnTopo.addEventListener("click", function() {
+      localStorage.removeItem("tutorialConcluido");
+      abrirTutorial(0);
+    });
+  }
+}
+
 function criarBotaoTutorialNoPerfil() {
   const perfilStatus = document.getElementById("perfilStatus");
 
   if (!perfilStatus) return;
 
-  if (document.getElementById("btnVerTutorial")) {
-    document.getElementById("btnVerTutorial").addEventListener("click", () => {
+  const botaoExistente = document.getElementById("btnVerTutorial");
+
+  if (botaoExistente) {
+    botaoExistente.addEventListener("click", () => {
       localStorage.removeItem("tutorialConcluido");
       abrirTutorial(0);
     });
@@ -1800,7 +1814,7 @@ function criarEstruturaTutorial() {
   const overlay = document.createElement("div");
 
   overlay.id = "tutorialOverlay";
-  overlay.className = "tutorial-overlay";
+  overlay.className = "tutorial-overlay pos-bottom";
 
   overlay.innerHTML = `
     <div class="tutorial-card">
@@ -1898,11 +1912,18 @@ function renderizarPassoTutorial() {
       try {
         alvo.scrollIntoView({
           behavior: "smooth",
-          block: "nearest"
+          block: "center"
         });
       } catch (erro) {
         console.log("Não foi possível centralizar o item do tutorial:", erro);
       }
+
+      setTimeout(() => {
+        ajustarPosicaoCardTutorial(alvo);
+      }, 450);
+    } else {
+      overlay.classList.remove("pos-top", "pos-bottom", "pos-center");
+      overlay.classList.add("pos-bottom");
     }
   }, 350);
 }
@@ -1913,6 +1934,32 @@ function prepararAbaDoTutorial(abaId) {
   if (typeof trocarAba === "function") {
     trocarAba(abaId, botaoAba);
   }
+}
+
+function ajustarPosicaoCardTutorial(alvo) {
+  const overlay = document.getElementById("tutorialOverlay");
+
+  if (!overlay || !alvo) return;
+
+  overlay.classList.remove("pos-top", "pos-bottom", "pos-center");
+
+  const rect = alvo.getBoundingClientRect();
+  const alturaTela = window.innerHeight;
+
+  const alvoMuitoEmbaixo = rect.bottom > alturaTela * 0.60;
+  const alvoMuitoNoTopo = rect.top < alturaTela * 0.35;
+
+  if (alvoMuitoEmbaixo) {
+    overlay.classList.add("pos-top");
+    return;
+  }
+
+  if (alvoMuitoNoTopo) {
+    overlay.classList.add("pos-bottom");
+    return;
+  }
+
+  overlay.classList.add("pos-bottom");
 }
 
 function avancarPassoTutorial() {
@@ -1942,6 +1989,8 @@ function fecharTutorial() {
 
   if (overlay) {
     overlay.style.display = "none";
+    overlay.classList.remove("pos-top", "pos-bottom", "pos-center");
+    overlay.classList.add("pos-bottom");
   }
 
   removerDestaquesTutorial();

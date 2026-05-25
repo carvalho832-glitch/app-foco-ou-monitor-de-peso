@@ -1692,3 +1692,237 @@ function renderizarGraficoUnico(canvasId, label, dados, labels, corGrid, corText
     }
   });
 }
+// ==========================================
+// TUTORIAL GUIADO DO EVOLUAFIT IA
+// ==========================================
+
+const tutorialPassos = [
+  {
+    aba: "dashboard",
+    alvo: ".card-highlight",
+    titulo: "Bem-vindo ao EvoluaFit IA",
+    texto: "Aqui você acompanha sua evolução, peso atual, meta, IMC e progresso da sua jornada."
+  },
+  {
+    aba: "dashboard",
+    alvo: "#btnSalvar",
+    titulo: "Registre suas medidas",
+    texto: "Informe seu peso, cintura e quadril. Esses dados ajudam o app e a IA a entenderem sua evolução."
+  },
+  {
+    aba: "alimentacao",
+    alvo: ".card-water",
+    titulo: "Diário e hidratação",
+    texto: "Nesta área você registra água, refeições e salva o diário para calcular as calorias do dia."
+  },
+  {
+    aba: "alimentacao",
+    alvo: ".card-total-kcal",
+    titulo: "Meta de kcal da IA",
+    texto: "A Luma compara o que você consumiu com uma meta personalizada de calorias."
+  },
+  {
+    aba: "exercicio",
+    alvo: "#btnGerarTreinoIA",
+    titulo: "Treino com I.A",
+    texto: "Aqui você registra caminhadas, corridas e também pode pedir um treino personalizado para a IA."
+  },
+  {
+    aba: "ia",
+    alvo: ".card-perfil-luma",
+    titulo: "Personalize sua IA",
+    texto: "Preencha seu perfil para a IA orientar melhor seus treinos, alimentação e metas."
+  },
+  {
+    aba: "dashboard",
+    alvo: "#btnMenuLuma",
+    titulo: "Menu rápido",
+    texto: "Use este botão para navegar entre Evolução, Diário, Treino e I.A de forma rápida."
+  }
+];
+
+let tutorialPassoAtual = 0;
+
+function iniciarTutorialSeNecessario() {
+  const tutorialConcluido = localStorage.getItem("tutorialConcluido");
+
+  if (!tutorialConcluido) {
+    setTimeout(() => {
+      abrirTutorial(0);
+    }, 700);
+  }
+}
+
+function criarBotaoTutorialNoPerfil() {
+  const perfilStatus = document.getElementById("perfilStatus");
+
+  if (!perfilStatus) return;
+
+  if (document.getElementById("btnVerTutorial")) return;
+
+  const botao = document.createElement("button");
+
+  botao.id = "btnVerTutorial";
+  botao.className = "btn-tutorial-rever";
+  botao.type = "button";
+  botao.innerHTML = '<i class="bi bi-compass"></i> Ver tutorial novamente';
+
+  botao.addEventListener("click", () => {
+    abrirTutorial(0);
+  });
+
+  perfilStatus.insertAdjacentElement("afterend", botao);
+}
+
+function abrirTutorial(indiceInicial = 0) {
+  tutorialPassoAtual = indiceInicial;
+
+  criarEstruturaTutorial();
+  renderizarPassoTutorial();
+}
+
+function criarEstruturaTutorial() {
+  if (document.getElementById("tutorialOverlay")) return;
+
+  const overlay = document.createElement("div");
+
+  overlay.id = "tutorialOverlay";
+  overlay.className = "tutorial-overlay";
+
+  overlay.innerHTML = `
+    <div class="tutorial-card">
+      <div class="tutorial-topo">
+        <div>
+          <div class="tutorial-label">Tutorial</div>
+          <h2 id="tutorialTitulo">Bem-vindo</h2>
+        </div>
+
+        <button id="btnFecharTutorial" class="tutorial-close" type="button">
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
+
+      <p id="tutorialTexto" class="tutorial-texto"></p>
+
+      <div class="tutorial-progress-area">
+        <div id="tutorialProgressoTexto" class="tutorial-progress-text">Passo 1 de 7</div>
+        <div class="tutorial-progress-bar">
+          <div id="tutorialProgressoFill" class="tutorial-progress-fill"></div>
+        </div>
+      </div>
+
+      <div class="tutorial-actions">
+        <button id="btnPularTutorial" class="tutorial-btn-secondary" type="button">
+          Pular
+        </button>
+
+        <div class="tutorial-actions-right">
+          <button id="btnVoltarTutorial" class="tutorial-btn-secondary" type="button">
+            Voltar
+          </button>
+
+          <button id="btnProximoTutorial" class="tutorial-btn-primary" type="button">
+            Próximo
+          </button>
+        </div>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(overlay);
+
+  document.getElementById("btnFecharTutorial").addEventListener("click", fecharTutorial);
+  document.getElementById("btnPularTutorial").addEventListener("click", concluirTutorial);
+  document.getElementById("btnVoltarTutorial").addEventListener("click", voltarPassoTutorial);
+  document.getElementById("btnProximoTutorial").addEventListener("click", avancarPassoTutorial);
+}
+
+function renderizarPassoTutorial() {
+  const passo = tutorialPassos[tutorialPassoAtual];
+
+  prepararAbaDoTutorial(passo.aba);
+
+  setTimeout(() => {
+    removerDestaquesTutorial();
+
+    const alvo = document.querySelector(passo.alvo);
+
+    if (alvo) {
+      alvo.classList.add("tutorial-highlight");
+    }
+  }, 200);
+
+  const overlay = document.getElementById("tutorialOverlay");
+  const titulo = document.getElementById("tutorialTitulo");
+  const texto = document.getElementById("tutorialTexto");
+  const progressoTexto = document.getElementById("tutorialProgressoTexto");
+  const progressoFill = document.getElementById("tutorialProgressoFill");
+  const btnVoltar = document.getElementById("btnVoltarTutorial");
+  const btnProximo = document.getElementById("btnProximoTutorial");
+
+  overlay.style.display = "flex";
+
+  titulo.innerText = passo.titulo;
+  texto.innerText = passo.texto;
+
+  progressoTexto.innerText = `Passo ${tutorialPassoAtual + 1} de ${tutorialPassos.length}`;
+
+  const porcentagem = ((tutorialPassoAtual + 1) / tutorialPassos.length) * 100;
+  progressoFill.style.width = `${porcentagem}%`;
+
+  btnVoltar.disabled = tutorialPassoAtual === 0;
+
+  btnProximo.innerText =
+    tutorialPassoAtual === tutorialPassos.length - 1
+      ? "Concluir"
+      : "Próximo";
+}
+
+function prepararAbaDoTutorial(abaId) {
+  const botaoAba = document.querySelector(`.floating-item[data-aba="${abaId}"]`);
+
+  if (typeof trocarAba === "function") {
+    trocarAba(abaId, botaoAba);
+  }
+}
+
+function avancarPassoTutorial() {
+  if (tutorialPassoAtual >= tutorialPassos.length - 1) {
+    concluirTutorial();
+    return;
+  }
+
+  tutorialPassoAtual++;
+  renderizarPassoTutorial();
+}
+
+function voltarPassoTutorial() {
+  if (tutorialPassoAtual <= 0) return;
+
+  tutorialPassoAtual--;
+  renderizarPassoTutorial();
+}
+
+function concluirTutorial() {
+  localStorage.setItem("tutorialConcluido", "true");
+  fecharTutorial();
+}
+
+function fecharTutorial() {
+  const overlay = document.getElementById("tutorialOverlay");
+
+  if (overlay) {
+    overlay.style.display = "none";
+  }
+
+  removerDestaquesTutorial();
+}
+
+function removerDestaquesTutorial() {
+  document.querySelectorAll(".tutorial-highlight").forEach(elemento => {
+    elemento.classList.remove("tutorial-highlight");
+  });
+}
+
+// Use esta função no console caso queira testar como primeiro acesso:
+// localStorage.removeItem("tutorialConcluido");

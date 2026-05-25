@@ -5,46 +5,20 @@ let instanciasGraficos = { peso: null, cintura: null, quadril: null };
 
 document.addEventListener("DOMContentLoaded", iniciarApp);
 
-document.getElementById("btnSalvar").addEventListener("click", adicionarRegistro);
-document.getElementById("btnSalvarAltura").addEventListener("click", salvarAltura);
-document.getElementById("btnModificarAltura").addEventListener("click", abrirEdicaoAltura);
-document.getElementById("btnModificarMeta").addEventListener("click", abrirEdicaoMeta);
-document.getElementById("btnSalvarMeta").addEventListener("click", salvarMeta);
-document.getElementById("btnTema").addEventListener("click", alternarTema);
-document.getElementById("btnExportar").addEventListener("click", exportarParaExcel);
+function byId(id) {
+  return document.getElementById(id);
+}
 
-document.getElementById("dataAlimentacaoInput").addEventListener("change", carregarRefeicoesDoDia);
-document.getElementById("btnSalvarAlimentacao").addEventListener("click", salvarRefeicoes);
-document.getElementById("btnAtualizarMetaKcal").addEventListener("click", atualizarMetaKcalComIA);
-
-document.getElementById("btnIniciarTreino").addEventListener("click", iniciarTreino);
-document.getElementById("btnPararTreino").addEventListener("click", encerrarTreino);
-document.getElementById("btnGerarTreinoIA").addEventListener("click", gerarTreinoIA);
-
-document.getElementById("treinoIAHeader").addEventListener("click", alternarCardTreinoIA);
-document.getElementById("btnRecolherTreinoIA").addEventListener("click", recolherCardTreinoIA);
-
-document.getElementById("btnCompartilharProgresso").addEventListener("click", compartilharProgresso);
-
-document.getElementById("btnAnalisarDia").addEventListener("click", solicitarAnaliseIA);
-
-document.getElementById("btnSalvarPerfil").addEventListener("click", salvarPerfilUsuario);
-
-document.getElementById("btnMenuLuma").addEventListener("click", alternarMenuLuma);
-
-document.addEventListener("click", function(event) {
-  const nav = document.getElementById("floatingNav");
-
-  if (!nav) return;
-
-  const clicouNoMenu = nav.contains(event.target);
-
-  if (!clicouNoMenu && nav.classList.contains("open")) {
-    nav.classList.remove("open");
+function addListener(id, evento, funcao) {
+  const elemento = byId(id);
+  if (elemento) {
+    elemento.addEventListener(evento, funcao);
   }
-});
+}
 
 function iniciarApp() {
+  configurarListeners();
+
   carregarTema();
   configurarDataPadrao();
   configurarDataAlimentacaoPadrao();
@@ -62,11 +36,61 @@ function iniciarApp() {
   iniciarTutorialSeNecessario();
 }
 
+function configurarListeners() {
+  addListener("btnSalvar", "click", adicionarRegistro);
+  addListener("btnSalvarAltura", "click", salvarAltura);
+  addListener("btnModificarAltura", "click", abrirEdicaoAltura);
+  addListener("btnModificarMeta", "click", abrirEdicaoMeta);
+  addListener("btnSalvarMeta", "click", salvarMeta);
+  addListener("btnTema", "click", alternarTema);
+  addListener("btnExportar", "click", exportarParaExcel);
+
+  addListener("dataAlimentacaoInput", "change", carregarRefeicoesDoDia);
+  addListener("btnSalvarAlimentacao", "click", salvarRefeicoes);
+  addListener("btnAtualizarMetaKcal", "click", atualizarMetaKcalComIA);
+
+  addListener("btnIniciarTreino", "click", iniciarTreino);
+  addListener("btnPararTreino", "click", encerrarTreino);
+  addListener("btnGerarTreinoIA", "click", gerarTreinoIA);
+
+  addListener("treinoIAHeader", "click", alternarCardTreinoIA);
+  addListener("btnRecolherTreinoIA", "click", recolherCardTreinoIA);
+
+  addListener("btnCompartilharProgresso", "click", compartilharProgresso);
+  addListener("btnAnalisarDia", "click", solicitarAnaliseIA);
+  addListener("btnSalvarPerfil", "click", salvarPerfilUsuario);
+  addListener("btnMenuLuma", "click", alternarMenuLuma);
+
+  document.addEventListener("click", function(event) {
+    const nav = byId("floatingNav");
+
+    if (!nav) return;
+
+    const clicouNoMenu = nav.contains(event.target);
+
+    if (!clicouNoMenu && nav.classList.contains("open")) {
+      nav.classList.remove("open");
+    }
+  });
+}
+
+// ==========================================
+// MENU E ABAS
+// ==========================================
+
 function trocarAba(abaId, elementoBotao) {
-  document.getElementById("aba-dashboard").style.display = abaId === "dashboard" ? "block" : "none";
-  document.getElementById("aba-alimentacao").style.display = abaId === "alimentacao" ? "block" : "none";
-  document.getElementById("aba-exercicio").style.display = abaId === "exercicio" ? "block" : "none";
-  document.getElementById("aba-ia").style.display = abaId === "ia" ? "block" : "none";
+  const abas = {
+    dashboard: byId("aba-dashboard"),
+    alimentacao: byId("aba-alimentacao"),
+    exercicio: byId("aba-exercicio"),
+    ia: byId("aba-ia")
+  };
+
+  Object.keys(abas).forEach(chave => {
+    if (abas[chave]) {
+      abas[chave].style.display = chave === abaId ? "block" : "none";
+    }
+  });
 
   document.querySelectorAll(".floating-item").forEach(btn => {
     btn.classList.remove("active");
@@ -79,13 +103,13 @@ function trocarAba(abaId, elementoBotao) {
     if (botaoAba) botaoAba.classList.add("active");
   }
 
-  const floatingNav = document.getElementById("floatingNav");
+  const floatingNav = byId("floatingNav");
   if (floatingNav) floatingNav.classList.remove("open");
 
   if (abaId === "alimentacao") {
-    const inputData = document.getElementById("dataAlimentacaoInput");
+    const inputData = byId("dataAlimentacaoInput");
 
-    if (!inputData.value) {
+    if (inputData && !inputData.value) {
       inputData.value = new Date().toISOString().split("T")[0];
     }
 
@@ -105,8 +129,13 @@ function trocarAba(abaId, elementoBotao) {
 }
 
 function alternarMenuLuma(event) {
-  event.stopPropagation();
-  document.getElementById("floatingNav").classList.toggle("open");
+  if (event) event.stopPropagation();
+
+  const nav = byId("floatingNav");
+
+  if (nav) {
+    nav.classList.toggle("open");
+  }
 }
 
 // ==========================================
@@ -125,23 +154,23 @@ function carregarPerfilUsuario() {
     return;
   }
 
-  document.getElementById("perfilNome").value = perfil.nome || "";
-  document.getElementById("perfilIdade").value = perfil.idade || "";
-  document.getElementById("perfilSexo").value = perfil.sexo || "";
-  document.getElementById("perfilNivel").value = perfil.nivel || "";
-  document.getElementById("perfilObjetivo").value = perfil.objetivo || "";
-  document.getElementById("perfilObservacoes").value = perfil.observacoes || "";
+  if (byId("perfilNome")) byId("perfilNome").value = perfil.nome || "";
+  if (byId("perfilIdade")) byId("perfilIdade").value = perfil.idade || "";
+  if (byId("perfilSexo")) byId("perfilSexo").value = perfil.sexo || "";
+  if (byId("perfilNivel")) byId("perfilNivel").value = perfil.nivel || "";
+  if (byId("perfilObjetivo")) byId("perfilObjetivo").value = perfil.objetivo || "";
+  if (byId("perfilObservacoes")) byId("perfilObservacoes").value = perfil.observacoes || "";
 
   atualizarStatusPerfil(perfil);
 }
 
 function salvarPerfilUsuario() {
-  const nome = document.getElementById("perfilNome").value.trim();
-  const idade = document.getElementById("perfilIdade").value.trim();
-  const sexo = document.getElementById("perfilSexo").value;
-  const nivel = document.getElementById("perfilNivel").value;
-  const objetivo = document.getElementById("perfilObjetivo").value;
-  const observacoes = document.getElementById("perfilObservacoes").value.trim();
+  const nome = byId("perfilNome").value.trim();
+  const idade = byId("perfilIdade").value.trim();
+  const sexo = byId("perfilSexo").value;
+  const nivel = byId("perfilNivel").value;
+  const objetivo = byId("perfilObjetivo").value;
+  const observacoes = byId("perfilObservacoes").value.trim();
 
   const perfil = {
     nome: nome,
@@ -159,7 +188,10 @@ function salvarPerfilUsuario() {
   atualizarStatusPerfil(perfil);
   carregarMetaKcalSalva();
 
-  const btn = document.getElementById("btnSalvarPerfil");
+  const btn = byId("btnSalvarPerfil");
+
+  if (!btn) return;
+
   const textoOriginal = btn.innerHTML;
 
   btn.innerHTML = '<i class="bi bi-check2-circle"></i> Perfil salvo!';
@@ -172,7 +204,7 @@ function salvarPerfilUsuario() {
 }
 
 function atualizarStatusPerfil(perfil) {
-  const status = document.getElementById("perfilStatus");
+  const status = byId("perfilStatus");
 
   if (!status) return;
 
@@ -209,7 +241,10 @@ function carregarMetaKcalSalva() {
 }
 
 async function atualizarMetaKcalComIA() {
-  const btn = document.getElementById("btnAtualizarMetaKcal");
+  const btn = byId("btnAtualizarMetaKcal");
+
+  if (!btn) return;
+
   const textoOriginal = btn.innerHTML;
 
   btn.disabled = true;
@@ -350,8 +385,8 @@ function calcularStatusKcal(totalConsumido, metaKcal) {
 // ==========================================
 
 function compartilharProgresso() {
-  const pesoAtual = document.getElementById("pesoAtualCard").innerText.replace("kg", "").trim();
-  const eliminado = document.getElementById("totalEliminadoCard").innerText;
+  const pesoAtual = byId("pesoAtualCard").innerText.replace("kg", "").trim();
+  const eliminado = byId("totalEliminadoCard").innerText;
 
   const texto = `Bora focar! 🚀 Já eliminei ${eliminado} e estou pesando ${pesoAtual} kg. 💪 Acompanhando tudo pelo meu app Luma!`;
 
@@ -388,7 +423,7 @@ function compartilharTreinoModal() {
 }
 
 // ==========================================
-// LÓGICA DO TREINADOR IA
+// IA DO DIA
 // ==========================================
 
 function carregarAnaliseSalva() {
@@ -397,15 +432,23 @@ function carregarAnaliseSalva() {
 
   if (analise && analise.data === hoje) {
     exibirRespostaIA(analise.plano, analise.dica);
-    document.getElementById("iaStatusData").innerText = "Análise de hoje concluída ✅";
-    document.getElementById("btnAnalisarDia").innerHTML = '<i class="bi bi-arrow-clockwise"></i> Atualizar análise';
+
+    if (byId("iaStatusData")) {
+      byId("iaStatusData").innerText = "Análise de hoje concluída ✅";
+    }
+
+    if (byId("btnAnalisarDia")) {
+      byId("btnAnalisarDia").innerHTML = '<i class="bi bi-arrow-clockwise"></i> Atualizar análise';
+    }
   }
 }
 
 async function solicitarAnaliseIA() {
-  const btnIA = document.getElementById("btnAnalisarDia");
-  const containerResposta = document.getElementById("iaRespostaContainer");
-  const loading = document.getElementById("iaLoading");
+  const btnIA = byId("btnAnalisarDia");
+  const containerResposta = byId("iaRespostaContainer");
+  const loading = byId("iaLoading");
+
+  if (!btnIA || !containerResposta || !loading) return;
 
   btnIA.style.display = "none";
   containerResposta.style.display = "none";
@@ -489,15 +532,17 @@ function extrairBlocoIA(texto, inicio, fim) {
 }
 
 function exibirRespostaIA(plano, dica) {
-  document.getElementById("iaTextoPlano").innerText = plano;
-  document.getElementById("iaTextoDica").innerText = dica;
-  document.getElementById("iaRespostaContainer").style.display = "block";
+  if (byId("iaTextoPlano")) byId("iaTextoPlano").innerText = plano;
+  if (byId("iaTextoDica")) byId("iaTextoDica").innerText = dica;
+  if (byId("iaRespostaContainer")) byId("iaRespostaContainer").style.display = "block";
 
-  document.getElementById("iaStatusData").innerText =
-    `Última análise: Hoje às ${new Date().toLocaleTimeString("pt-BR", {
-      hour: "2-digit",
-      minute: "2-digit"
-    })}`;
+  if (byId("iaStatusData")) {
+    byId("iaStatusData").innerText =
+      `Última análise: Hoje às ${new Date().toLocaleTimeString("pt-BR", {
+        hour: "2-digit",
+        minute: "2-digit"
+      })}`;
+  }
 }
 
 // ==========================================
@@ -510,14 +555,19 @@ function carregarTreinoIASalvo() {
 
   if (cache && cache.data === hoje && cache.treino) {
     exibirTreinoIA(cache.treino, true);
-    document.getElementById("btnGerarTreinoIA").innerHTML = '<i class="bi bi-arrow-clockwise"></i> Atualizar treino com I.A';
+
+    if (byId("btnGerarTreinoIA")) {
+      byId("btnGerarTreinoIA").innerHTML = '<i class="bi bi-arrow-clockwise"></i> Atualizar treino com I.A';
+    }
   }
 }
 
 async function gerarTreinoIA() {
-  const btn = document.getElementById("btnGerarTreinoIA");
-  const container = document.getElementById("treinoIAContainer");
-  const loading = document.getElementById("treinoIALoading");
+  const btn = byId("btnGerarTreinoIA");
+  const container = byId("treinoIAContainer");
+  const loading = byId("treinoIALoading");
+
+  if (!btn || !container || !loading) return;
 
   const textoOriginal = btn.innerHTML;
 
@@ -595,7 +645,7 @@ function montarDadosTreinoIA() {
     imc = pesoAtual / (altura * altura);
   }
 
-  const tipoAtividadeEscolhida = document.getElementById("tipoAtividade").value;
+  const tipoAtividadeEscolhida = byId("tipoAtividade") ? byId("tipoAtividade").value : "caminhada";
 
   return {
     dataHoje: hojeISO,
@@ -613,8 +663,10 @@ function montarDadosTreinoIA() {
 }
 
 function exibirTreinoIA(treino, recolhido = true) {
-  const container = document.getElementById("treinoIAContainer");
-  const texto = document.getElementById("treinoIATexto");
+  const container = byId("treinoIAContainer");
+  const texto = byId("treinoIATexto");
+
+  if (!container || !texto) return;
 
   texto.innerText = treino;
   container.style.display = "block";
@@ -627,13 +679,19 @@ function exibirTreinoIA(treino, recolhido = true) {
 }
 
 function alternarCardTreinoIA() {
-  const container = document.getElementById("treinoIAContainer");
-  container.classList.toggle("treino-ia-collapsed");
+  const container = byId("treinoIAContainer");
+
+  if (container) {
+    container.classList.toggle("treino-ia-collapsed");
+  }
 }
 
 function recolherCardTreinoIA() {
-  const container = document.getElementById("treinoIAContainer");
-  container.classList.add("treino-ia-collapsed");
+  const container = byId("treinoIAContainer");
+
+  if (container) {
+    container.classList.add("treino-ia-collapsed");
+  }
 }
 
 // ==========================================
@@ -656,6 +714,10 @@ let mapaDetalhe = null;
 let detalhePolyline = null;
 
 function iniciarMapaTreino() {
+  const mapaContainer = byId("mapaTreinoContainer");
+
+  if (!mapaContainer || typeof L === "undefined") return;
+
   if (mapaTreino !== null) {
     mapaTreino.invalidateSize();
     return;
@@ -689,7 +751,9 @@ function iniciarMapaTreino() {
 }
 
 function iniciarTreino() {
-  if (!navigator.geolocation) return alert("Seu navegador não suporta GPS.");
+  if (!navigator.geolocation) {
+    return alert("Seu navegador não suporta GPS.");
+  }
 
   if (!mapaTreino) iniciarMapaTreino();
 
@@ -699,14 +763,14 @@ function iniciarTreino() {
   coordenadasRota = [];
   tempoInicio = Date.now();
 
-  document.getElementById("displayDistancia").innerText = "0.00";
-  document.getElementById("displayVelocidade").innerText = "0.0";
-  document.getElementById("displayCalorias").innerText = "0";
-  document.getElementById("displayTempo").innerText = "00:00:00";
+  if (byId("displayDistancia")) byId("displayDistancia").innerText = "0.00";
+  if (byId("displayVelocidade")) byId("displayVelocidade").innerText = "0.0";
+  if (byId("displayCalorias")) byId("displayCalorias").innerText = "0";
+  if (byId("displayTempo")) byId("displayTempo").innerText = "00:00:00";
 
-  document.getElementById("btnIniciarTreino").style.display = "none";
-  document.getElementById("btnPararTreino").style.display = "block";
-  document.getElementById("msgGpsErro").style.display = "none";
+  if (byId("btnIniciarTreino")) byId("btnIniciarTreino").style.display = "none";
+  if (byId("btnPararTreino")) byId("btnPararTreino").style.display = "block";
+  if (byId("msgGpsErro")) byId("msgGpsErro").style.display = "none";
 
   if (rotaPolyline && mapaTreino) mapaTreino.removeLayer(rotaPolyline);
 
@@ -729,6 +793,7 @@ function iniciarTreino() {
 }
 
 function processarPosicaoGps(posicao) {
+  if (!mapaTreino) return;
   if (posicao.coords.accuracy > 40) return;
 
   const latLng = [posicao.coords.latitude, posicao.coords.longitude];
@@ -747,7 +812,10 @@ function processarPosicaoGps(posicao) {
 
   if (isTreinando) {
     coordenadasRota.push(latLng);
-    rotaPolyline.setLatLngs(coordenadasRota);
+
+    if (rotaPolyline) {
+      rotaPolyline.setLatLngs(coordenadasRota);
+    }
 
     const coordAtual = {
       lat: latLng[0],
@@ -766,7 +834,10 @@ function processarPosicaoGps(posicao) {
 
 function erroGps(erro) {
   console.warn("Erro no GPS:", erro);
-  document.getElementById("msgGpsErro").style.display = "block";
+
+  if (byId("msgGpsErro")) {
+    byId("msgGpsErro").style.display = "block";
+  }
 }
 
 function calcularDistanciaHaversine(pos1, pos2) {
@@ -791,10 +862,12 @@ function atualizarCronometro() {
   const minutos = Math.floor((diferenca % (1000 * 60 * 60)) / (1000 * 60));
   const segundos = Math.floor((diferenca % (1000 * 60)) / 1000);
 
-  document.getElementById("displayTempo").innerText =
-    String(horas).padStart(2, "0") + ":" +
-    String(minutos).padStart(2, "0") + ":" +
-    String(segundos).padStart(2, "0");
+  if (byId("displayTempo")) {
+    byId("displayTempo").innerText =
+      String(horas).padStart(2, "0") + ":" +
+      String(minutos).padStart(2, "0") + ":" +
+      String(segundos).padStart(2, "0");
+  }
 
   atualizarTelaTreino();
 }
@@ -809,12 +882,12 @@ function atualizarTelaTreino() {
   const ordenado = [...historico].sort((a, b) => b.id - a.id);
   const pesoAtual = ordenado.length > 0 ? ordenado[0].peso : 80;
 
-  const tipo = document.getElementById("tipoAtividade").value;
+  const tipo = byId("tipoAtividade") ? byId("tipoAtividade").value : "caminhada";
   const fatorCalorico = tipo === "corrida" ? 1.03 : 0.75;
 
-  document.getElementById("displayDistancia").innerText = distanciaTotalKm.toFixed(2);
-  document.getElementById("displayVelocidade").innerText = velocidade.toFixed(1);
-  document.getElementById("displayCalorias").innerText = Math.round(pesoAtual * distanciaTotalKm * fatorCalorico);
+  if (byId("displayDistancia")) byId("displayDistancia").innerText = distanciaTotalKm.toFixed(2);
+  if (byId("displayVelocidade")) byId("displayVelocidade").innerText = velocidade.toFixed(1);
+  if (byId("displayCalorias")) byId("displayCalorias").innerText = Math.round(pesoAtual * distanciaTotalKm * fatorCalorico);
 }
 
 function encerrarTreino() {
@@ -828,18 +901,18 @@ function encerrarTreino() {
     navigator.geolocation.clearWatch(gpsWatchId);
   }
 
-  document.getElementById("btnIniciarTreino").style.display = "block";
-  document.getElementById("btnPararTreino").style.display = "none";
+  if (byId("btnIniciarTreino")) byId("btnIniciarTreino").style.display = "block";
+  if (byId("btnPararTreino")) byId("btnPararTreino").style.display = "none";
 
   const treinos = JSON.parse(localStorage.getItem("historicoTreinos") || "[]");
 
   treinos.push({
     id: Date.now(),
     data: new Date().toLocaleDateString("pt-BR"),
-    tipo: document.getElementById("tipoAtividade").value,
-    tempo: document.getElementById("displayTempo").innerText,
-    distancia: document.getElementById("displayDistancia").innerText,
-    calorias: document.getElementById("displayCalorias").innerText,
+    tipo: byId("tipoAtividade") ? byId("tipoAtividade").value : "caminhada",
+    tempo: byId("displayTempo") ? byId("displayTempo").innerText : "00:00:00",
+    distancia: byId("displayDistancia") ? byId("displayDistancia").innerText : "0.00",
+    calorias: byId("displayCalorias") ? byId("displayCalorias").innerText : "0",
     rota: coordenadasRota
   });
 
@@ -852,7 +925,9 @@ function encerrarTreino() {
 
 function carregarHistoricoTreinos() {
   const treinos = JSON.parse(localStorage.getItem("historicoTreinos") || "[]");
-  const lista = document.getElementById("historicoTreinosLista");
+  const lista = byId("historicoTreinosLista");
+
+  if (!lista) return;
 
   lista.innerHTML = "";
 
@@ -902,15 +977,19 @@ function abrirModalTreino(id) {
 
   treinoAtualModalId = id;
 
-  document.getElementById("modalTituloTreino").innerText =
-    `${treino.tipo === "corrida" ? "Corrida" : "Caminhada"} - ${treino.data}`;
+  if (byId("modalTituloTreino")) {
+    byId("modalTituloTreino").innerText =
+      `${treino.tipo === "corrida" ? "Corrida" : "Caminhada"} - ${treino.data}`;
+  }
 
-  document.getElementById("modalDistancia").innerText = treino.distancia;
-  document.getElementById("modalTempo").innerText = treino.tempo;
-  document.getElementById("modalCalorias").innerText = treino.calorias;
-  document.getElementById("modalTreino").style.display = "flex";
+  if (byId("modalDistancia")) byId("modalDistancia").innerText = treino.distancia;
+  if (byId("modalTempo")) byId("modalTempo").innerText = treino.tempo;
+  if (byId("modalCalorias")) byId("modalCalorias").innerText = treino.calorias;
+  if (byId("modalTreino")) byId("modalTreino").style.display = "flex";
 
   setTimeout(() => {
+    if (!byId("mapaDetalheContainer") || typeof L === "undefined") return;
+
     if (!mapaDetalhe) {
       mapaDetalhe = L.map("mapaDetalheContainer");
 
@@ -937,7 +1016,9 @@ function abrirModalTreino(id) {
 }
 
 function fecharModalTreino() {
-  document.getElementById("modalTreino").style.display = "none";
+  if (byId("modalTreino")) {
+    byId("modalTreino").style.display = "none";
+  }
 }
 
 // ==========================================
@@ -960,11 +1041,17 @@ let refeicoesAtuais = {
 };
 
 function configurarDataAlimentacaoPadrao() {
-  document.getElementById("dataAlimentacaoInput").value = new Date().toISOString().split("T")[0];
+  if (byId("dataAlimentacaoInput")) {
+    byId("dataAlimentacaoInput").value = new Date().toISOString().split("T")[0];
+  }
 }
 
 function carregarRefeicoesDoDia() {
-  const dataSelect = document.getElementById("dataAlimentacaoInput").value;
+  const inputData = byId("dataAlimentacaoInput");
+
+  if (!inputData) return;
+
+  const dataSelect = inputData.value;
   const historico = JSON.parse(localStorage.getItem("historicoAlimentacao") || "{}");
 
   if (historico[dataSelect]) {
@@ -1015,22 +1102,26 @@ function renderizarAgua() {
   const atual = refeicoesAtuais.agua;
   const metaAgua = obterMetaAguaDinamica();
 
-  document.getElementById("aguaAtualDisplay").innerText = atual;
-  document.getElementById("aguaMetaDisplay").innerText = metaAgua;
+  if (byId("aguaAtualDisplay")) byId("aguaAtualDisplay").innerText = atual;
+  if (byId("aguaMetaDisplay")) byId("aguaMetaDisplay").innerText = metaAgua;
 
   let porcentagem = (atual / metaAgua) * 100;
 
   if (porcentagem > 100) porcentagem = 100;
 
-  const progressFill = document.getElementById("aguaProgressFill");
+  const progressFill = byId("aguaProgressFill");
 
-  progressFill.style.width = `${porcentagem}%`;
-  progressFill.style.backgroundColor = atual >= metaAgua ? "#10b981" : "#0ea5e9";
+  if (progressFill) {
+    progressFill.style.width = `${porcentagem}%`;
+    progressFill.style.backgroundColor = atual >= metaAgua ? "#10b981" : "#0ea5e9";
+  }
 }
 
 function renderizarTagsDeComida() {
   ["cafe", "almoco", "jantar"].forEach(refeicao => {
-    const container = document.getElementById(`tags-${refeicao}`);
+    const container = byId(`tags-${refeicao}`);
+
+    if (!container) return;
 
     container.innerHTML = "";
 
@@ -1074,7 +1165,10 @@ function renderizarTagsDeComida() {
 }
 
 function adicionarComidaCustomizada(refeicao) {
-  const input = document.getElementById(`custom-${refeicao}`);
+  const input = byId(`custom-${refeicao}`);
+
+  if (!input) return;
+
   const valor = input.value.trim();
   const valorFormatado = valor.charAt(0).toUpperCase() + valor.slice(1);
 
@@ -1109,36 +1203,43 @@ function renderizarCalorias() {
     ? Number(kcal.total) || 0
     : 0;
 
-  document.getElementById("kcal-cafe").innerText = kcal && typeof kcal.cafe !== "undefined" ? kcal.cafe : "--";
-  document.getElementById("kcal-almoco").innerText = kcal && typeof kcal.almoco !== "undefined" ? kcal.almoco : "--";
-  document.getElementById("kcal-jantar").innerText = kcal && typeof kcal.jantar !== "undefined" ? kcal.jantar : "--";
-  document.getElementById("kcal-total").innerText = kcal && typeof kcal.total !== "undefined" ? kcal.total : "--";
+  if (byId("kcal-cafe")) byId("kcal-cafe").innerText = kcal && typeof kcal.cafe !== "undefined" ? kcal.cafe : "--";
+  if (byId("kcal-almoco")) byId("kcal-almoco").innerText = kcal && typeof kcal.almoco !== "undefined" ? kcal.almoco : "--";
+  if (byId("kcal-jantar")) byId("kcal-jantar").innerText = kcal && typeof kcal.jantar !== "undefined" ? kcal.jantar : "--";
+  if (byId("kcal-total")) byId("kcal-total").innerText = kcal && typeof kcal.total !== "undefined" ? kcal.total : "--";
 
-  const metaDisplay = document.getElementById("kcal-meta-luma");
-  const restanteDisplay = document.getElementById("kcal-restante");
-  const statusDisplay = document.getElementById("kcal-status-dia");
+  const metaDisplay = byId("kcal-meta-luma");
+  const restanteDisplay = byId("kcal-restante");
+  const statusDisplay = byId("kcal-status-dia");
 
   if (metaKcal && metaKcal.metaKcal) {
     const metaValor = Number(metaKcal.metaKcal) || 0;
     const restante = Math.max(metaValor - totalConsumido, 0);
 
-    metaDisplay.innerText = metaValor;
-    restanteDisplay.innerText = restante;
+    if (metaDisplay) metaDisplay.innerText = metaValor;
+    if (restanteDisplay) restanteDisplay.innerText = restante;
 
     const status = calcularStatusKcal(totalConsumido, metaKcal);
 
-    statusDisplay.innerText = status.texto;
-    statusDisplay.className = `kcal-status-pill ${status.classe}`;
+    if (statusDisplay) {
+      statusDisplay.innerText = status.texto;
+      statusDisplay.className = `kcal-status-pill ${status.classe}`;
+    }
 
   } else {
-    metaDisplay.innerText = "--";
-    restanteDisplay.innerText = "--";
-    statusDisplay.innerText = "Aguardando meta da Luma";
-    statusDisplay.className = "kcal-status-pill";
+    if (metaDisplay) metaDisplay.innerText = "--";
+    if (restanteDisplay) restanteDisplay.innerText = "--";
+
+    if (statusDisplay) {
+      statusDisplay.innerText = "Aguardando meta da Luma";
+      statusDisplay.className = "kcal-status-pill";
+    }
   }
 
-  const observacao = document.getElementById("kcal-observacao");
+  const observacao = byId("kcal-observacao");
   const assinaturaAtual = obterAssinaturaRefeicoes();
+
+  if (!observacao) return;
 
   if (!kcal) {
     observacao.innerText = metaKcal
@@ -1161,9 +1262,13 @@ function renderizarCalorias() {
 }
 
 async function salvarRefeicoes() {
-  const dataSelect = document.getElementById("dataAlimentacaoInput").value;
+  const inputData = byId("dataAlimentacaoInput");
+  const btn = byId("btnSalvarAlimentacao");
+
+  if (!inputData || !btn) return;
+
+  const dataSelect = inputData.value;
   const historico = JSON.parse(localStorage.getItem("historicoAlimentacao") || "{}");
-  const btn = document.getElementById("btnSalvarAlimentacao");
   const textoOriginal = btn.innerHTML;
   const corOriginal = btn.style.backgroundColor;
 
@@ -1245,7 +1350,7 @@ async function calcularCaloriasComIA() {
       almoco: refeicoesAtuais.almoco || [],
       jantar: refeicoesAtuais.jantar || [],
       agua: refeicoesAtuais.agua || 0,
-      data: document.getElementById("dataAlimentacaoInput").value
+      data: byId("dataAlimentacaoInput") ? byId("dataAlimentacaoInput").value : new Date().toISOString().split("T")[0]
     })
   });
 
@@ -1271,32 +1376,52 @@ function carregarTema() {
 
   if (temaSalvo === "dark") {
     document.documentElement.setAttribute("data-theme", "dark");
-    document.getElementById("btnTema").innerHTML = '<i class="bi bi-sun"></i> Claro';
-    document.getElementById("metaThemeColor").setAttribute("content", "#0f172a");
+
+    if (byId("btnTema")) {
+      byId("btnTema").innerHTML = '<i class="bi bi-sun"></i> Claro';
+    }
+
+    if (byId("metaThemeColor")) {
+      byId("metaThemeColor").setAttribute("content", "#0f172a");
+    }
   }
 }
 
 function alternarTema() {
   const temaAtual = document.documentElement.getAttribute("data-theme");
-  const metaColor = document.getElementById("metaThemeColor");
+  const metaColor = byId("metaThemeColor");
 
   if (temaAtual === "dark") {
     document.documentElement.removeAttribute("data-theme");
     localStorage.setItem("usuarioTema", "light");
-    document.getElementById("btnTema").innerHTML = '<i class="bi bi-moon-stars"></i> Escuro';
-    metaColor.setAttribute("content", "#ffffff");
+
+    if (byId("btnTema")) {
+      byId("btnTema").innerHTML = '<i class="bi bi-moon-stars"></i> Escuro';
+    }
+
+    if (metaColor) {
+      metaColor.setAttribute("content", "#ffffff");
+    }
   } else {
     document.documentElement.setAttribute("data-theme", "dark");
     localStorage.setItem("usuarioTema", "dark");
-    document.getElementById("btnTema").innerHTML = '<i class="bi bi-sun"></i> Claro';
-    metaColor.setAttribute("content", "#0f172a");
+
+    if (byId("btnTema")) {
+      byId("btnTema").innerHTML = '<i class="bi bi-sun"></i> Claro';
+    }
+
+    if (metaColor) {
+      metaColor.setAttribute("content", "#0f172a");
+    }
   }
 
   atualizarGraficos();
 }
 
 function configurarDataPadrao() {
-  document.getElementById("dataInput").value = new Date().toISOString().split("T")[0];
+  if (byId("dataInput")) {
+    byId("dataInput").value = new Date().toISOString().split("T")[0];
+  }
 }
 
 function obterAltura() {
@@ -1307,22 +1432,26 @@ function verificarExibicaoAltura() {
   const altura = obterAltura();
 
   if (altura) {
-    document.getElementById("cardAltura").style.display = "none";
-    document.getElementById("btnModificarAltura").style.display = "block";
-    document.getElementById("alturaInput").value = altura;
+    if (byId("cardAltura")) byId("cardAltura").style.display = "none";
+    if (byId("btnModificarAltura")) byId("btnModificarAltura").style.display = "block";
+    if (byId("alturaInput")) byId("alturaInput").value = altura;
   } else {
-    document.getElementById("cardAltura").style.display = "block";
-    document.getElementById("btnModificarAltura").style.display = "none";
+    if (byId("cardAltura")) byId("cardAltura").style.display = "block";
+    if (byId("btnModificarAltura")) byId("btnModificarAltura").style.display = "none";
   }
 }
 
 function abrirEdicaoAltura() {
-  document.getElementById("cardAltura").style.display = "block";
-  document.getElementById("btnModificarAltura").style.display = "none";
+  if (byId("cardAltura")) byId("cardAltura").style.display = "block";
+  if (byId("btnModificarAltura")) byId("btnModificarAltura").style.display = "none";
 }
 
 function salvarAltura() {
-  const altura = parseFloat(document.getElementById("alturaInput").value);
+  const input = byId("alturaInput");
+
+  if (!input) return;
+
+  const altura = parseFloat(input.value);
 
   if (!altura || isNaN(altura) || altura <= 0) {
     return alert("Altura inválida!");
@@ -1343,19 +1472,30 @@ function obterMeta() {
 function carregarMeta() {
   const meta = obterMeta();
 
-  document.getElementById("pesoMetaCard").innerHTML =
-    `${parseFloat(meta).toFixed(1)} <span style="font-size: 16px; font-weight: 400;">kg</span>`;
+  if (byId("pesoMetaCard")) {
+    byId("pesoMetaCard").innerHTML =
+      `${parseFloat(meta).toFixed(1)} <span style="font-size: 16px; font-weight: 400;">kg</span>`;
+  }
 
-  document.getElementById("metaInput").value = meta;
+  if (byId("metaInput")) {
+    byId("metaInput").value = meta;
+  }
 }
 
 function abrirEdicaoMeta() {
-  const card = document.getElementById("cardMeta");
-  card.style.display = card.style.display === "none" ? "block" : "none";
+  const card = byId("cardMeta");
+
+  if (card) {
+    card.style.display = card.style.display === "none" ? "block" : "none";
+  }
 }
 
 function salvarMeta() {
-  const meta = parseFloat(document.getElementById("metaInput").value);
+  const input = byId("metaInput");
+
+  if (!input) return;
+
+  const meta = parseFloat(input.value);
 
   if (!meta || isNaN(meta) || meta <= 0) {
     return alert("Meta inválida!");
@@ -1366,7 +1506,9 @@ function salvarMeta() {
 
   carregarMeta();
 
-  document.getElementById("cardMeta").style.display = "none";
+  if (byId("cardMeta")) {
+    byId("cardMeta").style.display = "none";
+  }
 
   carregarDados();
   carregarMetaKcalSalva();
@@ -1379,31 +1521,37 @@ function obterHistorico() {
 function carregarDados() {
   const historico = obterHistorico();
   const altura = obterAltura();
-  const lista = document.getElementById("historicoLista");
+  const lista = byId("historicoLista");
 
-  lista.innerHTML = "";
+  if (lista) lista.innerHTML = "";
 
   const ordenado = [...historico].sort((a, b) => b.id - a.id);
   const pesoAtual = ordenado.length > 0 ? ordenado[0].peso : 0;
 
-  document.getElementById("pesoAtualCard").innerHTML =
-    pesoAtual > 0
-      ? `${pesoAtual.toFixed(1)} <span style="font-size: 16px; font-weight: 400;">kg</span>`
-      : `--.- <span style="font-size: 16px; font-weight: 400;">kg</span>`;
+  if (byId("pesoAtualCard")) {
+    byId("pesoAtualCard").innerHTML =
+      pesoAtual > 0
+        ? `${pesoAtual.toFixed(1)} <span style="font-size: 16px; font-weight: 400;">kg</span>`
+        : `--.- <span style="font-size: 16px; font-weight: 400;">kg</span>`;
+  }
 
   if (altura && pesoAtual > 0) {
     const imc = pesoAtual / (altura * altura);
 
-    document.getElementById("imcValue").innerText = imc.toFixed(1);
+    if (byId("imcValue")) {
+      byId("imcValue").innerText = imc.toFixed(1);
+    }
 
-    if (imc < 18.5) {
-      document.getElementById("imcStatus").innerText = "Abaixo";
-    } else if (imc < 25) {
-      document.getElementById("imcStatus").innerText = "Ideal";
-    } else if (imc < 30) {
-      document.getElementById("imcStatus").innerText = "Sobrepeso";
-    } else {
-      document.getElementById("imcStatus").innerText = "Obesidade";
+    if (byId("imcStatus")) {
+      if (imc < 18.5) {
+        byId("imcStatus").innerText = "Abaixo";
+      } else if (imc < 25) {
+        byId("imcStatus").innerText = "Ideal";
+      } else if (imc < 30) {
+        byId("imcStatus").innerText = "Sobrepeso";
+      } else {
+        byId("imcStatus").innerText = "Obesidade";
+      }
     }
   }
 
@@ -1411,8 +1559,10 @@ function carregarDados() {
     const cronologico = [...historico].sort((a, b) => a.id - b.id);
     const dif = cronologico[0].peso - cronologico[cronologico.length - 1].peso;
 
-    document.getElementById("totalEliminadoCard").innerText =
-      dif >= 0 ? `${dif.toFixed(1)} kg` : `+${Math.abs(dif).toFixed(1)} kg`;
+    if (byId("totalEliminadoCard")) {
+      byId("totalEliminadoCard").innerText =
+        dif >= 0 ? `${dif.toFixed(1)} kg` : `+${Math.abs(dif).toFixed(1)} kg`;
+    }
 
     const dias = Math.round(
       Math.abs(
@@ -1421,40 +1571,51 @@ function carregarDados() {
       )
     );
 
-    document.getElementById("tempoJornadaCard").innerText =
-      dias === 0 ? "1º dia" : `${dias} dias`;
+    if (byId("tempoJornadaCard")) {
+      byId("tempoJornadaCard").innerText =
+        dias === 0 ? "1º dia" : `${dias} dias`;
+    }
   }
 
-  ordenado.forEach(item => {
-    let medidasTxt = "";
+  if (lista) {
+    ordenado.forEach(item => {
+      let medidasTxt = "";
 
-    if (item.cintura) medidasTxt += `Cintura: ${item.cintura}cm `;
-    if (item.quadril) medidasTxt += `| Quadril: ${item.quadril}cm`;
+      if (item.cintura) medidasTxt += `Cintura: ${item.cintura}cm `;
+      if (item.quadril) medidasTxt += `| Quadril: ${item.quadril}cm`;
 
-    lista.innerHTML += `
-      <div class="history-item">
-        <div class="history-info">
-          <span class="history-date">${item.dataTexto}</span>
-          ${medidasTxt ? `<span class="history-medidas">${medidasTxt}</span>` : ""}
+      lista.innerHTML += `
+        <div class="history-item">
+          <div class="history-info">
+            <span class="history-date">${item.dataTexto}</span>
+            ${medidasTxt ? `<span class="history-medidas">${medidasTxt}</span>` : ""}
+          </div>
+
+          <div class="history-actions">
+            <span class="history-weight">${item.peso.toFixed(1)} kg</span>
+            <button class="btn-delete" onclick="event.stopPropagation(); deletarRegistro(${item.id})">Excluir</button>
+          </div>
         </div>
-
-        <div class="history-actions">
-          <span class="history-weight">${item.peso.toFixed(1)} kg</span>
-          <button class="btn-delete" onclick="event.stopPropagation(); deletarRegistro(${item.id})">Excluir</button>
-        </div>
-      </div>
-    `;
-  });
+      `;
+    });
+  }
 
   atualizarGraficosSlider();
   renderizarAgua();
 }
 
 function adicionarRegistro() {
-  const peso = parseFloat(document.getElementById("pesoInput").value);
-  const data = document.getElementById("dataInput").value;
-  const cintura = document.getElementById("cinturaInput").value;
-  const quadril = document.getElementById("quadrilInput").value;
+  const pesoInput = byId("pesoInput");
+  const dataInput = byId("dataInput");
+  const cinturaInput = byId("cinturaInput");
+  const quadrilInput = byId("quadrilInput");
+
+  if (!pesoInput || !dataInput) return;
+
+  const peso = parseFloat(pesoInput.value);
+  const data = dataInput.value;
+  const cintura = cinturaInput ? cinturaInput.value : "";
+  const quadril = quadrilInput ? quadrilInput.value : "";
 
   if (!peso || isNaN(peso)) return alert("Digite o peso!");
 
@@ -1481,9 +1642,9 @@ function adicionarRegistro() {
   carregarDados();
   carregarMetaKcalSalva();
 
-  document.getElementById("pesoInput").value = "";
-  document.getElementById("cinturaInput").value = "";
-  document.getElementById("quadrilInput").value = "";
+  pesoInput.value = "";
+  if (cinturaInput) cinturaInput.value = "";
+  if (quadrilInput) quadrilInput.value = "";
 }
 
 function deletarRegistro(id) {
@@ -1526,8 +1687,10 @@ function exportarParaExcel() {
 
 function atualizarGraficosSlider() {
   const historico = obterHistorico();
-  const cardSlider = document.getElementById("cardGraficosSlider");
-  const wrapper = document.getElementById("graficosWrapper");
+  const cardSlider = byId("cardGraficosSlider");
+  const wrapper = byId("graficosWrapper");
+
+  if (!cardSlider || !wrapper || typeof Swiper === "undefined") return;
 
   wrapper.innerHTML = "";
 
@@ -1586,7 +1749,7 @@ function adicionarSlideComGrafico(wrapper, canvasId) {
 function atualizarGraficos() {
   const historico = obterHistorico();
 
-  if (historico.length < 2) return;
+  if (historico.length < 2 || typeof Chart === "undefined") return;
 
   const dadosHistorico = [...historico].sort((a, b) => a.id - b.id);
   const temaAtual = document.documentElement.getAttribute("data-theme");
@@ -1625,9 +1788,9 @@ function atualizarGraficos() {
 }
 
 function renderizarGraficoUnico(canvasId, label, dados, labels, corGrid, corTexto, metricKey) {
-  const canvas = document.getElementById(canvasId);
+  const canvas = byId(canvasId);
 
-  if (!canvas) return;
+  if (!canvas || typeof Chart === "undefined") return;
 
   if (instanciasGraficos[metricKey]) {
     instanciasGraficos[metricKey].destroy();
@@ -1760,7 +1923,7 @@ function iniciarTutorialSeNecessario() {
 }
 
 function configurarBotaoTutorialTopo() {
-  const btnTopo = document.getElementById("btnVerTutorialTopo");
+  const btnTopo = byId("btnVerTutorialTopo");
 
   if (btnTopo) {
     btnTopo.addEventListener("click", function() {
@@ -1771,11 +1934,11 @@ function configurarBotaoTutorialTopo() {
 }
 
 function criarBotaoTutorialNoPerfil() {
-  const perfilStatus = document.getElementById("perfilStatus");
+  const perfilStatus = byId("perfilStatus");
 
   if (!perfilStatus) return;
 
-  const botaoExistente = document.getElementById("btnVerTutorial");
+  const botaoExistente = byId("btnVerTutorial");
 
   if (botaoExistente) {
     botaoExistente.addEventListener("click", () => {
@@ -1809,7 +1972,7 @@ function abrirTutorial(indiceInicial = 0) {
 }
 
 function criarEstruturaTutorial() {
-  if (document.getElementById("tutorialOverlay")) return;
+  if (byId("tutorialOverlay")) return;
 
   const overlay = document.createElement("div");
 
@@ -1859,10 +2022,10 @@ function criarEstruturaTutorial() {
 
   document.body.appendChild(overlay);
 
-  document.getElementById("btnFecharTutorial").addEventListener("click", concluirTutorial);
-  document.getElementById("btnPularTutorial").addEventListener("click", concluirTutorial);
-  document.getElementById("btnVoltarTutorial").addEventListener("click", voltarPassoTutorial);
-  document.getElementById("btnProximoTutorial").addEventListener("click", avancarPassoTutorial);
+  addListener("btnFecharTutorial", "click", concluirTutorial);
+  addListener("btnPularTutorial", "click", concluirTutorial);
+  addListener("btnVoltarTutorial", "click", voltarPassoTutorial);
+  addListener("btnProximoTutorial", "click", avancarPassoTutorial);
 }
 
 function renderizarPassoTutorial() {
@@ -1872,13 +2035,13 @@ function renderizarPassoTutorial() {
 
   prepararAbaDoTutorial(passo.aba);
 
-  const overlay = document.getElementById("tutorialOverlay");
-  const titulo = document.getElementById("tutorialTitulo");
-  const texto = document.getElementById("tutorialTexto");
-  const progressoTexto = document.getElementById("tutorialProgressoTexto");
-  const progressoFill = document.getElementById("tutorialProgressoFill");
-  const btnVoltar = document.getElementById("btnVoltarTutorial");
-  const btnProximo = document.getElementById("btnProximoTutorial");
+  const overlay = byId("tutorialOverlay");
+  const titulo = byId("tutorialTitulo");
+  const texto = byId("tutorialTexto");
+  const progressoTexto = byId("tutorialProgressoTexto");
+  const progressoFill = byId("tutorialProgressoFill");
+  const btnVoltar = byId("btnVoltarTutorial");
+  const btnProximo = byId("btnProximoTutorial");
 
   if (!overlay || !titulo || !texto || !progressoTexto || !progressoFill || !btnVoltar || !btnProximo) {
     return;
@@ -1937,7 +2100,7 @@ function prepararAbaDoTutorial(abaId) {
 }
 
 function ajustarPosicaoCardTutorial(alvo) {
-  const overlay = document.getElementById("tutorialOverlay");
+  const overlay = byId("tutorialOverlay");
 
   if (!overlay || !alvo) return;
 
@@ -1985,7 +2148,7 @@ function concluirTutorial() {
 }
 
 function fecharTutorial() {
-  const overlay = document.getElementById("tutorialOverlay");
+  const overlay = byId("tutorialOverlay");
 
   if (overlay) {
     overlay.style.display = "none";
@@ -2003,3 +2166,11 @@ function removerDestaquesTutorial() {
 }
 
 window.abrirTutorial = abrirTutorial;
+window.trocarAba = trocarAba;
+window.adicionarAgua = adicionarAgua;
+window.adicionarComidaCustomizada = adicionarComidaCustomizada;
+window.abrirModalTreino = abrirModalTreino;
+window.fecharModalTreino = fecharModalTreino;
+window.deletarTreino = deletarTreino;
+window.deletarRegistro = deletarRegistro;
+window.compartilharTreinoModal = compartilharTreinoModal;

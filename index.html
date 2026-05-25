@@ -6,8 +6,9 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="theme-color" content="#ffffff" id="metaThemeColor">
+
   <title>Luma - Jornada Saudável</title>
-  
+
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
@@ -17,7 +18,8 @@
 
 <body>
   <div class="app-container" style="padding-bottom: 110px;">
-    
+
+    <!-- ABA EVOLUÇÃO -->
     <div id="aba-dashboard" class="aba-conteudo" style="display: block;">
       <header style="display: flex; justify-content: space-between; align-items: flex-start;">
         <div>
@@ -46,12 +48,16 @@
         <div class="meta-grid">
           <div class="meta-item">
             <div class="label">Peso Atual</div>
-            <div class="value" id="pesoAtualCard">--.- <span style="font-size: 16px; font-weight: 400;">kg</span></div>
+            <div class="value" id="pesoAtualCard">
+              --.- <span style="font-size: 16px; font-weight: 400;">kg</span>
+            </div>
           </div>
 
           <div class="meta-item" style="text-align: right;">
             <div class="label">Meta</div>
-            <div class="value" id="pesoMetaCard">--.- <span style="font-size: 16px; font-weight: 400;">kg</span></div>
+            <div class="value" id="pesoMetaCard">
+              --.- <span style="font-size: 16px; font-weight: 400;">kg</span>
+            </div>
           </div>
         </div>
 
@@ -74,12 +80,16 @@
         <div class="meta-grid">
           <div class="meta-item">
             <div class="label">Total Eliminado</div>
-            <div class="sub-value" id="totalEliminadoCard" style="font-size: 20px; font-weight: 700;">--.- kg</div>
+            <div class="sub-value" id="totalEliminadoCard" style="font-size: 20px; font-weight: 700;">
+              --.- kg
+            </div>
           </div>
 
           <div class="meta-item" style="text-align: right;">
             <div class="label">Tempo de Jornada</div>
-            <div class="sub-value" id="tempoJornadaCard" style="font-size: 16px; font-weight: 600;">-- dias</div>
+            <div class="sub-value" id="tempoJornadaCard" style="font-size: 16px; font-weight: 600;">
+              -- dias
+            </div>
           </div>
         </div>
 
@@ -154,6 +164,7 @@
       <div class="history-section">
         <div class="history-header">
           <div class="history-title">Registros anteriores</div>
+
           <button id="btnExportar" class="btn-secondary">
             <i class="bi bi-download"></i> CSV
           </button>
@@ -163,6 +174,7 @@
       </div>
     </div>
 
+    <!-- ABA DIÁRIO -->
     <div id="aba-alimentacao" class="aba-conteudo" style="display: none;">
       <header>
         <h1>Diário</h1>
@@ -171,7 +183,9 @@
 
       <div class="card">
         <div class="input-group">
-          <span style="font-size: 12px; color: var(--text-muted); font-weight: 600; margin-bottom: 4px;">Data do Diário:</span>
+          <span style="font-size: 12px; color: var(--text-muted); font-weight: 600; margin-bottom: 4px;">
+            Data do Diário:
+          </span>
           <input type="date" id="dataAlimentacaoInput">
         </div>
       </div>
@@ -180,7 +194,8 @@
         <h3><i class="bi bi-droplet-half"></i> Meta de Água</h3>
 
         <div class="water-status">
-          <span id="aguaAtualDisplay">0</span> / <span id="aguaMetaDisplay">2000</span>
+          <span id="aguaAtualDisplay">0</span> /
+          <span id="aguaMetaDisplay">2000</span>
           <span style="font-size: 14px; font-weight: normal;">ml</span>
         </div>
 
@@ -198,7 +213,9 @@
       <div class="card meal-card">
         <div class="meal-title-row">
           <h3><i class="bi bi-cup-hot"></i> Café da Manhã</h3>
-          <span class="kcal-refeicao"><i class="bi bi-fire"></i> <span id="kcal-cafe">--</span> kcal</span>
+          <span class="kcal-refeicao">
+            <i class="bi bi-fire"></i> <span id="kcal-cafe">--</span> kcal
+          </span>
         </div>
 
         <div class="food-tags" id="tags-cafe"></div>
@@ -214,7 +231,9 @@
       <div class="card meal-card">
         <div class="meal-title-row">
           <h3><i class="bi bi-egg-fried"></i> Almoço</h3>
-          <span class="kcal-refeicao"><i class="bi bi-fire"></i> <span id="kcal-almoco">--</span> kcal</span>
+          <span class="kcal-refeicao">
+            <i class="bi bi-fire"></i> <span id="kcal-almoco">--</span> kcal
+          </span>
         </div>
 
         <div class="food-tags" id="tags-almoco"></div>
@@ -230,7 +249,9 @@
       <div class="card meal-card">
         <div class="meal-title-row">
           <h3><i class="bi bi-moon-stars"></i> Jantar</h3>
-          <span class="kcal-refeicao"><i class="bi bi-fire"></i> <span id="kcal-jantar">--</span> kcal</span>
+          <span class="kcal-refeicao">
+            <i class="bi bi-fire"></i> <span id="kcal-jantar">--</span> kcal
+          </span>
         </div>
 
         <div class="food-tags" id="tags-jantar"></div>
@@ -279,12 +300,13 @@
           As calorias serão estimadas ao salvar o diário.
         </div>
       </div>
-      
+
       <button id="btnSalvarAlimentacao" style="width: 100%; margin-top: 8px;">
         <i class="bi bi-check-circle"></i> Salvar Diário do Dia
       </button>
     </div>
 
+    <!-- ABA TREINO -->
     <div id="aba-exercicio" class="aba-conteudo" style="display: none;">
       <header>
         <h1>Treino</h1>
@@ -299,11 +321,14 @@
           </select>
         </div>
 
-        <div id="mapaTreinoContainer" style="height: 220px; width: 100%; border-radius: 12px; overflow: hidden; margin-bottom: 20px; border: 1px solid var(--border-color);"></div>
+        <div
+          id="mapaTreinoContainer"
+          style="height: 220px; width: 100%; border-radius: 12px; overflow: hidden; margin-bottom: 20px; border: 1px solid var(--border-color);"
+        ></div>
 
         <div class="treino-display">
           <div class="treino-cronometro" id="displayTempo">00:00:00</div>
-          
+
           <div class="treino-grid">
             <div class="treino-dado">
               <span id="displayDistancia">0.00</span>
@@ -315,7 +340,7 @@
               <div class="treino-label">km/h</div>
             </div>
           </div>
-          
+
           <div class="treino-dado-destaque">
             <span id="displayCalorias">0</span>
             <div class="treino-label">Calorias (kcal)</div>
@@ -364,7 +389,7 @@
           <p>Luma está montando seu treino...</p>
         </div>
       </div>
-      
+
       <div class="history-section">
         <div class="history-header">
           <div class="history-title">Histórico de Treinos</div>
@@ -374,6 +399,7 @@
       </div>
     </div>
 
+    <!-- ABA IA -->
     <div id="aba-ia" class="aba-conteudo" style="display: none;">
       <header>
         <h1>Luma I.A.</h1>
@@ -445,6 +471,10 @@
         <div id="perfilStatus" class="perfil-status">
           Perfil ainda não configurado.
         </div>
+
+        <button id="btnVerTutorial" class="btn-tutorial-rever" type="button">
+          <i class="bi bi-compass"></i> Ver tutorial novamente
+        </button>
       </div>
 
       <div class="card card-ia-status">
@@ -458,12 +488,18 @@
       </div>
 
       <div id="iaRespostaContainer" class="card card-ia-resposta" style="display: none;">
-        <div class="ia-secao-titulo"><i class="bi bi-clipboard-heart"></i> PLANO DE HOJE</div>
+        <div class="ia-secao-titulo">
+          <i class="bi bi-clipboard-heart"></i> PLANO DE HOJE
+        </div>
+
         <div id="iaTextoPlano" class="ia-texto-conteudo"></div>
-        
+
         <div class="card-divider" style="background: rgba(0,0,0,0.05);"></div>
-        
-        <div class="ia-secao-titulo"><i class="bi bi-lightbulb"></i> DICA DA LUMA</div>
+
+        <div class="ia-secao-titulo">
+          <i class="bi bi-lightbulb"></i> DICA DA LUMA
+        </div>
+
         <div id="iaTextoDica" class="ia-texto-conteudo"></div>
       </div>
 
@@ -473,14 +509,18 @@
       </div>
     </div>
 
+    <!-- MODAL TREINO -->
     <div id="modalTreino" class="modal">
       <div class="modal-content">
         <span class="close-modal" onclick="fecharModalTreino()">&times;</span>
 
         <h3 id="modalTituloTreino" style="margin-bottom: 16px;">Detalhes do Treino</h3>
 
-        <div id="mapaDetalheContainer" style="height: 200px; width: 100%; border-radius: 12px; overflow: hidden; margin-bottom: 16px; border: 1px solid var(--border-color);"></div>
-        
+        <div
+          id="mapaDetalheContainer"
+          style="height: 200px; width: 100%; border-radius: 12px; overflow: hidden; margin-bottom: 16px; border: 1px solid var(--border-color);"
+        ></div>
+
         <div class="treino-grid" style="margin-bottom: 16px;">
           <div class="treino-dado">
             <span id="modalDistancia" style="font-size: 24px;"></span>
@@ -504,6 +544,7 @@
       </div>
     </div>
 
+    <!-- MENU FLUTUANTE -->
     <nav class="floating-nav" id="floatingNav">
       <div class="floating-menu" id="floatingMenu">
         <button class="floating-item active" data-aba="dashboard" onclick="trocarAba('dashboard', this)">
@@ -536,12 +577,15 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="script.js"></script>
-  
+
+  <script src="script.js?v=3"></script>
+
   <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js').catch((err) => console.log(err));
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker
+          .register("./sw.js")
+          .catch((err) => console.log(err));
       });
     }
   </script>

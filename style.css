@@ -327,7 +327,7 @@ button i {
   font-weight: 700;
 }
 
-/* --- MENU FLUTUANTE DA LUMA --- */
+/* MENU FLUTUANTE DA LUMA */
 
 .floating-nav {
   position: fixed;
@@ -502,7 +502,7 @@ button i {
   transition-delay: 0.18s;
 }
 
-/* --- ÁGUA E ALIMENTAÇÃO --- */
+/* ÁGUA E ALIMENTAÇÃO */
 
 .card-water {
   text-align: center;
@@ -603,7 +603,7 @@ button i {
   margin-right: 2px;
 }
 
-/* --- CARD INTELIGENTE DE KCAL --- */
+/* CARD INTELIGENTE DE KCAL */
 
 .card-total-kcal {
   background: linear-gradient(135deg, rgba(249, 115, 22, 0.10), rgba(168, 85, 247, 0.09), rgba(14, 165, 233, 0.08));
@@ -826,7 +826,7 @@ button i {
   margin: 0;
 }
 
-/* --- TREINO E GPS --- */
+/* TREINO E GPS */
 
 .select-treino {
   width: 100%;
@@ -911,7 +911,7 @@ button i {
   background-color: #dc2626;
 }
 
-/* --- TREINO COM IA --- */
+/* TREINO COM IA */
 
 .btn-ia-treino {
   width: 100%;
@@ -950,7 +950,7 @@ button i {
   box-shadow: 0 8px 24px rgba(168, 85, 247, 0.22);
 }
 
-/* --- TREINO IA RECOLHÍVEL --- */
+/* TREINO IA RECOLHÍVEL */
 
 .treino-ia-header {
   width: 100%;
@@ -1025,7 +1025,7 @@ button i {
   background: rgba(168, 85, 247, 0.20);
 }
 
-/* Leaflet Dark Mode Fix */
+/* LEAFLET DARK MODE */
 
 [data-theme="dark"] .leaflet-layer,
 [data-theme="dark"] .leaflet-control-zoom-in,
@@ -1034,7 +1034,7 @@ button i {
   filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%);
 }
 
-/* --- PERFIL DA LUMA --- */
+/* PERFIL DA LUMA */
 
 .card-perfil-luma {
   background: linear-gradient(135deg, rgba(168, 85, 247, 0.08), rgba(14, 165, 233, 0.06));
@@ -1105,7 +1105,7 @@ button i {
   font-weight: 700;
 }
 
-/* --- MODAL --- */
+/* MODAL */
 
 .modal {
   display: none;
@@ -1145,7 +1145,7 @@ button i {
   color: var(--text-main);
 }
 
-/* --- ESTILO LUMA IA --- */
+/* ESTILO LUMA IA */
 
 .card-ia-status {
   background: var(--card-bg);
@@ -1214,9 +1214,7 @@ button i {
   animation: spin 1s linear infinite;
 }
 
-/* ==========================================
-   TUTORIAL GUIADO AJUSTADO
-========================================== */
+/* TUTORIAL GUIADO REVISADO */
 
 .tutorial-overlay {
   position: fixed;
@@ -1234,14 +1232,14 @@ button i {
 .tutorial-card {
   position: relative;
   z-index: 30002;
-  width: 100%;
-  max-width: 430px;
-  max-height: 44vh;
+  width: calc(100% - 20px);
+  max-width: 390px;
+  max-height: 46vh;
   overflow-y: auto;
   background: rgba(30, 41, 59, 0.96);
   border: 1px solid rgba(148, 163, 184, 0.22);
   border-radius: 24px;
-  padding: 18px;
+  padding: 18px 16px;
   box-shadow:
     0 24px 70px rgba(0, 0, 0, 0.42),
     0 0 28px rgba(168, 85, 247, 0.18);
@@ -1335,24 +1333,27 @@ button i {
 }
 
 .tutorial-actions {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 10px;
+  width: 100%;
   align-items: center;
-  justify-content: space-between;
-  gap: 8px;
 }
 
 .tutorial-actions-right {
-  display: flex;
-  gap: 8px;
+  display: contents;
 }
 
 .tutorial-btn-secondary,
 .tutorial-btn-primary {
-  padding: 11px 14px;
+  width: 100%;
+  min-width: 0;
+  padding: 12px 8px;
   font-size: 13px;
-  border-radius: 13px;
+  border-radius: 14px;
   font-weight: 900;
-  min-width: 78px;
+  text-align: center;
+  white-space: nowrap;
 }
 
 .tutorial-btn-secondary {
@@ -1403,7 +1404,7 @@ button i {
   background: rgba(168, 85, 247, 0.20);
 }
 
-/* --- RESPONSIVO --- */
+/* RESPONSIVO */
 
 @media (max-width: 430px) {
   .floating-menu {
@@ -1463,6 +1464,30 @@ button i {
   .floating-item span {
     font-size: 9px;
   }
+
+  .tutorial-card {
+    width: calc(100% - 14px);
+    padding: 16px 14px;
+    border-radius: 22px;
+  }
+
+  .tutorial-actions {
+    gap: 8px;
+  }
+
+  .tutorial-btn-secondary,
+  .tutorial-btn-primary {
+    font-size: 12px;
+    padding: 11px 6px;
+  }
+
+  .tutorial-card h2 {
+    font-size: 19px;
+  }
+
+  .tutorial-texto {
+    font-size: 14px;
+  }
 }
 
 @media (max-height: 720px) {
@@ -1480,7 +1505,7 @@ button i {
   }
 }
 
-/* --- ANIMAÇÕES --- */
+/* ANIMAÇÕES */
 
 @keyframes spin {
   100% {

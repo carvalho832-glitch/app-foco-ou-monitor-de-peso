@@ -60,6 +60,9 @@ function iniciarApp() {
   carregarRefeicoesDoDia();
   carregarHistoricoTreinos();
   carregarTreinoIASalvo();
+
+  criarBotaoTutorialNoPerfil();
+  iniciarTutorialSeNecessario();
 }
 
 function trocarAba(abaId, elementoBotao) {
@@ -1692,6 +1695,7 @@ function renderizarGraficoUnico(canvasId, label, dados, labels, corGrid, corText
     }
   });
 }
+
 // ==========================================
 // TUTORIAL GUIADO DO EVOLUAFIT IA
 // ==========================================
@@ -1749,7 +1753,7 @@ function iniciarTutorialSeNecessario() {
   if (!tutorialConcluido) {
     setTimeout(() => {
       abrirTutorial(0);
-    }, 700);
+    }, 900);
   }
 }
 
@@ -1768,6 +1772,7 @@ function criarBotaoTutorialNoPerfil() {
   botao.innerHTML = '<i class="bi bi-compass"></i> Ver tutorial novamente';
 
   botao.addEventListener("click", () => {
+    localStorage.removeItem("tutorialConcluido");
     abrirTutorial(0);
   });
 
@@ -1806,6 +1811,7 @@ function criarEstruturaTutorial() {
 
       <div class="tutorial-progress-area">
         <div id="tutorialProgressoTexto" class="tutorial-progress-text">Passo 1 de 7</div>
+
         <div class="tutorial-progress-bar">
           <div id="tutorialProgressoFill" class="tutorial-progress-fill"></div>
         </div>
@@ -1831,7 +1837,7 @@ function criarEstruturaTutorial() {
 
   document.body.appendChild(overlay);
 
-  document.getElementById("btnFecharTutorial").addEventListener("click", fecharTutorial);
+  document.getElementById("btnFecharTutorial").addEventListener("click", concluirTutorial);
   document.getElementById("btnPularTutorial").addEventListener("click", concluirTutorial);
   document.getElementById("btnVoltarTutorial").addEventListener("click", voltarPassoTutorial);
   document.getElementById("btnProximoTutorial").addEventListener("click", avancarPassoTutorial);
@@ -1840,17 +1846,9 @@ function criarEstruturaTutorial() {
 function renderizarPassoTutorial() {
   const passo = tutorialPassos[tutorialPassoAtual];
 
+  if (!passo) return;
+
   prepararAbaDoTutorial(passo.aba);
-
-  setTimeout(() => {
-    removerDestaquesTutorial();
-
-    const alvo = document.querySelector(passo.alvo);
-
-    if (alvo) {
-      alvo.classList.add("tutorial-highlight");
-    }
-  }, 200);
 
   const overlay = document.getElementById("tutorialOverlay");
   const titulo = document.getElementById("tutorialTitulo");
@@ -1859,6 +1857,10 @@ function renderizarPassoTutorial() {
   const progressoFill = document.getElementById("tutorialProgressoFill");
   const btnVoltar = document.getElementById("btnVoltarTutorial");
   const btnProximo = document.getElementById("btnProximoTutorial");
+
+  if (!overlay || !titulo || !texto || !progressoTexto || !progressoFill || !btnVoltar || !btnProximo) {
+    return;
+  }
 
   overlay.style.display = "flex";
 
@@ -1876,6 +1878,25 @@ function renderizarPassoTutorial() {
     tutorialPassoAtual === tutorialPassos.length - 1
       ? "Concluir"
       : "Próximo";
+
+  setTimeout(() => {
+    removerDestaquesTutorial();
+
+    const alvo = document.querySelector(passo.alvo);
+
+    if (alvo) {
+      alvo.classList.add("tutorial-highlight");
+
+      try {
+        alvo.scrollIntoView({
+          behavior: "smooth",
+          block: "center"
+        });
+      } catch (erro) {
+        console.log("Não foi possível centralizar o item do tutorial:", erro);
+      }
+    }
+  }, 350);
 }
 
 function prepararAbaDoTutorial(abaId) {
@@ -1923,6 +1944,3 @@ function removerDestaquesTutorial() {
     elemento.classList.remove("tutorial-highlight");
   });
 }
-
-// Use esta função no console caso queira testar como primeiro acesso:
-// localStorage.removeItem("tutorialConcluido");

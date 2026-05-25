@@ -1214,7 +1214,7 @@ button i {
   animation: spin 1s linear infinite;
 }
 
-/* TUTORIAL GUIADO REVISADO */
+/* TUTORIAL GUIADO COM FUNDO EMBAÇADO E DESTAQUE LIMPO */
 
 .tutorial-overlay {
   position: fixed;
@@ -1223,14 +1223,9 @@ button i {
   display: none;
   justify-content: center;
   padding: 18px 18px calc(24px + env(safe-area-inset-bottom));
-
-  /* Fundo escuro sem embaçar */
-  background: rgba(15, 23, 42, 0.78);
-
-  /* Remove o efeito embaçado */
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
-
+  background: rgba(15, 23, 42, 0.46);
+  backdrop-filter: blur(7px);
+  -webkit-backdrop-filter: blur(7px);
   pointer-events: auto;
 }
 
@@ -1249,7 +1244,7 @@ button i {
 
 .tutorial-card {
   position: relative;
-  z-index: 30002;
+  z-index: 30003;
   width: calc(100% - 20px);
   max-width: 390px;
   max-height: 52vh;
@@ -1398,11 +1393,12 @@ button i {
 
 .tutorial-highlight {
   position: relative;
-  z-index: 29999 !important;
+  z-index: 30002 !important;
   border-radius: 18px;
   box-shadow:
-    0 0 0 4px rgba(168, 85, 247, 0.42),
-    0 0 34px rgba(168, 85, 247, 0.75) !important;
+    0 0 0 4px rgba(168, 85, 247, 0.50),
+    0 0 42px rgba(168, 85, 247, 0.85),
+    0 18px 45px rgba(0, 0, 0, 0.28) !important;
   animation: tutorialHighlightPulse 1.5s ease-in-out infinite;
 }
 
@@ -1590,13 +1586,15 @@ button i {
 @keyframes tutorialHighlightPulse {
   0%, 100% {
     box-shadow:
-      0 0 0 4px rgba(168, 85, 247, 0.24),
-      0 0 24px rgba(168, 85, 247, 0.42);
+      0 0 0 4px rgba(168, 85, 247, 0.30),
+      0 0 26px rgba(168, 85, 247, 0.52),
+      0 18px 45px rgba(0, 0, 0, 0.24);
   }
 
   50% {
     box-shadow:
-      0 0 0 6px rgba(168, 85, 247, 0.38),
-      0 0 42px rgba(168, 85, 247, 0.72);
+      0 0 0 6px rgba(168, 85, 247, 0.50),
+      0 0 48px rgba(168, 85, 247, 0.86),
+      0 22px 55px rgba(0, 0, 0, 0.32);
   }
 }

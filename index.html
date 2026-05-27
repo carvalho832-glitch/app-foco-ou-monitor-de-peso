@@ -2,18 +2,29 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+  >
+
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Luma">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="theme-color" content="#ffffff" id="metaThemeColor">
 
   <title>Luma - Jornada Saudável</title>
 
-  <link rel="stylesheet" href="style.css?v=9">
+  <link rel="manifest" href="manifest.json">
+
+  <link rel="icon" href="./icons/icon-192.png">
+  <link rel="apple-touch-icon" href="./icons/icon-192.png">
+
+  <link rel="stylesheet" href="style.css?v=10">
   <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-  <link rel="manifest" href="manifest.json">
 </head>
 
 <body>
@@ -301,6 +312,43 @@
         </div>
       </div>
 
+      <div class="card calorie-chart-card">
+        <div class="calorie-chart-header">
+          <div>
+            <div class="calorie-chart-title">
+              <i class="bi bi-graph-up"></i> Histórico de calorias
+            </div>
+            <div class="calorie-chart-subtitle">
+              Consumo diário comparado com a meta da Luma
+            </div>
+          </div>
+
+          <button id="btnAtualizarGraficoKcal" class="btn-secondary" type="button">
+            <i class="bi bi-arrow-clockwise"></i> Atualizar
+          </button>
+        </div>
+
+        <div class="calorie-chart-summary">
+          <div>
+            <span>Hoje</span>
+            <strong><span id="grafico-kcal-hoje">--</span> kcal</strong>
+          </div>
+
+          <div>
+            <span>Meta</span>
+            <strong><span id="grafico-kcal-meta">--</span> kcal</strong>
+          </div>
+        </div>
+
+        <div class="calorie-chart-canvas-box">
+          <canvas id="graficoCaloriasMeta"></canvas>
+        </div>
+
+        <div class="calorie-chart-note">
+          A linha azul mostra o consumo. A linha laranja mostra a meta diária.
+        </div>
+      </div>
+
       <button id="btnSalvarAlimentacao" style="width: 100%; margin-top: 8px;">
         <i class="bi bi-check-circle"></i> Salvar Diário do Dia
       </button>
@@ -582,14 +630,14 @@
   <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-  <script src="script.js?v=5"></script>
+  <script src="script.js?v=10"></script>
 
   <script>
     if ("serviceWorker" in navigator) {
       window.addEventListener("load", () => {
         navigator.serviceWorker
-          .register("./sw.js")
-          .catch((err) => console.log(err));
+          .register("./sw.js?v=10")
+          .catch((err) => console.log("Erro Service Worker:", err));
       });
     }
   </script>

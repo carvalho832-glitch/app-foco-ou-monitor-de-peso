@@ -9,7 +9,7 @@
 
   <title>EvoluaFit I.A. - Jornada Saudável</title>
 
-  <link rel="stylesheet" href="style.css?v=12">
+  <link rel="stylesheet" href="style.css?v=13">
   <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
@@ -213,6 +213,7 @@
       <div class="card meal-card">
         <div class="meal-title-row">
           <h3><i class="bi bi-cup-hot"></i> Café da Manhã</h3>
+
           <span class="kcal-refeicao">
             <i class="bi bi-fire"></i> <span id="kcal-cafe">--</span> kcal
           </span>
@@ -222,6 +223,7 @@
 
         <div class="custom-food-input">
           <input type="text" id="custom-cafe" placeholder="Outro item... (Ex: Mamão)">
+
           <button type="button" class="btn-add-food" onclick="adicionarComidaCustomizada('cafe')">
             <i class="bi bi-plus-lg"></i>
           </button>
@@ -231,6 +233,7 @@
       <div class="card meal-card">
         <div class="meal-title-row">
           <h3><i class="bi bi-egg-fried"></i> Almoço</h3>
+
           <span class="kcal-refeicao">
             <i class="bi bi-fire"></i> <span id="kcal-almoco">--</span> kcal
           </span>
@@ -240,6 +243,7 @@
 
         <div class="custom-food-input">
           <input type="text" id="custom-almoco" placeholder="Outro item... (Ex: Lasanha)">
+
           <button type="button" class="btn-add-food" onclick="adicionarComidaCustomizada('almoco')">
             <i class="bi bi-plus-lg"></i>
           </button>
@@ -249,6 +253,7 @@
       <div class="card meal-card">
         <div class="meal-title-row">
           <h3><i class="bi bi-moon-stars"></i> Jantar</h3>
+
           <span class="kcal-refeicao">
             <i class="bi bi-fire"></i> <span id="kcal-jantar">--</span> kcal
           </span>
@@ -258,6 +263,7 @@
 
         <div class="custom-food-input">
           <input type="text" id="custom-jantar" placeholder="Outro item... (Ex: Sopa)">
+
           <button type="button" class="btn-add-food" onclick="adicionarComidaCustomizada('jantar')">
             <i class="bi bi-plus-lg"></i>
           </button>
@@ -269,17 +275,8 @@
           <i class="bi bi-bar-chart-line"></i> Calorias do dia
         </div>
 
-        <div class="kcal-wave-box">
-          <canvas id="kcalWaveCanvas"></canvas>
-
-          <div class="kcal-wave-info">
-            <span>Progresso da meta</span>
-            <strong id="kcal-wave-percent">--%</strong>
-          </div>
-
-          <div class="kcal-wave-meta-line">
-            <span>Meta Luma</span>
-          </div>
+        <div class="kcal-chart-box">
+          <canvas id="kcalTrendChart"></canvas>
         </div>
 
         <div class="kcal-dashboard">
@@ -382,7 +379,10 @@
               <div class="ia-secao-titulo">
                 <i class="bi bi-lightning-charge"></i> TREINO PERSONALIZADO
               </div>
-              <div class="treino-ia-subtitle">Toque para abrir a orientação da Luma</div>
+
+              <div class="treino-ia-subtitle">
+                Toque para abrir a orientação da Luma
+              </div>
             </div>
 
             <i id="treinoIAIconeToggle" class="bi bi-chevron-down treino-ia-toggle"></i>
@@ -467,6 +467,7 @@
 
         <div class="input-field">
           <span>Objetivo principal</span>
+
           <select id="perfilObjetivo" class="perfil-select">
             <option value="">Selecione</option>
             <option value="emagrecimento">Emagrecimento</option>
@@ -531,7 +532,9 @@
       <div class="modal-content">
         <span class="close-modal" onclick="fecharModalTreino()">&times;</span>
 
-        <h3 id="modalTituloTreino" style="margin-bottom: 16px;">Detalhes do Treino</h3>
+        <h3 id="modalTituloTreino" style="margin-bottom: 16px;">
+          Detalhes do Treino
+        </h3>
 
         <div
           id="mapaDetalheContainer"
@@ -595,7 +598,7 @@
   <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-  <script src="script.js?v=7"></script>
+  <script src="script.js?v=8"></script>
 
   <script>
     if ("serviceWorker" in navigator) {

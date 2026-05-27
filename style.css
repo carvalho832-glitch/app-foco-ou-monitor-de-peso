@@ -331,7 +331,7 @@ button i {
   font-weight: 700;
 }
 
-/* MENU FLUTUANTE DA LUMA */
+/* MENU FLUTUANTE */
 
 .floating-nav {
   position: fixed;
@@ -660,7 +660,7 @@ button i {
   margin: 0;
 }
 
-/* CARD INTELIGENTE DE KCAL */
+/* CARD DE KCAL */
 
 .card-total-kcal {
   background: linear-gradient(135deg, rgba(249, 115, 22, 0.10), rgba(168, 85, 247, 0.09), rgba(14, 165, 233, 0.08));
@@ -688,6 +688,43 @@ button i {
   margin-bottom: 12px;
   position: relative;
   z-index: 1;
+}
+
+/* GRÁFICO ESTILO PREMIUM COM META DA LUMA */
+
+.kcal-chart-box {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 230px;
+  margin: 4px 0 16px;
+  border-radius: 22px;
+  overflow: hidden;
+  padding: 12px 10px 6px;
+  background:
+    radial-gradient(circle at 18% 10%, rgba(14, 165, 233, 0.14), transparent 33%),
+    radial-gradient(circle at 82% 12%, rgba(168, 85, 247, 0.12), transparent 34%),
+    linear-gradient(135deg, rgba(15, 23, 42, 0.90), rgba(30, 41, 59, 0.76));
+  border: 1px solid rgba(148, 163, 184, 0.20);
+  box-shadow:
+    inset 0 0 28px rgba(15, 23, 42, 0.34),
+    0 12px 28px rgba(15, 23, 42, 0.12);
+}
+
+:root:not([data-theme="dark"]) .kcal-chart-box {
+  background:
+    radial-gradient(circle at 18% 10%, rgba(14, 165, 233, 0.10), transparent 33%),
+    radial-gradient(circle at 82% 12%, rgba(168, 85, 247, 0.10), transparent 34%),
+    linear-gradient(135deg, rgba(248, 250, 252, 0.98), rgba(226, 232, 240, 0.74));
+  border-color: rgba(148, 163, 184, 0.24);
+  box-shadow:
+    inset 0 0 22px rgba(148, 163, 184, 0.16),
+    0 12px 28px rgba(15, 23, 42, 0.07);
+}
+
+#kcalTrendChart {
+  width: 100% !important;
+  height: 100% !important;
 }
 
 .kcal-dashboard {
@@ -828,119 +865,6 @@ button i {
 [data-theme="dark"] .card-total-kcal {
   background: linear-gradient(135deg, rgba(249, 115, 22, 0.14), rgba(168, 85, 247, 0.12), rgba(14, 165, 233, 0.10));
   border-color: rgba(249, 115, 22, 0.32);
-}
-
-/* GRÁFICO ONDA DE KCAL DA LUMA */
-
-.kcal-wave-box {
-  position: relative;
-  z-index: 1;
-  width: 100%;
-  height: 145px;
-  margin: 4px 0 16px;
-  border-radius: 22px;
-  overflow: hidden;
-  background:
-    radial-gradient(circle at 20% 20%, rgba(168, 85, 247, 0.22), transparent 36%),
-    radial-gradient(circle at 80% 30%, rgba(14, 165, 233, 0.20), transparent 34%),
-    linear-gradient(135deg, rgba(15, 23, 42, 0.88), rgba(30, 41, 59, 0.68));
-  border: 1px solid rgba(168, 85, 247, 0.25);
-  box-shadow:
-    inset 0 0 28px rgba(15, 23, 42, 0.35),
-    0 12px 28px rgba(15, 23, 42, 0.16);
-}
-
-:root:not([data-theme="dark"]) .kcal-wave-box {
-  background:
-    radial-gradient(circle at 20% 20%, rgba(168, 85, 247, 0.18), transparent 36%),
-    radial-gradient(circle at 80% 30%, rgba(14, 165, 233, 0.16), transparent 34%),
-    linear-gradient(135deg, rgba(248, 250, 252, 0.96), rgba(226, 232, 240, 0.72));
-  box-shadow:
-    inset 0 0 26px rgba(148, 163, 184, 0.20),
-    0 12px 28px rgba(15, 23, 42, 0.08);
-}
-
-#kcalWaveCanvas {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-}
-
-.kcal-wave-info {
-  position: absolute;
-  left: 16px;
-  top: 14px;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  z-index: 2;
-}
-
-.kcal-wave-info span {
-  font-size: 11px;
-  font-weight: 900;
-  color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.kcal-wave-info strong {
-  font-size: 30px;
-  line-height: 1.1;
-  font-weight: 950;
-  color: #ffffff;
-  text-shadow: 0 4px 14px rgba(15, 23, 42, 0.35);
-}
-
-:root:not([data-theme="dark"]) .kcal-wave-info strong {
-  color: var(--text-main);
-  text-shadow: none;
-}
-
-.kcal-wave-meta-line {
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 18%;
-  height: 1px;
-  border-top: 2px dashed rgba(255, 255, 255, 0.42);
-  z-index: 2;
-  pointer-events: none;
-}
-
-:root:not([data-theme="dark"]) .kcal-wave-meta-line {
-  border-top-color: rgba(100, 116, 139, 0.35);
-}
-
-.kcal-wave-meta-line span {
-  position: absolute;
-  right: 12px;
-  top: -25px;
-  background: rgba(168, 85, 247, 0.16);
-  color: var(--luma-purple);
-  border: 1px solid rgba(168, 85, 247, 0.28);
-  padding: 5px 9px;
-  border-radius: 999px;
-  font-size: 10px;
-  font-weight: 900;
-  text-transform: uppercase;
-}
-
-.kcal-wave-box::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background:
-    linear-gradient(
-      120deg,
-      transparent,
-      rgba(255, 255, 255, 0.08),
-      transparent
-    );
-  transform: translateX(-120%);
-  animation: kcalWaveShine 4.5s ease-in-out infinite;
-  pointer-events: none;
 }
 
 /* TREINO E GPS */
@@ -1140,7 +1064,7 @@ button i {
   background: rgba(168, 85, 247, 0.20);
 }
 
-/* LEAFLET DARK MODE */
+/* MAPA NO MODO ESCURO */
 
 [data-theme="dark"] .leaflet-layer,
 [data-theme="dark"] .leaflet-control-zoom-in,
@@ -1617,6 +1541,10 @@ button i {
   .tutorial-texto {
     font-size: 14px;
   }
+
+  .kcal-chart-box {
+    height: 210px;
+  }
 }
 
 @media (max-height: 720px) {
@@ -1711,15 +1639,5 @@ button i {
       0 0 0 6px rgba(168, 85, 247, 0.50),
       0 0 48px rgba(168, 85, 247, 0.86),
       0 22px 55px rgba(0, 0, 0, 0.32);
-  }
-}
-
-@keyframes kcalWaveShine {
-  0%, 55% {
-    transform: translateX(-120%);
-  }
-
-  100% {
-    transform: translateX(120%);
   }
 }

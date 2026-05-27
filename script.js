@@ -1,7 +1,13 @@
 const API_BASE_URL = "https://luma-gemini-api.onrender.com";
 
 let meuSwiper = null;
-let instanciasGraficos = { peso: null, cintura: null, quadril: null };
+
+let instanciasGraficos = {
+  peso: null,
+  cintura: null,
+  quadril: null,
+  caloriasMeta: null
+};
 
 document.addEventListener("DOMContentLoaded", iniciarApp);
 
@@ -11,6 +17,7 @@ function byId(id) {
 
 function addListener(id, evento, funcao) {
   const elemento = byId(id);
+
   if (elemento) {
     elemento.addEventListener(evento, funcao);
   }
@@ -30,6 +37,7 @@ function iniciarApp() {
   carregarRefeicoesDoDia();
   carregarHistoricoTreinos();
   carregarTreinoIASalvo();
+  atualizarGraficoCaloriasMeta();
 
   criarBotaoTutorialNoPerfil();
   configurarBotaoTutorialTopo();
@@ -48,6 +56,7 @@ function configurarListeners() {
   addListener("dataAlimentacaoInput", "change", carregarRefeicoesDoDia);
   addListener("btnSalvarAlimentacao", "click", salvarRefeicoes);
   addListener("btnAtualizarMetaKcal", "click", atualizarMetaKcalComIA);
+  addListener("btnAtualizarGraficoKcal", "click", atualizarGraficoCaloriasMeta);
 
   addListener("btnIniciarTreino", "click", iniciarTreino);
   addListener("btnPararTreino", "click", encerrarTreino);
@@ -115,6 +124,10 @@ function trocarAba(abaId, elementoBotao) {
 
     carregarRefeicoesDoDia();
     carregarMetaKcalSalva();
+
+    setTimeout(() => {
+      atualizarGraficoCaloriasMeta();
+    }, 150);
   }
 
   if (abaId === "exercicio") {
@@ -187,6 +200,7 @@ function salvarPerfilUsuario() {
 
   atualizarStatusPerfil(perfil);
   carregarMetaKcalSalva();
+  atualizarGraficoCaloriasMeta();
 
   const btn = byId("btnSalvarPerfil");
 
@@ -238,6 +252,7 @@ function obterMetaKcalSalva() {
 
 function carregarMetaKcalSalva() {
   renderizarCalorias();
+  atualizarGraficoCaloriasMeta();
 }
 
 async function atualizarMetaKcalComIA() {
@@ -285,6 +300,7 @@ async function atualizarMetaKcalComIA() {
     localStorage.setItem("usuarioMetaKcal", JSON.stringify(metaNormalizada));
 
     renderizarCalorias();
+    atualizarGraficoCaloriasMeta();
 
     btn.innerHTML = '<i class="bi bi-check2-circle"></i> Meta atualizada!';
     btn.style.background = "#10b981";
@@ -1078,6 +1094,7 @@ function carregarRefeicoesDoDia() {
   renderizarTagsDeComida();
   renderizarAgua();
   renderizarCalorias();
+  atualizarGraficoCaloriasMeta();
 }
 
 function obterMetaAguaDinamica() {
@@ -1157,6 +1174,7 @@ function renderizarTagsDeComida() {
         marcarCaloriasComoDesatualizadas();
         renderizarTagsDeComida();
         renderizarCalorias();
+        atualizarGraficoCaloriasMeta();
       });
 
       container.appendChild(tag);
@@ -1178,6 +1196,7 @@ function adicionarComidaCustomizada(refeicao) {
     marcarCaloriasComoDesatualizadas();
     renderizarTagsDeComida();
     renderizarCalorias();
+    atualizarGraficoCaloriasMeta();
   }
 }
 
@@ -1239,26 +1258,37 @@ function renderizarCalorias() {
   const observacao = byId("kcal-observacao");
   const assinaturaAtual = obterAssinaturaRefeicoes();
 
-  if (!observacao) return;
+  if (!observacao) {
+    atualizarResumoGraficoCalorias();
+    return;
+  }
 
   if (!kcal) {
     observacao.innerText = metaKcal
       ? "As calorias serão estimadas ao salvar o diário."
       : "Atualize a meta de kcal para a Luma comparar seu consumo.";
+
+    atualizarResumoGraficoCalorias();
     return;
   }
 
   if (refeicoesAtuais.assinaturaKcal !== assinaturaAtual) {
     observacao.innerText = "Você alterou alimentos. Salve o diário para recalcular as kcal.";
+
+    atualizarResumoGraficoCalorias();
     return;
   }
 
   if (metaKcal && metaKcal.observacao) {
     observacao.innerText = metaKcal.observacao;
+
+    atualizarResumoGraficoCalorias();
     return;
   }
 
   observacao.innerText = kcal.observacao || "Estimativa aproximada calculada pela Luma.";
+
+  atualizarResumoGraficoCalorias();
 }
 
 async function salvarRefeicoes() {
@@ -1314,6 +1344,7 @@ async function salvarRefeicoes() {
     localStorage.setItem("historicoAlimentacao", JSON.stringify(historico));
 
     renderizarCalorias();
+    atualizarGraficoCaloriasMeta();
 
     btn.innerHTML = '<i class="bi bi-check-circle"></i> Diário salvo com kcal!';
     btn.style.backgroundColor = "#10b981";
@@ -1323,6 +1354,9 @@ async function salvarRefeicoes() {
 
     historico[dataSelect] = refeicoesAtuais;
     localStorage.setItem("historicoAlimentacao", JSON.stringify(historico));
+
+    renderizarCalorias();
+    atualizarGraficoCaloriasMeta();
 
     btn.innerHTML = '<i class="bi bi-check-circle"></i> Salvo sem kcal';
     btn.style.backgroundColor = "#10b981";
@@ -1365,6 +1399,239 @@ async function calcularCaloriasComIA() {
   }
 
   return resultado.calorias;
+}
+
+// ==========================================
+// GRÁFICO CALORIAS X META
+// ==========================================
+
+function obterHistoricoCaloriasParaGrafico() {
+  const historicoAlimentacao = JSON.parse(localStorage.getItem("historicoAlimentacao") || "{}");
+  const metaKcal = obterMetaKcalSalva();
+  const metaAtual = metaKcal && metaKcal.metaKcal ? Number(metaKcal.metaKcal) : 0;
+
+  const itens = Object.keys(historicoAlimentacao)
+    .map(data => {
+      const diario = historicoAlimentacao[data] || {};
+      const kcal = diario.kcal || {};
+      const total = Number(kcal.total) || 0;
+
+      const metaDoDia = diario.metaKcal && diario.metaKcal.metaKcal
+        ? Number(diario.metaKcal.metaKcal)
+        : metaAtual;
+
+      return {
+        data,
+        total,
+        meta: metaDoDia || metaAtual || 0
+      };
+    })
+    .filter(item => item.total > 0 || item.meta > 0)
+    .sort((a, b) => new Date(a.data) - new Date(b.data));
+
+  const dataAtual = byId("dataAlimentacaoInput")
+    ? byId("dataAlimentacaoInput").value
+    : new Date().toISOString().split("T")[0];
+
+  const jaExisteHoje = itens.some(item => item.data === dataAtual);
+
+  if (!jaExisteHoje) {
+    const kcalAtual = refeicoesAtuais.kcal && typeof refeicoesAtuais.kcal.total !== "undefined"
+      ? Number(refeicoesAtuais.kcal.total) || 0
+      : 0;
+
+    if (kcalAtual > 0 || metaAtual > 0) {
+      itens.push({
+        data: dataAtual,
+        total: kcalAtual,
+        meta: metaAtual
+      });
+    }
+  }
+
+  return itens.slice(-14);
+}
+
+function formatarDataGraficoKcal(dataISO) {
+  if (!dataISO || !dataISO.includes("-")) return dataISO || "";
+
+  const partes = dataISO.split("-");
+  return `${partes[2]}/${partes[1]}`;
+}
+
+function atualizarResumoGraficoCalorias() {
+  const hojeDisplay = byId("grafico-kcal-hoje");
+  const metaDisplay = byId("grafico-kcal-meta");
+
+  const totalHoje = refeicoesAtuais.kcal && typeof refeicoesAtuais.kcal.total !== "undefined"
+    ? Number(refeicoesAtuais.kcal.total) || 0
+    : 0;
+
+  const metaKcal = obterMetaKcalSalva();
+  const metaAtual = metaKcal && metaKcal.metaKcal ? Number(metaKcal.metaKcal) : 0;
+
+  if (hojeDisplay) {
+    hojeDisplay.innerText = totalHoje > 0 ? totalHoje : "--";
+  }
+
+  if (metaDisplay) {
+    metaDisplay.innerText = metaAtual > 0 ? metaAtual : "--";
+  }
+}
+
+function atualizarGraficoCaloriasMeta() {
+  atualizarResumoGraficoCalorias();
+
+  const canvas = byId("graficoCaloriasMeta");
+
+  if (!canvas || typeof Chart === "undefined") return;
+
+  const dados = obterHistoricoCaloriasParaGrafico();
+
+  if (instanciasGraficos.caloriasMeta) {
+    instanciasGraficos.caloriasMeta.destroy();
+    instanciasGraficos.caloriasMeta = null;
+  }
+
+  const temaAtual = document.documentElement.getAttribute("data-theme");
+  const corGrid = temaAtual === "dark" ? "#334155" : "#e2e8f0";
+  const corTexto = temaAtual === "dark" ? "#cbd5e1" : "#64748b";
+
+  if (dados.length === 0) {
+    const ctxVazio = canvas.getContext("2d");
+
+    instanciasGraficos.caloriasMeta = new Chart(ctxVazio, {
+      type: "line",
+      data: {
+        labels: ["Hoje"],
+        datasets: [
+          {
+            label: "Consumido",
+            data: [0],
+            borderColor: "#0ea5e9",
+            backgroundColor: "rgba(14, 165, 233, 0.12)",
+            borderWidth: 3,
+            tension: 0.4,
+            fill: true
+          },
+          {
+            label: "Meta",
+            data: [0],
+            borderColor: "#f97316",
+            borderWidth: 3,
+            borderDash: [7, 6],
+            tension: 0.25,
+            fill: false
+          }
+        ]
+      },
+      options: criarOpcoesGraficoCalorias(corGrid, corTexto)
+    });
+
+    return;
+  }
+
+  const labels = dados.map(item => formatarDataGraficoKcal(item.data));
+  const consumido = dados.map(item => item.total);
+  const metas = dados.map(item => item.meta);
+
+  const ctx = canvas.getContext("2d");
+  const gradiente = ctx.createLinearGradient(0, 0, 0, 220);
+
+  gradiente.addColorStop(0, "rgba(14, 165, 233, 0.34)");
+  gradiente.addColorStop(1, "rgba(14, 165, 233, 0.00)");
+
+  instanciasGraficos.caloriasMeta = new Chart(ctx, {
+    type: "line",
+    data: {
+      labels,
+      datasets: [
+        {
+          label: "Consumido",
+          data: consumido,
+          borderColor: "#0ea5e9",
+          pointBackgroundColor: "#0284c7",
+          pointBorderColor: "#ffffff",
+          pointBorderWidth: 2,
+          pointRadius: 4,
+          pointHoverRadius: 6,
+          backgroundColor: gradiente,
+          borderWidth: 3,
+          tension: 0.4,
+          fill: true
+        },
+        {
+          label: "Meta",
+          data: metas,
+          borderColor: "#f97316",
+          pointBackgroundColor: "#f97316",
+          pointBorderColor: "#ffffff",
+          pointBorderWidth: 2,
+          pointRadius: 3,
+          pointHoverRadius: 5,
+          borderWidth: 3,
+          borderDash: [7, 6],
+          tension: 0.25,
+          fill: false
+        }
+      ]
+    },
+    options: criarOpcoesGraficoCalorias(corGrid, corTexto)
+  });
+}
+
+function criarOpcoesGraficoCalorias(corGrid, corTexto) {
+  return {
+    responsive: true,
+    maintainAspectRatio: false,
+    interaction: {
+      mode: "index",
+      intersect: false
+    },
+    plugins: {
+      legend: {
+        display: true,
+        labels: {
+          color: corTexto,
+          usePointStyle: true,
+          boxWidth: 8,
+          font: {
+            size: 11,
+            weight: "700"
+          }
+        }
+      },
+      tooltip: {
+        callbacks: {
+          label: function(context) {
+            return `${context.dataset.label}: ${context.parsed.y} kcal`;
+          }
+        }
+      }
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+        grid: {
+          color: corGrid
+        },
+        ticks: {
+          color: corTexto,
+          callback: function(value) {
+            return `${value}`;
+          }
+        }
+      },
+      x: {
+        grid: {
+          display: false
+        },
+        ticks: {
+          color: corTexto
+        }
+      }
+    }
+  };
 }
 
 // ==========================================
@@ -1416,6 +1683,7 @@ function alternarTema() {
   }
 
   atualizarGraficos();
+  atualizarGraficoCaloriasMeta();
 }
 
 function configurarDataPadrao() {
@@ -1891,6 +2159,12 @@ const tutorialPassos = [
     texto: "A Luma compara o que você consumiu com uma meta personalizada de calorias."
   },
   {
+    aba: "alimentacao",
+    alvo: ".calorie-chart-card",
+    titulo: "Histórico de calorias",
+    texto: "Aqui você acompanha uma linha com as calorias consumidas e outra com a meta diária da Luma."
+  },
+  {
     aba: "exercicio",
     alvo: "#btnGerarTreinoIA",
     titulo: "Treino com I.A",
@@ -1995,7 +2269,7 @@ function criarEstruturaTutorial() {
       <p id="tutorialTexto" class="tutorial-texto"></p>
 
       <div class="tutorial-progress-area">
-        <div id="tutorialProgressoTexto" class="tutorial-progress-text">Passo 1 de 7</div>
+        <div id="tutorialProgressoTexto" class="tutorial-progress-text">Passo 1 de 8</div>
 
         <div class="tutorial-progress-bar">
           <div id="tutorialProgressoFill" class="tutorial-progress-fill"></div>

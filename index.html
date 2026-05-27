@@ -9,7 +9,7 @@
 
   <title>EvoluaFit I.A. - Jornada Saudável</title>
 
-  <link rel="stylesheet" href="style.css?v=16">
+  <link rel="stylesheet" href="style.css?v=17">
   <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
@@ -343,7 +343,6 @@
         </p>
       </div>
 
-      <!-- CENTRAL DE LEMBRETES -->
       <div class="card card-lembretes-luma">
         <div class="lembretes-header">
           <div>
@@ -360,14 +359,14 @@
           <i class="bi bi-bell-fill"></i> Ativar notificações
         </button>
 
-        <div class="lembretes-grid">
-          <div class="lembrete-item">
+        <div class="lembretes-scroll">
+          <div class="lembrete-item lembrete-card-scroll">
             <div class="lembrete-topo">
               <div class="lembrete-info">
                 <span class="lembrete-icone">🩺</span>
                 <div>
                   <strong>Pressão de manhã</strong>
-                  <small>Ideal para acompanhar o início do dia</small>
+                  <small>Início do dia</small>
                 </div>
               </div>
 
@@ -380,13 +379,13 @@
             <input type="time" id="horaPressaoManha" value="07:00">
           </div>
 
-          <div class="lembrete-item">
+          <div class="lembrete-item lembrete-card-scroll">
             <div class="lembrete-topo">
               <div class="lembrete-info">
                 <span class="lembrete-icone">🩺</span>
                 <div>
                   <strong>Pressão à noite</strong>
-                  <small>Bom para comparar com o período da manhã</small>
+                  <small>Comparar com a manhã</small>
                 </div>
               </div>
 
@@ -399,13 +398,13 @@
             <input type="time" id="horaPressaoNoite" value="20:00">
           </div>
 
-          <div class="lembrete-item">
+          <div class="lembrete-item lembrete-card-scroll">
             <div class="lembrete-topo">
               <div class="lembrete-info">
                 <span class="lembrete-icone">🩸</span>
                 <div>
                   <strong>Glicose em jejum</strong>
-                  <small>Lembrete antes da primeira refeição</small>
+                  <small>Antes da refeição</small>
                 </div>
               </div>
 
@@ -418,13 +417,13 @@
             <input type="time" id="horaGlicoseJejum" value="06:30">
           </div>
 
-          <div class="lembrete-item">
+          <div class="lembrete-item lembrete-card-scroll">
             <div class="lembrete-topo">
               <div class="lembrete-info">
                 <span class="lembrete-icone">💧</span>
                 <div>
                   <strong>Beber água</strong>
-                  <small>A Luma te lembra durante o dia</small>
+                  <small>Lembrete durante o dia</small>
                 </div>
               </div>
 
@@ -441,13 +440,13 @@
             </select>
           </div>
 
-          <div class="lembrete-item">
+          <div class="lembrete-item lembrete-card-scroll">
             <div class="lembrete-topo">
               <div class="lembrete-info">
                 <span class="lembrete-icone">🍽️</span>
                 <div>
-                  <strong>Registrar alimentação</strong>
-                  <small>Não esquecer o diário do dia</small>
+                  <strong>Alimentação</strong>
+                  <small>Registrar diário</small>
                 </div>
               </div>
 
@@ -460,13 +459,13 @@
             <input type="time" id="horaAlimentacao" value="21:00">
           </div>
 
-          <div class="lembrete-item">
+          <div class="lembrete-item lembrete-card-scroll">
             <div class="lembrete-topo">
               <div class="lembrete-info">
                 <span class="lembrete-icone">🔥</span>
                 <div>
-                  <strong>Treino ou caminhada</strong>
-                  <small>Um toque para manter a constância</small>
+                  <strong>Treino</strong>
+                  <small>Caminhada ou rotina</small>
                 </div>
               </div>
 
@@ -907,7 +906,7 @@
   <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-  <script src="script.js?v=15"></script>
+  <script src="script.js?v=17"></script>
 
   <script>
     if ("serviceWorker" in navigator) {

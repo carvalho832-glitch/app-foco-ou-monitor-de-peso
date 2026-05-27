@@ -1,4 +1,4 @@
-const CACHE_NAME = "luma-cache-v38";
+const CACHE_NAME = "monitor-peso-v39";
 
 const APP_FILES = [
   "./",
@@ -7,10 +7,6 @@ const APP_FILES = [
   "./script.js",
   "./manifest.json"
 ];
-
-// ==========================================
-// INSTALAÇÃO DO SERVICE WORKER
-// ==========================================
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
@@ -23,10 +19,6 @@ self.addEventListener("install", (event) => {
       })
   );
 });
-
-// ==========================================
-// ATIVAÇÃO E LIMPEZA DE CACHE ANTIGO
-// ==========================================
 
 self.addEventListener("activate", (event) => {
   event.waitUntil(
@@ -45,10 +37,6 @@ self.addEventListener("activate", (event) => {
   );
 });
 
-// ==========================================
-// FETCH: CARREGAMENTO DO APP
-// ==========================================
-
 self.addEventListener("fetch", (event) => {
   const request = event.request;
   const url = new URL(request.url);
@@ -57,13 +45,11 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // Não cacheia chamadas da API do Render
   if (url.hostname.includes("onrender.com")) {
     event.respondWith(fetch(request));
     return;
   }
 
-  // Para navegação, tenta internet primeiro e cai no cache
   if (request.mode === "navigate") {
     event.respondWith(
       fetch(request)
@@ -82,7 +68,6 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // Para arquivos estáticos, usa cache primeiro
   event.respondWith(
     caches.match(request).then((cachedResponse) => {
       if (cachedResponse) {
@@ -99,16 +84,10 @@ self.addEventListener("fetch", (event) => {
 
           return networkResponse;
         })
-        .catch(() => {
-          return caches.match("./index.html");
-        });
+        .catch(() => caches.match("./index.html"));
     })
   );
 });
-
-// ==========================================
-// CLIQUE NA NOTIFICAÇÃO
-// ==========================================
 
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
@@ -139,10 +118,6 @@ self.addEventListener("notificationclick", (event) => {
     })
   );
 });
-
-// ==========================================
-// RECEBER PUSH FUTURAMENTE PELO BACKEND
-// ==========================================
 
 self.addEventListener("push", (event) => {
   let dados = {
@@ -178,17 +153,9 @@ self.addEventListener("push", (event) => {
   );
 });
 
-// ==========================================
-// FECHAMENTO DA NOTIFICAÇÃO
-// ==========================================
-
 self.addEventListener("notificationclose", (event) => {
   console.log("Notificação fechada:", event.notification.tag);
 });
-
-// ==========================================
-// MENSAGENS VINDAS DO APP
-// ==========================================
 
 self.addEventListener("message", (event) => {
   const dados = event.data || {};

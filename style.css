@@ -228,6 +228,8 @@ button i {
   background: rgba(255, 255, 255, 0.25);
 }
 
+/* GRÁFICOS DE EVOLUÇÃO */
+
 #cardGraficosSlider {
   padding: 16px 8px;
 }
@@ -270,6 +272,8 @@ button i {
   background: var(--luma-blue);
   opacity: 1;
 }
+
+/* HISTÓRICO */
 
 .history-header {
   display: flex;
@@ -603,6 +607,59 @@ button i {
   margin-right: 2px;
 }
 
+.food-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.food-tag {
+  background: var(--input-bg);
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+  padding: 8px 14px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.food-tag.selected {
+  background: var(--luma-blue);
+  color: #ffffff;
+  border-color: var(--luma-blue);
+  box-shadow: 0 4px 6px -1px rgba(14, 165, 233, 0.3);
+}
+
+.custom-food-input {
+  display: flex;
+  gap: 8px;
+  align-items: stretch;
+}
+
+.custom-food-input input {
+  padding: 10px 14px;
+  font-size: 14px;
+  border-radius: 10px;
+  flex: 1;
+}
+
+.btn-add-food {
+  padding: 0 16px;
+  font-size: 18px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-add-food i {
+  margin: 0;
+}
+
 /* CARD INTELIGENTE DE KCAL */
 
 .card-total-kcal {
@@ -773,170 +830,117 @@ button i {
   border-color: rgba(249, 115, 22, 0.32);
 }
 
-/* GRÁFICO CALORIAS X META */
+/* GRÁFICO ONDA DE KCAL DA LUMA */
 
-.calorie-chart-card {
-  background:
-    radial-gradient(circle at top right, rgba(168, 85, 247, 0.18), transparent 34%),
-    linear-gradient(135deg, rgba(14, 165, 233, 0.08), rgba(249, 115, 22, 0.08));
-  border: 1px solid rgba(14, 165, 233, 0.20);
-  overflow: hidden;
-}
-
-[data-theme="dark"] .calorie-chart-card {
-  background:
-    radial-gradient(circle at top right, rgba(168, 85, 247, 0.22), transparent 35%),
-    linear-gradient(135deg, rgba(14, 165, 233, 0.12), rgba(249, 115, 22, 0.10));
-  border-color: rgba(14, 165, 233, 0.24);
-}
-
-.calorie-chart-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 12px;
-  margin-bottom: 14px;
-}
-
-.calorie-chart-title {
-  font-size: 15px;
-  font-weight: 950;
-  color: var(--text-main);
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.calorie-chart-title i {
-  color: var(--luma-blue);
-}
-
-.calorie-chart-subtitle {
-  font-size: 12px;
-  color: var(--text-muted);
-  margin-top: 4px;
-  line-height: 1.35;
-}
-
-.calorie-chart-summary {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-  margin: 12px 0 14px;
-}
-
-.calorie-chart-summary div {
-  background: rgba(255, 255, 255, 0.50);
-  border: 1px solid rgba(148, 163, 184, 0.22);
-  border-radius: 15px;
-  padding: 11px 8px;
-  text-align: center;
-}
-
-[data-theme="dark"] .calorie-chart-summary div {
-  background: rgba(15, 23, 42, 0.36);
-  border-color: rgba(148, 163, 184, 0.18);
-}
-
-.calorie-chart-summary span {
-  display: block;
-  font-size: 11px;
-  color: var(--text-muted);
-  font-weight: 850;
-  margin-bottom: 4px;
-}
-
-.calorie-chart-summary strong {
-  display: block;
-  font-size: 17px;
-  font-weight: 950;
-  color: var(--text-main);
-}
-
-.calorie-chart-canvas-box {
+.kcal-wave-box {
+  position: relative;
+  z-index: 1;
   width: 100%;
-  height: 230px;
-  padding: 10px;
-  border-radius: 18px;
-  background: rgba(255, 255, 255, 0.52);
-  border: 1px solid rgba(148, 163, 184, 0.22);
+  height: 145px;
+  margin: 4px 0 16px;
+  border-radius: 22px;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 20% 20%, rgba(168, 85, 247, 0.22), transparent 36%),
+    radial-gradient(circle at 80% 30%, rgba(14, 165, 233, 0.20), transparent 34%),
+    linear-gradient(135deg, rgba(15, 23, 42, 0.88), rgba(30, 41, 59, 0.68));
+  border: 1px solid rgba(168, 85, 247, 0.25);
+  box-shadow:
+    inset 0 0 28px rgba(15, 23, 42, 0.35),
+    0 12px 28px rgba(15, 23, 42, 0.16);
 }
 
-[data-theme="dark"] .calorie-chart-canvas-box {
-  background: rgba(15, 23, 42, 0.42);
-  border-color: rgba(148, 163, 184, 0.18);
+:root:not([data-theme="dark"]) .kcal-wave-box {
+  background:
+    radial-gradient(circle at 20% 20%, rgba(168, 85, 247, 0.18), transparent 36%),
+    radial-gradient(circle at 80% 30%, rgba(14, 165, 233, 0.16), transparent 34%),
+    linear-gradient(135deg, rgba(248, 250, 252, 0.96), rgba(226, 232, 240, 0.72));
+  box-shadow:
+    inset 0 0 26px rgba(148, 163, 184, 0.20),
+    0 12px 28px rgba(15, 23, 42, 0.08);
 }
 
-.calorie-chart-canvas-box canvas {
-  width: 100% !important;
-  height: 100% !important;
+#kcalWaveCanvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
 }
 
-.calorie-chart-note {
+.kcal-wave-info {
+  position: absolute;
+  left: 16px;
+  top: 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  z-index: 2;
+}
+
+.kcal-wave-info span {
   font-size: 11px;
+  font-weight: 900;
   color: var(--text-muted);
-  margin-top: 10px;
-  line-height: 1.35;
-  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
-#btnAtualizarGraficoKcal {
-  white-space: nowrap;
-  padding: 8px 10px;
-  font-size: 11px;
-}
-
-.food-tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-bottom: 16px;
-}
-
-.food-tag {
-  background: var(--input-bg);
-  border: 1px solid var(--border-color);
-  color: var(--text-main);
-  padding: 8px 14px;
-  border-radius: 20px;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  user-select: none;
-}
-
-.food-tag.selected {
-  background: var(--luma-blue);
+.kcal-wave-info strong {
+  font-size: 30px;
+  line-height: 1.1;
+  font-weight: 950;
   color: #ffffff;
-  border-color: var(--luma-blue);
-  box-shadow: 0 4px 6px -1px rgba(14, 165, 233, 0.3);
+  text-shadow: 0 4px 14px rgba(15, 23, 42, 0.35);
 }
 
-.custom-food-input {
-  display: flex;
-  gap: 8px;
-  align-items: stretch;
+:root:not([data-theme="dark"]) .kcal-wave-info strong {
+  color: var(--text-main);
+  text-shadow: none;
 }
 
-.custom-food-input input {
-  padding: 10px 14px;
-  font-size: 14px;
-  border-radius: 10px;
-  flex: 1;
+.kcal-wave-meta-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 18%;
+  height: 1px;
+  border-top: 2px dashed rgba(255, 255, 255, 0.42);
+  z-index: 2;
+  pointer-events: none;
 }
 
-.btn-add-food {
-  padding: 0 16px;
-  font-size: 18px;
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+:root:not([data-theme="dark"]) .kcal-wave-meta-line {
+  border-top-color: rgba(100, 116, 139, 0.35);
 }
 
-.btn-add-food i {
-  margin: 0;
+.kcal-wave-meta-line span {
+  position: absolute;
+  right: 12px;
+  top: -25px;
+  background: rgba(168, 85, 247, 0.16);
+  color: var(--luma-purple);
+  border: 1px solid rgba(168, 85, 247, 0.28);
+  padding: 5px 9px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.kcal-wave-box::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(
+      120deg,
+      transparent,
+      rgba(255, 255, 255, 0.08),
+      transparent
+    );
+  transform: translateX(-120%);
+  animation: kcalWaveShine 4.5s ease-in-out infinite;
+  pointer-events: none;
 }
 
 /* TREINO E GPS */
@@ -1062,8 +1066,6 @@ button i {
 [data-theme="dark"] .btn-ia-treino {
   box-shadow: 0 8px 24px rgba(168, 85, 247, 0.22);
 }
-
-/* TREINO IA RECOLHÍVEL */
 
 .treino-ia-header {
   width: 100%;
@@ -1258,7 +1260,7 @@ button i {
   color: var(--text-main);
 }
 
-/* ESTILO LUMA IA */
+/* IA */
 
 .card-ia-status {
   background: var(--card-bg);
@@ -1327,7 +1329,7 @@ button i {
   animation: spin 1s linear infinite;
 }
 
-/* TUTORIAL GUIADO COM FUNDO EMBAÇADO E DESTAQUE LIMPO */
+/* TUTORIAL GUIADO */
 
 .tutorial-overlay {
   position: fixed;
@@ -1554,14 +1556,6 @@ button i {
     grid-template-columns: 1fr 1fr;
     gap: 10px;
   }
-
-  .calorie-chart-canvas-box {
-    height: 215px;
-  }
-
-  .calorie-chart-header {
-    align-items: flex-start;
-  }
 }
 
 @media (max-width: 380px) {
@@ -1622,14 +1616,6 @@ button i {
 
   .tutorial-texto {
     font-size: 14px;
-  }
-
-  .calorie-chart-summary {
-    grid-template-columns: 1fr;
-  }
-
-  .calorie-chart-canvas-box {
-    height: 200px;
   }
 }
 
@@ -1725,5 +1711,15 @@ button i {
       0 0 0 6px rgba(168, 85, 247, 0.50),
       0 0 48px rgba(168, 85, 247, 0.86),
       0 22px 55px rgba(0, 0, 0, 0.32);
+  }
+}
+
+@keyframes kcalWaveShine {
+  0%, 55% {
+    transform: translateX(-120%);
+  }
+
+  100% {
+    transform: translateX(120%);
   }
 }

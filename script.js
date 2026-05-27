@@ -15,6 +15,8 @@ let graficoKcalData = null;
 let graficoPressaoSaude = null;
 let graficoGlicoseSaude = null;
 
+let monitorLembretesInterval = null;
+
 document.addEventListener("DOMContentLoaded", iniciarApp);
 
 function byId(id) {
@@ -46,6 +48,10 @@ function iniciarApp() {
   carregarHistoricoTreinos();
   carregarTreinoIASalvo();
 
+  carregarLembretesLuma();
+  atualizarStatusPermissaoNotificacao();
+  iniciarMonitorDeLembretes();
+
   criarBotaoTutorialNoPerfil();
   configurarBotaoTutorialTopo();
   iniciarTutorialSeNecessario();
@@ -66,6 +72,10 @@ function configurarListeners() {
 
   addListener("btnSalvarSaude", "click", salvarRegistroSaude);
   addListener("btnExportarSaude", "click", exportarSaudeCSV);
+
+  addListener("btnAtivarNotificacoes", "click", ativarNotificacoesLuma);
+  addListener("btnSalvarLembretes", "click", salvarLembretesLuma);
+  addListener("btnTestarNotificacao", "click", testarNotificacaoLuma);
 
   addListener("btnIniciarTreino", "click", iniciarTreino);
   addListener("btnPararTreino", "click", encerrarTreino);
@@ -144,6 +154,8 @@ function trocarAba(abaId, elementoBotao) {
   if (abaId === "saude") {
     configurarDataSaudePadrao();
     carregarHistoricoSaude();
+    carregarLembretesLuma();
+    atualizarStatusPermissaoNotificacao();
 
     setTimeout(() => {
       inicializarSaudeSwiper();
@@ -170,6 +182,521 @@ function alternarMenuLuma(event) {
   if (nav) {
     nav.classList.toggle("open");
   }
+}
+
+/* ==========================================
+   LEMBRETES DA LUMA
+========================================== */
+
+function obterLembretesPadrao() {
+  return {
+    pressaoManha: {
+      ativo: false,
+      hora: "07:00"
+    },
+    pressaoNoite: {
+      ativo: false,
+      hora: "20:00"
+    },
+    glicoseJejum: {
+      ativo: false,
+      hora: "06:30"
+    },
+    agua: {
+      ativo: false,
+      intervalo: 120
+    },
+    alimentacao: {
+      ativo: false,
+      hora: "21:00"
+    },
+    treino: {
+      ativo: false,
+      hora: "18:30"
+    }
+  };
+}
+
+function obterLembretesLuma() {
+  const padrao = obterLembretesPadrao();
+
+  try {
+    const salvo = JSON.parse(localStorage.getItem("lumaLembretes") || "null");
+
+    if (!salvo) return padrao;
+
+    return {
+      pressaoManha: {
+        ...padrao.pressaoManha,
+        ...(salvo.pressaoManha || {})
+      },
+      pressaoNoite: {
+        ...padrao.pressaoNoite,
+        ...(salvo.pressaoNoite || {})
+      },
+      glicoseJejum: {
+        ...padrao.glicoseJejum,
+        ...(salvo.glicoseJejum || {})
+      },
+      agua: {
+        ...padrao.agua,
+        ...(salvo.agua || {})
+      },
+      alimentacao: {
+        ...padrao.alimentacao,
+        ...(salvo.alimentacao || {})
+      },
+      treino: {
+        ...padrao.treino,
+        ...(salvo.treino || {})
+      }
+    };
+
+  } catch (erro) {
+    console.warn("Erro ao carregar lembretes:", erro);
+    return padrao;
+  }
+}
+
+function carregarLembretesLuma() {
+  const lembretes = obterLembretesLuma();
+
+  setCheckboxValue("lembrarPressaoManha", lembretes.pressaoManha.ativo);
+  setInputValue("horaPressaoManha", lembretes.pressaoManha.hora);
+
+  setCheckboxValue("lembrarPressaoNoite", lembretes.pressaoNoite.ativo);
+  setInputValue("horaPressaoNoite", lembretes.pressaoNoite.hora);
+
+  setCheckboxValue("lembrarGlicoseJejum", lembretes.glicoseJejum.ativo);
+  setInputValue("horaGlicoseJejum", lembretes.glicoseJejum.hora);
+
+  setCheckboxValue("lembrarAgua", lembretes.agua.ativo);
+  setInputValue("intervaloAgua", String(lembretes.agua.intervalo || 120));
+
+  setCheckboxValue("lembrarAlimentacao", lembretes.alimentacao.ativo);
+  setInputValue("horaAlimentacao", lembretes.alimentacao.hora);
+
+  setCheckboxValue("lembrarTreino", lembretes.treino.ativo);
+  setInputValue("horaTreino", lembretes.treino.hora);
+
+  atualizarResumoLembretes();
+}
+
+function setCheckboxValue(id, valor) {
+  const el = byId(id);
+
+  if (el) {
+    el.checked = !!valor;
+  }
+}
+
+function setInputValue(id, valor) {
+  const el = byId(id);
+
+  if (el) {
+    el.value = valor;
+  }
+}
+
+function lerLembretesDaTela() {
+  return {
+    pressaoManha: {
+      ativo: !!(byId("lembrarPressaoManha") && byId("lembrarPressaoManha").checked),
+      hora: byId("horaPressaoManha") ? byId("horaPressaoManha").value || "07:00" : "07:00"
+    },
+    pressaoNoite: {
+      ativo: !!(byId("lembrarPressaoNoite") && byId("lembrarPressaoNoite").checked),
+      hora: byId("horaPressaoNoite") ? byId("horaPressaoNoite").value || "20:00" : "20:00"
+    },
+    glicoseJejum: {
+      ativo: !!(byId("lembrarGlicoseJejum") && byId("lembrarGlicoseJejum").checked),
+      hora: byId("horaGlicoseJejum") ? byId("horaGlicoseJejum").value || "06:30" : "06:30"
+    },
+    agua: {
+      ativo: !!(byId("lembrarAgua") && byId("lembrarAgua").checked),
+      intervalo: byId("intervaloAgua") ? Number(byId("intervaloAgua").value) || 120 : 120
+    },
+    alimentacao: {
+      ativo: !!(byId("lembrarAlimentacao") && byId("lembrarAlimentacao").checked),
+      hora: byId("horaAlimentacao") ? byId("horaAlimentacao").value || "21:00" : "21:00"
+    },
+    treino: {
+      ativo: !!(byId("lembrarTreino") && byId("lembrarTreino").checked),
+      hora: byId("horaTreino") ? byId("horaTreino").value || "18:30" : "18:30"
+    }
+  };
+}
+
+async function salvarLembretesLuma() {
+  const lembretes = lerLembretesDaTela();
+
+  localStorage.setItem("lumaLembretes", JSON.stringify(lembretes));
+
+  if (lembretes.agua.ativo && !localStorage.getItem("lumaUltimoLembreteAgua")) {
+    localStorage.setItem("lumaUltimoLembreteAgua", String(Date.now()));
+  }
+
+  const existeAtivo = verificarSeExisteLembreteAtivo(lembretes);
+
+  if (existeAtivo && "Notification" in window && Notification.permission === "default") {
+    await solicitarPermissaoNotificacao();
+  }
+
+  atualizarStatusPermissaoNotificacao();
+  atualizarResumoLembretes();
+  iniciarMonitorDeLembretes();
+
+  const btn = byId("btnSalvarLembretes");
+
+  if (btn) {
+    const textoOriginal = btn.innerHTML;
+
+    btn.innerHTML = '<i class="bi bi-check2-circle"></i> Lembretes salvos!';
+    btn.style.background = "#10b981";
+
+    setTimeout(() => {
+      btn.innerHTML = textoOriginal;
+      btn.style.background = "";
+    }, 1800);
+  }
+}
+
+function verificarSeExisteLembreteAtivo(lembretes) {
+  return !!(
+    lembretes.pressaoManha.ativo ||
+    lembretes.pressaoNoite.ativo ||
+    lembretes.glicoseJejum.ativo ||
+    lembretes.agua.ativo ||
+    lembretes.alimentacao.ativo ||
+    lembretes.treino.ativo
+  );
+}
+
+function atualizarResumoLembretes() {
+  const texto = byId("lembretesStatusTexto");
+
+  if (!texto) return;
+
+  const lembretes = obterLembretesLuma();
+
+  const ativos = [];
+
+  if (lembretes.pressaoManha.ativo) ativos.push(`pressão manhã ${lembretes.pressaoManha.hora}`);
+  if (lembretes.pressaoNoite.ativo) ativos.push(`pressão noite ${lembretes.pressaoNoite.hora}`);
+  if (lembretes.glicoseJejum.ativo) ativos.push(`glicose ${lembretes.glicoseJejum.hora}`);
+  if (lembretes.agua.ativo) ativos.push(`água a cada ${lembretes.agua.intervalo} min`);
+  if (lembretes.alimentacao.ativo) ativos.push(`alimentação ${lembretes.alimentacao.hora}`);
+  if (lembretes.treino.ativo) ativos.push(`treino ${lembretes.treino.hora}`);
+
+  if (ativos.length === 0) {
+    texto.innerText = "Nenhum lembrete ativo. Ative os cuidados que deseja receber.";
+    return;
+  }
+
+  texto.innerText = `Lembretes ativos: ${ativos.join(" • ")}.`;
+}
+
+async function ativarNotificacoesLuma() {
+  const ok = await solicitarPermissaoNotificacao();
+
+  atualizarStatusPermissaoNotificacao();
+
+  if (ok) {
+    enviarNotificacaoLuma(
+      "🔔 Luma ativada",
+      "Prontinho! Agora posso te lembrar dos cuidados importantes.",
+      "luma-permissao"
+    );
+  }
+}
+
+async function solicitarPermissaoNotificacao() {
+  if (!("Notification" in window)) {
+    alert("Este navegador não suporta notificações.");
+    return false;
+  }
+
+  if (Notification.permission === "granted") {
+    return true;
+  }
+
+  if (Notification.permission === "denied") {
+    alert("As notificações estão bloqueadas. Ative manualmente nas permissões do navegador/app.");
+    return false;
+  }
+
+  const permissao = await Notification.requestPermission();
+
+  return permissao === "granted";
+}
+
+function atualizarStatusPermissaoNotificacao() {
+  const pill = byId("statusPermissaoNotificacao");
+  const btn = byId("btnAtivarNotificacoes");
+
+  if (!pill) return;
+
+  pill.classList.remove("ativo", "negado");
+
+  if (!("Notification" in window)) {
+    pill.innerText = "Não suportado";
+    pill.classList.add("negado");
+
+    if (btn) {
+      btn.disabled = true;
+      btn.innerHTML = '<i class="bi bi-bell-slash"></i> Não suportado';
+    }
+
+    return;
+  }
+
+  if (Notification.permission === "granted") {
+    pill.innerText = "Notificações ativadas";
+    pill.classList.add("ativo");
+
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="bi bi-bell-fill"></i> Notificações ativadas';
+    }
+
+    return;
+  }
+
+  if (Notification.permission === "denied") {
+    pill.innerText = "Bloqueadas";
+    pill.classList.add("negado");
+
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="bi bi-bell-slash"></i> Permissão bloqueada';
+    }
+
+    return;
+  }
+
+  pill.innerText = "Notificações não ativadas";
+
+  if (btn) {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="bi bi-bell-fill"></i> Ativar notificações';
+  }
+}
+
+async function testarNotificacaoLuma() {
+  const ok = await solicitarPermissaoNotificacao();
+
+  atualizarStatusPermissaoNotificacao();
+
+  if (!ok) return;
+
+  await enviarNotificacaoLuma(
+    "🩺 Luma lembra você",
+    "Este é um teste. Quando chegar o horário, vou te lembrar dos cuidados salvos.",
+    "luma-teste"
+  );
+
+  const status = byId("lembretesStatusTexto");
+
+  if (status) {
+    status.innerText = "Notificação de teste enviada. Se não apareceu, confira as permissões do navegador.";
+  }
+}
+
+async function enviarNotificacaoLuma(titulo, mensagem, tag = "luma-lembrete") {
+  if (!("Notification" in window)) return false;
+
+  if (Notification.permission !== "granted") {
+    return false;
+  }
+
+  const opcoes = {
+    body: mensagem,
+    tag: tag,
+    renotify: true,
+    silent: false,
+    data: {
+      url: "./index.html"
+    }
+  };
+
+  try {
+    if ("serviceWorker" in navigator) {
+      const registro = await navigator.serviceWorker.ready;
+
+      if (registro && registro.showNotification) {
+        await registro.showNotification(titulo, opcoes);
+        return true;
+      }
+    }
+
+    const notificacao = new Notification(titulo, opcoes);
+
+    notificacao.onclick = function() {
+      window.focus();
+      notificacao.close();
+    };
+
+    return true;
+
+  } catch (erro) {
+    console.warn("Erro ao enviar notificação:", erro);
+
+    try {
+      new Notification(titulo, opcoes);
+      return true;
+    } catch (erroFinal) {
+      console.warn("Falha final na notificação:", erroFinal);
+      return false;
+    }
+  }
+}
+
+function iniciarMonitorDeLembretes() {
+  if (monitorLembretesInterval) {
+    clearInterval(monitorLembretesInterval);
+  }
+
+  verificarLembretesLuma();
+
+  monitorLembretesInterval = setInterval(() => {
+    verificarLembretesLuma();
+  }, 60000);
+}
+
+function verificarLembretesLuma() {
+  if (!("Notification" in window)) return;
+  if (Notification.permission !== "granted") return;
+
+  const lembretes = obterLembretesLuma();
+  const agora = new Date();
+  const dataHoje = agora.toISOString().split("T")[0];
+  const horaAtual = agora.toTimeString().slice(0, 5);
+
+  verificarLembreteHorario({
+    chave: "pressaoManha",
+    ativo: lembretes.pressaoManha.ativo,
+    hora: lembretes.pressaoManha.hora,
+    horaAtual,
+    dataHoje,
+    titulo: "🩺 Luma lembra você",
+    mensagem: "Hora de medir sua pressão da manhã e registrar na aba Saúde.",
+    tag: "luma-pressao-manha"
+  });
+
+  verificarLembreteHorario({
+    chave: "pressaoNoite",
+    ativo: lembretes.pressaoNoite.ativo,
+    hora: lembretes.pressaoNoite.hora,
+    horaAtual,
+    dataHoje,
+    titulo: "🩺 Luma lembra você",
+    mensagem: "Hora de medir sua pressão da noite e comparar com o dia.",
+    tag: "luma-pressao-noite"
+  });
+
+  verificarLembreteHorario({
+    chave: "glicoseJejum",
+    ativo: lembretes.glicoseJejum.ativo,
+    hora: lembretes.glicoseJejum.hora,
+    horaAtual,
+    dataHoje,
+    titulo: "🩸 Luma lembra você",
+    mensagem: "Hora de medir sua glicose em jejum e registrar no app.",
+    tag: "luma-glicose-jejum"
+  });
+
+  verificarLembreteHorario({
+    chave: "alimentacao",
+    ativo: lembretes.alimentacao.ativo,
+    hora: lembretes.alimentacao.hora,
+    horaAtual,
+    dataHoje,
+    titulo: "🍽️ Luma lembra você",
+    mensagem: "Não esqueça de registrar sua alimentação do dia.",
+    tag: "luma-alimentacao"
+  });
+
+  verificarLembreteHorario({
+    chave: "treino",
+    ativo: lembretes.treino.ativo,
+    hora: lembretes.treino.hora,
+    horaAtual,
+    dataHoje,
+    titulo: "🔥 Luma lembra você",
+    mensagem: "Hora de cuidar do corpo. Veja seu treino ou faça uma caminhada leve.",
+    tag: "luma-treino"
+  });
+
+  verificarLembreteAgua(lembretes.agua);
+}
+
+function verificarLembreteHorario(config) {
+  if (!config.ativo || !config.hora) return;
+
+  if (!horaDentroDaJanela(config.hora, config.horaAtual, 5)) return;
+
+  const chaveEnvio = `lumaLembreteEnviado_${config.chave}_${config.dataHoje}`;
+
+  const jaEnviado = localStorage.getItem(chaveEnvio);
+
+  if (jaEnviado === config.hora) return;
+
+  enviarNotificacaoLuma(config.titulo, config.mensagem, config.tag);
+
+  localStorage.setItem(chaveEnvio, config.hora);
+}
+
+function verificarLembreteAgua(configAgua) {
+  if (!configAgua || !configAgua.ativo) return;
+
+  const agora = new Date();
+  const hora = agora.getHours();
+
+  if (hora < 6 || hora > 23) return;
+
+  const intervaloMinutos = Number(configAgua.intervalo) || 120;
+  const intervaloMs = intervaloMinutos * 60 * 1000;
+
+  const chave = "lumaUltimoLembreteAgua";
+  const ultimo = Number(localStorage.getItem(chave) || "0");
+
+  if (!ultimo) {
+    localStorage.setItem(chave, String(Date.now()));
+    return;
+  }
+
+  const passouTempo = Date.now() - ultimo >= intervaloMs;
+
+  if (!passouTempo) return;
+
+  enviarNotificacaoLuma(
+    "💧 Luma lembra você",
+    "Hora de beber água e manter sua hidratação em dia.",
+    "luma-agua"
+  );
+
+  localStorage.setItem(chave, String(Date.now()));
+}
+
+function horaDentroDaJanela(horaAlvo, horaAtual, janelaMinutos = 5) {
+  const alvo = converterHoraParaMinutos(horaAlvo);
+  const atual = converterHoraParaMinutos(horaAtual);
+
+  if (alvo === null || atual === null) return false;
+
+  return atual >= alvo && atual <= alvo + janelaMinutos;
+}
+
+function converterHoraParaMinutos(hora) {
+  if (!hora || !hora.includes(":")) return null;
+
+  const partes = hora.split(":");
+  const h = Number(partes[0]);
+  const m = Number(partes[1]);
+
+  if (Number.isNaN(h) || Number.isNaN(m)) return null;
+
+  return h * 60 + m;
 }
 
 /* ==========================================
@@ -3195,6 +3722,12 @@ const tutorialPassos = [
   },
   {
     aba: "saude",
+    alvo: ".card-lembretes-luma",
+    titulo: "Lembretes da Luma",
+    texto: "Ative notificações para lembrar de medir pressão, glicose, beber água, registrar alimentação e manter sua rotina."
+  },
+  {
+    aba: "saude",
     alvo: "#btnSalvarSaude",
     titulo: "Salve seus dados de saúde",
     texto: "Depois de medir pressão ou glicose, salve o registro para gerar histórico, gráficos e leitura da Luma."
@@ -3304,7 +3837,7 @@ function criarEstruturaTutorial() {
       <p id="tutorialTexto" class="tutorial-texto"></p>
 
       <div class="tutorial-progress-area">
-        <div id="tutorialProgressoTexto" class="tutorial-progress-text">Passo 1 de 9</div>
+        <div id="tutorialProgressoTexto" class="tutorial-progress-text">Passo 1 de 10</div>
 
         <div class="tutorial-progress-bar">
           <div id="tutorialProgressoFill" class="tutorial-progress-fill"></div>

@@ -145,6 +145,7 @@ header p {
 input[type="number"],
 input[type="date"],
 input[type="text"],
+input[type="time"],
 select {
   width: 100%;
   padding: 14px 16px;
@@ -317,6 +318,7 @@ button i {
   color: var(--text-muted);
   margin-top: 4px;
   display: block;
+  line-height: 1.45;
 }
 
 .history-actions {
@@ -931,6 +933,295 @@ button i {
   line-height: 1.5;
   color: var(--text-muted);
   font-weight: 600;
+}
+
+/* LEMBRETES DA LUMA */
+
+.card-lembretes-luma {
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 12% 0%, rgba(168, 85, 247, 0.16), transparent 34%),
+    radial-gradient(circle at 90% 8%, rgba(14, 165, 233, 0.13), transparent 36%),
+    linear-gradient(135deg, rgba(168, 85, 247, 0.08), rgba(14, 165, 233, 0.06), rgba(16, 185, 129, 0.04));
+  border: 1px solid rgba(168, 85, 247, 0.24);
+}
+
+[data-theme="dark"] .card-lembretes-luma {
+  background:
+    radial-gradient(circle at 12% 0%, rgba(168, 85, 247, 0.20), transparent 34%),
+    radial-gradient(circle at 90% 8%, rgba(14, 165, 233, 0.16), transparent 36%),
+    linear-gradient(135deg, rgba(168, 85, 247, 0.14), rgba(14, 165, 233, 0.09), rgba(16, 185, 129, 0.06));
+  border-color: rgba(168, 85, 247, 0.34);
+}
+
+.card-lembretes-luma::before {
+  content: "";
+  position: absolute;
+  width: 170px;
+  height: 170px;
+  right: -80px;
+  top: -80px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(236, 72, 153, 0.18), transparent 68%);
+  pointer-events: none;
+}
+
+.lembretes-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  position: relative;
+  z-index: 1;
+  margin-bottom: 12px;
+}
+
+.lembretes-header h3 {
+  margin-bottom: 5px;
+}
+
+.lembretes-header h3 i {
+  color: var(--luma-purple);
+}
+
+.lembretes-header p {
+  font-size: 13px;
+  color: var(--text-muted);
+  line-height: 1.4;
+  font-weight: 600;
+}
+
+.lembrete-status-pill {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 28px;
+  padding: 7px 10px;
+  border-radius: 999px;
+  background: rgba(100, 116, 139, 0.12);
+  color: var(--text-muted);
+  border: 1px solid rgba(100, 116, 139, 0.18);
+  font-size: 10px;
+  font-weight: 900;
+  text-align: center;
+  line-height: 1.2;
+  max-width: 135px;
+}
+
+.lembrete-status-pill.ativo {
+  background: rgba(16, 185, 129, 0.13);
+  color: #059669;
+  border-color: rgba(16, 185, 129, 0.28);
+}
+
+.lembrete-status-pill.negado {
+  background: rgba(239, 68, 68, 0.12);
+  color: #dc2626;
+  border-color: rgba(239, 68, 68, 0.25);
+}
+
+[data-theme="dark"] .lembrete-status-pill.ativo {
+  color: #34d399;
+}
+
+[data-theme="dark"] .lembrete-status-pill.negado {
+  color: #f87171;
+}
+
+.btn-lembrete-permissao {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  padding: 13px 14px;
+  margin-bottom: 14px;
+  border-radius: 15px;
+  font-size: 14px;
+  font-weight: 900;
+  background: linear-gradient(135deg, #7c3aed, #a855f7, #ec4899);
+  color: #ffffff;
+  box-shadow: 0 8px 18px rgba(168, 85, 247, 0.23);
+}
+
+.btn-lembrete-permissao:hover {
+  background: linear-gradient(135deg, #6d28d9, #9333ea, #db2777);
+  transform: translateY(-1px);
+}
+
+.lembretes-grid {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+.lembrete-item {
+  padding: 14px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.56);
+  border: 1px solid rgba(148, 163, 184, 0.20);
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.05);
+}
+
+[data-theme="dark"] .lembrete-item {
+  background: rgba(15, 23, 42, 0.34);
+  border-color: rgba(148, 163, 184, 0.18);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.18);
+}
+
+.lembrete-topo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.lembrete-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.lembrete-icone {
+  width: 38px;
+  height: 38px;
+  border-radius: 15px;
+  background: rgba(168, 85, 247, 0.12);
+  border: 1px solid rgba(168, 85, 247, 0.22);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.lembrete-info strong {
+  display: block;
+  font-size: 14px;
+  color: var(--text-main);
+  font-weight: 900;
+  line-height: 1.2;
+}
+
+.lembrete-info small {
+  display: block;
+  font-size: 11px;
+  color: var(--text-muted);
+  font-weight: 700;
+  line-height: 1.35;
+  margin-top: 3px;
+}
+
+.lembrete-item input[type="time"],
+.lembrete-item select {
+  position: relative;
+  z-index: 1;
+  padding: 12px 14px;
+  font-size: 14px;
+  border-radius: 14px;
+  font-weight: 800;
+}
+
+/* SWITCH LUMA */
+
+.switch-luma {
+  position: relative;
+  display: inline-flex;
+  width: 52px;
+  height: 30px;
+  flex-shrink: 0;
+}
+
+.switch-luma input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.switch-luma span {
+  position: absolute;
+  cursor: pointer;
+  inset: 0;
+  background: rgba(100, 116, 139, 0.25);
+  border: 1px solid rgba(100, 116, 139, 0.20);
+  border-radius: 999px;
+  transition: all 0.25s ease;
+}
+
+.switch-luma span::before {
+  content: "";
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  left: 2px;
+  top: 2px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 4px 10px rgba(15, 23, 42, 0.22);
+  transition: all 0.25s ease;
+}
+
+.switch-luma input:checked + span {
+  background: linear-gradient(135deg, #10b981, #0ea5e9);
+  border-color: transparent;
+}
+
+.switch-luma input:checked + span::before {
+  transform: translateX(22px);
+}
+
+.lembrete-actions {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.btn-salvar-lembretes,
+.btn-testar-notificacao {
+  width: 100%;
+  padding: 13px 10px;
+  border-radius: 15px;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.btn-salvar-lembretes {
+  background: linear-gradient(135deg, #10b981, #0ea5e9);
+  color: #ffffff;
+  box-shadow: 0 8px 18px rgba(16, 185, 129, 0.22);
+}
+
+.btn-salvar-lembretes:hover {
+  background: linear-gradient(135deg, #059669, #0284c7);
+  transform: translateY(-1px);
+}
+
+.btn-testar-notificacao {
+  background: rgba(168, 85, 247, 0.12);
+  color: var(--luma-purple);
+  border: 1px solid rgba(168, 85, 247, 0.28);
+}
+
+.btn-testar-notificacao:hover {
+  background: rgba(168, 85, 247, 0.20);
+}
+
+.lembretes-status-texto {
+  position: relative;
+  z-index: 1;
+  margin-top: 10px;
+  color: var(--text-muted);
+  font-size: 12px;
+  line-height: 1.45;
+  text-align: center;
+  font-weight: 700;
 }
 
 .card-saude {
@@ -1733,6 +2024,16 @@ button i {
     grid-template-columns: 1fr 1fr;
     gap: 10px;
   }
+
+  .lembretes-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .lembrete-status-pill {
+    max-width: 100%;
+    width: fit-content;
+  }
 }
 
 @media (max-width: 380px) {
@@ -1826,6 +2127,25 @@ button i {
   .saude-pill {
     font-size: 10px;
     padding: 5px 8px;
+  }
+
+  .lembrete-info strong {
+    font-size: 13px;
+  }
+
+  .lembrete-info small {
+    font-size: 10.5px;
+  }
+
+  .lembrete-icone {
+    width: 34px;
+    height: 34px;
+    font-size: 18px;
+    border-radius: 13px;
+  }
+
+  .lembrete-actions {
+    grid-template-columns: 1fr;
   }
 }
 

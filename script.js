@@ -2,9 +2,7 @@ const API_BASE_URL = "https://luma-gemini-api.onrender.com";
 
 let meuSwiper = null;
 let instanciasGraficos = { peso: null, cintura: null, quadril: null };
-
-let kcalWaveAnimationId = null;
-let kcalWaveFrame = 0;
+let graficoKcalTrend = null;
 
 document.addEventListener("DOMContentLoaded", iniciarApp);
 
@@ -78,9 +76,9 @@ function configurarListeners() {
   });
 }
 
-// ==========================================
-// MENU E ABAS
-// ==========================================
+/* ==========================================
+   MENU E ABAS
+========================================== */
 
 function trocarAba(abaId, elementoBotao) {
   const abas = {
@@ -142,9 +140,9 @@ function alternarMenuLuma(event) {
   }
 }
 
-// ==========================================
-// PERFIL DA LUMA
-// ==========================================
+/* ==========================================
+   PERFIL DA LUMA
+========================================== */
 
 function obterPerfilUsuario() {
   return JSON.parse(localStorage.getItem("usuarioPerfil") || "null");
@@ -232,9 +230,9 @@ function formatarTextoPerfil(texto) {
     .replace(/\b\w/g, letra => letra.toUpperCase());
 }
 
-// ==========================================
-// META KCAL DA LUMA
-// ==========================================
+/* ==========================================
+   META KCAL DA LUMA
+========================================== */
 
 function obterMetaKcalSalva() {
   return JSON.parse(localStorage.getItem("usuarioMetaKcal") || "null");
@@ -384,9 +382,9 @@ function calcularStatusKcal(totalConsumido, metaKcal) {
   };
 }
 
-// ==========================================
-// COMPARTILHAMENTO
-// ==========================================
+/* ==========================================
+   COMPARTILHAMENTO
+========================================== */
 
 function compartilharProgresso() {
   const pesoAtual = byId("pesoAtualCard").innerText.replace("kg", "").trim();
@@ -426,9 +424,9 @@ function compartilharTreinoModal() {
   }
 }
 
-// ==========================================
-// IA DO DIA
-// ==========================================
+/* ==========================================
+   IA DO DIA
+========================================== */
 
 function carregarAnaliseSalva() {
   const analise = JSON.parse(localStorage.getItem("iaAnaliseCache") || "null");
@@ -549,9 +547,9 @@ function exibirRespostaIA(plano, dica) {
   }
 }
 
-// ==========================================
-// TREINO COM IA
-// ==========================================
+/* ==========================================
+   TREINO COM IA
+========================================== */
 
 function carregarTreinoIASalvo() {
   const cache = JSON.parse(localStorage.getItem("treinoIACache") || "null");
@@ -698,9 +696,9 @@ function recolherCardTreinoIA() {
   }
 }
 
-// ==========================================
-// TREINO, GPS E MAPAS
-// ==========================================
+/* ==========================================
+   TREINO, GPS E MAPAS
+========================================== */
 
 let isTreinando = false;
 let gpsWatchId = null;
@@ -1025,9 +1023,9 @@ function fecharModalTreino() {
   }
 }
 
-// ==========================================
-// DIÁRIO, ÁGUA E KCAL
-// ==========================================
+/* ==========================================
+   DIÁRIO, ÁGUA E KCAL
+========================================== */
 
 const itensPreProgramados = {
   cafe: ["Pão Francês", "Fruta", "Iogurte", "Café Preto", "Suco", "Ovos", "Biscoito"],
@@ -1249,28 +1247,28 @@ function renderizarCalorias() {
         ? "As calorias serão estimadas ao salvar o diário."
         : "Atualize a meta de kcal para a Luma comparar seu consumo.";
 
-      atualizarGraficoKcalOnda(totalConsumido, metaKcal);
+      atualizarGraficoKcalTrend();
       return;
     }
 
     if (refeicoesAtuais.assinaturaKcal !== assinaturaAtual) {
       observacao.innerText = "Você alterou alimentos. Salve o diário para recalcular as kcal.";
 
-      atualizarGraficoKcalOnda(totalConsumido, metaKcal);
+      atualizarGraficoKcalTrend();
       return;
     }
 
     if (metaKcal && metaKcal.observacao) {
       observacao.innerText = metaKcal.observacao;
 
-      atualizarGraficoKcalOnda(totalConsumido, metaKcal);
+      atualizarGraficoKcalTrend();
       return;
     }
 
     observacao.innerText = kcal.observacao || "Estimativa aproximada calculada pela Luma.";
   }
 
-  atualizarGraficoKcalOnda(totalConsumido, metaKcal);
+  atualizarGraficoKcalTrend();
 }
 
 async function salvarRefeicoes() {
@@ -1381,194 +1379,171 @@ async function calcularCaloriasComIA() {
   return resultado.calorias;
 }
 
-// ==========================================
-// GRÁFICO ONDA DE KCAL DA LUMA
-// ==========================================
+/* ==========================================
+   GRÁFICO DE KCAL COM META DA LUMA
+========================================== */
 
-function atualizarGraficoKcalOnda(totalConsumido, metaKcal) {
-  const canvas = byId("kcalWaveCanvas");
-  const percentText = byId("kcal-wave-percent");
-  const metaLine = document.querySelector(".kcal-wave-meta-line");
+function atualizarGraficoKcalTrend() {
+  const canvas = byId("kcalTrendChart");
 
-  if (!canvas || !percentText) return;
+  if (!canvas || typeof Chart === "undefined") return;
 
-  const metaValor = metaKcal && metaKcal.metaKcal
-    ? Number(metaKcal.metaKcal)
+  const metaKcal = obterMetaKcalSalva();
+  const metaValor = metaKcal && metaKcal.metaKcal ? Number(metaKcal.metaKcal) || 0 : 0;
+
+  const cafe = refeicoesAtuais.kcal && typeof refeicoesAtuais.kcal.cafe !== "undefined"
+    ? Number(refeicoesAtuais.kcal.cafe) || 0
     : 0;
 
-  if (!metaValor || metaValor <= 0) {
-    percentText.innerText = "--%";
+  const almoco = refeicoesAtuais.kcal && typeof refeicoesAtuais.kcal.almoco !== "undefined"
+    ? Number(refeicoesAtuais.kcal.almoco) || 0
+    : 0;
 
-    if (metaLine) {
-      metaLine.style.display = "none";
-    }
+  const jantar = refeicoesAtuais.kcal && typeof refeicoesAtuais.kcal.jantar !== "undefined"
+    ? Number(refeicoesAtuais.kcal.jantar) || 0
+    : 0;
 
-    desenharOndaKcal(canvas, 0, 0, false);
-    return;
-  }
+  const dadosConsumo = [
+    cafe,
+    cafe + almoco,
+    cafe + almoco + jantar
+  ];
 
-  if (metaLine) {
-    metaLine.style.display = "block";
-  }
+  const labels = ["Café", "Almoço", "Jantar"];
+  const dadosMeta = labels.map(() => metaValor || null);
 
-  const porcentagemReal = totalConsumido / metaValor;
-  const porcentagemLimitada = Math.min(Math.max(porcentagemReal, 0), 1.15);
-  const porcentagemTexto = Math.round(Math.min(porcentagemReal * 100, 999));
+  const temaAtual = document.documentElement.getAttribute("data-theme");
+  const dark = temaAtual === "dark";
 
-  percentText.innerText = `${porcentagemTexto}%`;
+  const corTexto = dark ? "#94a3b8" : "#64748b";
+  const corGrid = dark ? "rgba(148, 163, 184, 0.18)" : "rgba(100, 116, 139, 0.18)";
 
-  desenharOndaKcal(canvas, porcentagemLimitada, porcentagemReal, true);
-}
-
-function desenharOndaKcal(canvas, porcentagem, porcentagemReal, temMeta) {
   const ctx = canvas.getContext("2d");
-  const box = canvas.getBoundingClientRect();
 
-  const largura = Math.max(box.width, 1);
-  const altura = Math.max(box.height, 1);
-  const dpr = window.devicePixelRatio || 1;
-
-  canvas.width = largura * dpr;
-  canvas.height = altura * dpr;
-
-  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-
-  if (kcalWaveAnimationId) {
-    cancelAnimationFrame(kcalWaveAnimationId);
+  if (graficoKcalTrend) {
+    graficoKcalTrend.destroy();
+    graficoKcalTrend = null;
   }
 
-  function animar() {
-    kcalWaveFrame += 0.035;
+  const gradiente = ctx.createLinearGradient(0, 0, 0, 210);
+  gradiente.addColorStop(0, "rgba(14, 165, 233, 0.48)");
+  gradiente.addColorStop(1, "rgba(14, 165, 233, 0.00)");
 
-    ctx.clearRect(0, 0, largura, altura);
-
-    desenharFundoParticulasKcal(ctx, largura, altura);
-
-    const nivel = altura - altura * Math.min(porcentagem, 1);
-    const passouMeta = porcentagemReal > 1;
-
-    desenharLinhaMetaKcal(ctx, largura, altura, temMeta);
-    desenharOndaPrincipalKcal(ctx, largura, altura, nivel, kcalWaveFrame, passouMeta);
-    desenharOndaSecundariaKcal(ctx, largura, altura, nivel, kcalWaveFrame, passouMeta);
-
-    kcalWaveAnimationId = requestAnimationFrame(animar);
-  }
-
-  animar();
-}
-
-function desenharFundoParticulasKcal(ctx, largura, altura) {
-  ctx.save();
-
-  for (let i = 0; i < 16; i++) {
-    const x = (i * 47 + Math.sin(kcalWaveFrame + i) * 18) % largura;
-    const y = 20 + ((i * 31 + Math.cos(kcalWaveFrame * 1.4 + i) * 10) % (altura - 35));
-    const r = 1.2 + (i % 3) * 0.7;
-
-    ctx.beginPath();
-    ctx.fillStyle = "rgba(168, 85, 247, 0.18)";
-    ctx.arc(x, y, r, 0, Math.PI * 2);
-    ctx.fill();
-  }
-
-  ctx.restore();
-}
-
-function desenharLinhaMetaKcal(ctx, largura, altura, temMeta) {
-  if (!temMeta) return;
-
-  const y = altura * 0.18;
-
-  ctx.save();
-
-  ctx.setLineDash([8, 8]);
-  ctx.lineWidth = 2;
-  ctx.strokeStyle = "rgba(255, 255, 255, 0.28)";
-
-  if (!document.documentElement.getAttribute("data-theme")) {
-    ctx.strokeStyle = "rgba(100, 116, 139, 0.24)";
-  }
-
-  ctx.beginPath();
-  ctx.moveTo(0, y);
-  ctx.lineTo(largura, y);
-  ctx.stroke();
-
-  ctx.restore();
-}
-
-function desenharOndaPrincipalKcal(ctx, largura, altura, nivel, frame, passouMeta) {
-  ctx.save();
-
-  const gradiente = ctx.createLinearGradient(0, nivel, 0, altura);
-
-  if (passouMeta) {
-    gradiente.addColorStop(0, "rgba(249, 115, 22, 0.92)");
-    gradiente.addColorStop(0.48, "rgba(236, 72, 153, 0.78)");
-    gradiente.addColorStop(1, "rgba(124, 58, 237, 0.82)");
-  } else {
-    gradiente.addColorStop(0, "rgba(14, 165, 233, 0.95)");
-    gradiente.addColorStop(0.50, "rgba(168, 85, 247, 0.80)");
-    gradiente.addColorStop(1, "rgba(236, 72, 153, 0.82)");
-  }
-
-  ctx.beginPath();
-  ctx.moveTo(0, altura);
-
-  for (let x = 0; x <= largura; x++) {
-    const onda =
-      Math.sin((x * 0.030) + frame * 2.0) * 9 +
-      Math.sin((x * 0.012) + frame * 1.2) * 6;
-
-    ctx.lineTo(x, nivel + onda);
-  }
-
-  ctx.lineTo(largura, altura);
-  ctx.closePath();
-
-  ctx.fillStyle = gradiente;
-  ctx.fill();
-
-  ctx.restore();
-}
-
-function desenharOndaSecundariaKcal(ctx, largura, altura, nivel, frame, passouMeta) {
-  ctx.save();
-
-  ctx.beginPath();
-
-  for (let x = 0; x <= largura; x++) {
-    const onda =
-      Math.sin((x * 0.022) + frame * 2.8 + 1.5) * 7 +
-      Math.cos((x * 0.016) + frame * 1.6) * 4;
-
-    const y = nivel + onda + 8;
-
-    if (x === 0) {
-      ctx.moveTo(x, y);
-    } else {
-      ctx.lineTo(x, y);
+  graficoKcalTrend = new Chart(ctx, {
+    type: "line",
+    data: {
+      labels: labels,
+      datasets: [
+        {
+          label: "Consumido",
+          data: dadosConsumo,
+          borderColor: "#0ea5e9",
+          backgroundColor: gradiente,
+          borderWidth: 4,
+          tension: 0.45,
+          pointRadius: 6,
+          pointHoverRadius: 7,
+          pointBorderWidth: 4,
+          pointBackgroundColor: dark ? "#1e293b" : "#ffffff",
+          pointBorderColor: "#0ea5e9",
+          fill: true
+        },
+        {
+          label: "Meta Luma",
+          data: dadosMeta,
+          borderColor: "#a855f7",
+          borderWidth: 2,
+          borderDash: [8, 7],
+          tension: 0,
+          pointRadius: 0,
+          fill: false
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: {
+        duration: 700,
+        easing: "easeOutQuart"
+      },
+      plugins: {
+        legend: {
+          display: true,
+          labels: {
+            color: corTexto,
+            usePointStyle: true,
+            boxWidth: 8,
+            boxHeight: 8,
+            font: {
+              size: 11,
+              weight: "700"
+            }
+          }
+        },
+        title: {
+          display: true,
+          text: "Consumo x Meta Luma",
+          color: corTexto,
+          font: {
+            size: 15,
+            weight: "800"
+          },
+          padding: {
+            bottom: 14
+          }
+        },
+        tooltip: {
+          callbacks: {
+            label: function(context) {
+              const valor = context.parsed.y || 0;
+              return `${context.dataset.label}: ${valor} kcal`;
+            }
+          }
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          suggestedMax: metaValor
+            ? Math.max(metaValor, dadosConsumo[2]) * 1.18
+            : Math.max(dadosConsumo[2], 600),
+          grid: {
+            color: corGrid,
+            drawBorder: false
+          },
+          ticks: {
+            color: corTexto,
+            font: {
+              size: 11,
+              weight: "700"
+            },
+            callback: function(value) {
+              return value;
+            }
+          }
+        },
+        x: {
+          grid: {
+            display: false,
+            drawBorder: false
+          },
+          ticks: {
+            color: corTexto,
+            font: {
+              size: 12,
+              weight: "800"
+            }
+          }
+        }
+      }
     }
-  }
-
-  ctx.lineWidth = 3;
-  ctx.strokeStyle = passouMeta
-    ? "rgba(255, 255, 255, 0.45)"
-    : "rgba(255, 255, 255, 0.55)";
-
-  ctx.shadowColor = passouMeta
-    ? "rgba(249, 115, 22, 0.55)"
-    : "rgba(14, 165, 233, 0.55)";
-
-  ctx.shadowBlur = 12;
-  ctx.stroke();
-
-  ctx.restore();
+  });
 }
 
-// ==========================================
-// PESO E GRÁFICOS
-// ==========================================
+/* ==========================================
+   PESO E GRÁFICOS
+========================================== */
 
 function carregarTema() {
   const temaSalvo = localStorage.getItem("usuarioTema");
@@ -1615,12 +1590,7 @@ function alternarTema() {
   }
 
   atualizarGraficos();
-
-  const kcal = refeicoesAtuais && refeicoesAtuais.kcal ? refeicoesAtuais.kcal : null;
-  const metaKcal = obterMetaKcalSalva();
-  const totalConsumido = kcal && typeof kcal.total !== "undefined" ? Number(kcal.total) || 0 : 0;
-
-  atualizarGraficoKcalOnda(totalConsumido, metaKcal);
+  atualizarGraficoKcalTrend();
 }
 
 function configurarDataPadrao() {
@@ -2066,9 +2036,9 @@ function renderizarGraficoUnico(canvasId, label, dados, labels, corGrid, corText
   });
 }
 
-// ==========================================
-// TUTORIAL GUIADO
-// ==========================================
+/* ==========================================
+   TUTORIAL GUIADO
+========================================== */
 
 const tutorialPassos = [
   {
@@ -2370,24 +2340,17 @@ function removerDestaquesTutorial() {
   });
 }
 
-// ==========================================
-// REAJUSTE DA ONDA AO REDIMENSIONAR
-// ==========================================
+/* ==========================================
+   REAJUSTE DOS GRÁFICOS
+========================================== */
 
 window.addEventListener("resize", function() {
-  const kcal = refeicoesAtuais && refeicoesAtuais.kcal ? refeicoesAtuais.kcal : null;
-  const metaKcal = obterMetaKcalSalva();
-
-  const totalConsumido = kcal && typeof kcal.total !== "undefined"
-    ? Number(kcal.total) || 0
-    : 0;
-
-  atualizarGraficoKcalOnda(totalConsumido, metaKcal);
+  atualizarGraficoKcalTrend();
 });
 
-// ==========================================
-// FUNÇÕES GLOBAIS PARA HTML
-// ==========================================
+/* ==========================================
+   FUNÇÕES GLOBAIS PARA HTML
+========================================== */
 
 window.abrirTutorial = abrirTutorial;
 window.trocarAba = trocarAba;

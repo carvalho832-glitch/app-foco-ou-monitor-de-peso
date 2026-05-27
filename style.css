@@ -2283,3 +2283,96 @@ button i {
       0 22px 55px rgba(0, 0, 0, 0.32);
   }
 }
+
+/* ======================================================
+   CORREÇÃO FINAL - LEMBRETES DA LUMA EM ROLAGEM HORIZONTAL
+   Cole este bloco no FINAL do style.css
+====================================================== */
+
+.card-lembretes-luma {
+  position: relative !important;
+  overflow: hidden !important;
+  padding-bottom: 14px !important;
+}
+
+.card-lembretes-luma .lembretes-header {
+  margin-bottom: 10px !important;
+}
+
+.card-lembretes-luma .btn-lembrete-permissao {
+  margin-bottom: 10px !important;
+}
+
+.lembretes-scroll,
+.lembretes-grid {
+  position: relative !important;
+  z-index: 1 !important;
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  gap: 12px !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  padding: 4px 2px 12px !important;
+  scroll-snap-type: x mandatory !important;
+  -webkit-overflow-scrolling: touch !important;
+  width: 100% !important;
+}
+
+.lembretes-scroll::-webkit-scrollbar,
+.lembretes-grid::-webkit-scrollbar {
+  height: 6px !important;
+}
+
+.lembretes-scroll::-webkit-scrollbar-track,
+.lembretes-grid::-webkit-scrollbar-track {
+  background: rgba(100, 116, 139, 0.12) !important;
+  border-radius: 999px !important;
+}
+
+.lembretes-scroll::-webkit-scrollbar-thumb,
+.lembretes-grid::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #a855f7, #0ea5e9) !important;
+  border-radius: 999px !important;
+}
+
+.lembrete-item,
+.lembrete-card-scroll {
+  min-width: 255px !important;
+  max-width: 255px !important;
+  width: 255px !important;
+  flex: 0 0 255px !important;
+  scroll-snap-align: start !important;
+  margin-bottom: 0 !important;
+}
+
+.lembrete-card-scroll .lembrete-topo,
+.lembrete-item .lembrete-topo {
+  min-height: 58px !important;
+}
+
+.lembrete-card-scroll input[type="time"],
+.lembrete-card-scroll select,
+.lembrete-item input[type="time"],
+.lembrete-item select {
+  margin-top: 2px !important;
+  width: 100% !important;
+}
+
+.card-lembretes-luma .lembrete-actions {
+  margin-top: 10px !important;
+}
+
+.card-lembretes-luma .lembretes-status-texto {
+  margin-top: 10px !important;
+}
+
+@media (max-width: 380px) {
+  .lembrete-item,
+  .lembrete-card-scroll {
+    min-width: 235px !important;
+    max-width: 235px !important;
+    width: 235px !important;
+    flex: 0 0 235px !important;
+  }
+}

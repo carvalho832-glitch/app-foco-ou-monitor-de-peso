@@ -2,6 +2,7 @@ const API_BASE_URL = "https://luma-gemini-api.onrender.com";
 
 let meuSwiper = null;
 let kcalSwiper = null;
+let saudeSwiper = null;
 
 let instanciasGraficos = {
   peso: null,
@@ -11,6 +12,8 @@ let instanciasGraficos = {
 
 let graficoKcalTrend = null;
 let graficoKcalData = null;
+let graficoPressaoSaude = null;
+let graficoGlicoseSaude = null;
 
 document.addEventListener("DOMContentLoaded", iniciarApp);
 
@@ -32,12 +35,14 @@ function iniciarApp() {
   carregarTema();
   configurarDataPadrao();
   configurarDataAlimentacaoPadrao();
+  configurarDataSaudePadrao();
   verificarExibicaoAltura();
   carregarMeta();
   carregarPerfilUsuario();
   carregarMetaKcalSalva();
   carregarDados();
   carregarRefeicoesDoDia();
+  carregarHistoricoSaude();
   carregarHistoricoTreinos();
   carregarTreinoIASalvo();
 
@@ -58,6 +63,9 @@ function configurarListeners() {
   addListener("dataAlimentacaoInput", "change", carregarRefeicoesDoDia);
   addListener("btnSalvarAlimentacao", "click", salvarRefeicoes);
   addListener("btnAtualizarMetaKcal", "click", atualizarMetaKcalComIA);
+
+  addListener("btnSalvarSaude", "click", salvarRegistroSaude);
+  addListener("btnExportarSaude", "click", exportarSaudeCSV);
 
   addListener("btnIniciarTreino", "click", iniciarTreino);
   addListener("btnPararTreino", "click", encerrarTreino);
@@ -92,6 +100,7 @@ function trocarAba(abaId, elementoBotao) {
   const abas = {
     dashboard: byId("aba-dashboard"),
     alimentacao: byId("aba-alimentacao"),
+    saude: byId("aba-saude"),
     exercicio: byId("aba-exercicio"),
     ia: byId("aba-ia")
   };
@@ -129,6 +138,16 @@ function trocarAba(abaId, elementoBotao) {
     setTimeout(() => {
       inicializarKcalSwiper();
       atualizarGraficosKcalCarrossel();
+    }, 250);
+  }
+
+  if (abaId === "saude") {
+    configurarDataSaudePadrao();
+    carregarHistoricoSaude();
+
+    setTimeout(() => {
+      inicializarSaudeSwiper();
+      atualizarGraficosSaude();
     }, 250);
   }
 
@@ -330,6 +349,7 @@ function montarDadosMetaKcal() {
   const historicoPeso = JSON.parse(localStorage.getItem("historicoPeso") || "[]");
   const historicoAlimentacao = JSON.parse(localStorage.getItem("historicoAlimentacao") || "{}");
   const historicoTreinos = JSON.parse(localStorage.getItem("historicoTreinos") || "[]");
+  const historicoSaude = obterHistoricoSaude();
 
   const hojeISO = new Date().toISOString().split("T")[0];
   const altura = parseFloat(localStorage.getItem("usuarioAltura"));
@@ -353,7 +373,9 @@ function montarDadosMetaKcal() {
     metaPeso: metaPeso,
     historicoPeso: historicoPeso.slice(-10),
     diarioHoje: historicoAlimentacao[hojeISO] || null,
-    ultimosTreinos: historicoTreinos.slice(-7)
+    ultimosTreinos: historicoTreinos.slice(-7),
+    saudeHoje: obterSaudePorData(hojeISO),
+    ultimosRegistrosSaude: historicoSaude.slice(-7)
   };
 }
 
@@ -518,6 +540,7 @@ function montarDadosParaIA() {
   const historicoPeso = JSON.parse(localStorage.getItem("historicoPeso") || "[]");
   const historicoAlimentacao = JSON.parse(localStorage.getItem("historicoAlimentacao") || "{}");
   const historicoTreinos = JSON.parse(localStorage.getItem("historicoTreinos") || "[]");
+  const historicoSaude = obterHistoricoSaude();
   const hojeISO = new Date().toISOString().split("T")[0];
 
   return {
@@ -528,7 +551,9 @@ function montarDadosParaIA() {
     metaPeso: localStorage.getItem("usuarioMeta") || "80.0",
     historicoPeso: historicoPeso.slice(-10),
     diarioHoje: historicoAlimentacao[hojeISO] || null,
-    ultimosTreinos: historicoTreinos.slice(-5)
+    ultimosTreinos: historicoTreinos.slice(-5),
+    saudeHoje: obterSaudePorData(hojeISO),
+    ultimosRegistrosSaude: historicoSaude.slice(-7)
   };
 }
 
@@ -646,6 +671,7 @@ function montarDadosTreinoIA() {
   const historicoPeso = JSON.parse(localStorage.getItem("historicoPeso") || "[]");
   const historicoAlimentacao = JSON.parse(localStorage.getItem("historicoAlimentacao") || "{}");
   const historicoTreinos = JSON.parse(localStorage.getItem("historicoTreinos") || "[]");
+  const historicoSaude = obterHistoricoSaude();
 
   const hojeISO = new Date().toISOString().split("T")[0];
   const altura = parseFloat(localStorage.getItem("usuarioAltura"));
@@ -673,7 +699,9 @@ function montarDadosTreinoIA() {
     metaPeso: metaPeso,
     historicoPeso: historicoPeso.slice(-10),
     diarioHoje: historicoAlimentacao[hojeISO] || null,
-    ultimosTreinos: historicoTreinos.slice(-7)
+    ultimosTreinos: historicoTreinos.slice(-7),
+    saudeHoje: obterSaudePorData(hojeISO),
+    ultimosRegistrosSaude: historicoSaude.slice(-7)
   };
 }
 
@@ -707,6 +735,634 @@ function recolherCardTreinoIA() {
   if (container) {
     container.classList.add("treino-ia-collapsed");
   }
+}
+
+/* ==========================================
+   SAÚDE
+========================================== */
+
+function configurarDataSaudePadrao() {
+  if (byId("dataSaudeInput") && !byId("dataSaudeInput").value) {
+    byId("dataSaudeInput").value = new Date().toISOString().split("T")[0];
+  }
+}
+
+function obterHistoricoSaude() {
+  return JSON.parse(localStorage.getItem("historicoSaude") || "[]");
+}
+
+function obterSaudePorData(dataISO) {
+  const historico = obterHistoricoSaude();
+
+  return historico
+    .filter(item => item.dataRaw === dataISO)
+    .sort((a, b) => b.id - a.id)[0] || null;
+}
+
+function salvarRegistroSaude() {
+  const dataInput = byId("dataSaudeInput");
+  const sistolicaInput = byId("pressaoSistolicaInput");
+  const diastolicaInput = byId("pressaoDiastolicaInput");
+  const batimentosInput = byId("batimentosInput");
+  const periodoSelect = byId("periodoPressaoSelect");
+  const observacaoPressaoInput = byId("observacaoPressaoInput");
+  const glicoseInput = byId("glicoseInput");
+  const momentoGlicoseSelect = byId("momentoGlicoseSelect");
+  const observacaoGlicoseInput = byId("observacaoGlicoseInput");
+
+  if (!dataInput) return;
+
+  const data = dataInput.value || new Date().toISOString().split("T")[0];
+
+  const sistolica = sistolicaInput && sistolicaInput.value ? Number(sistolicaInput.value) : null;
+  const diastolica = diastolicaInput && diastolicaInput.value ? Number(diastolicaInput.value) : null;
+  const batimentos = batimentosInput && batimentosInput.value ? Number(batimentosInput.value) : null;
+  const glicose = glicoseInput && glicoseInput.value ? Number(glicoseInput.value) : null;
+
+  const temPressao = sistolica || diastolica || batimentos;
+  const temGlicose = glicose;
+
+  if (!temPressao && !temGlicose) {
+    alert("Digite pelo menos a pressão ou a glicose para salvar.");
+    return;
+  }
+
+  if ((sistolica && sistolica <= 0) || (diastolica && diastolica <= 0) || (batimentos && batimentos <= 0) || (glicose && glicose <= 0)) {
+    alert("Confira os valores digitados. Eles precisam ser maiores que zero.");
+    return;
+  }
+
+  if ((sistolica && !diastolica) || (!sistolica && diastolica)) {
+    alert("Para registrar pressão, informe sistólica e diastólica.");
+    return;
+  }
+
+  const partes = data.split("-");
+
+  const registro = {
+    id: Date.now(),
+    dataRaw: data,
+    dataTexto: new Date(partes[0], partes[1] - 1, partes[2])
+      .toLocaleDateString("pt-BR", {
+        day: "2-digit",
+        month: "short"
+      })
+      .replace(".", ""),
+    criadoEm: new Date().toLocaleString("pt-BR"),
+    pressao: temPressao
+      ? {
+          sistolica: sistolica,
+          diastolica: diastolica,
+          batimentos: batimentos,
+          periodo: periodoSelect ? periodoSelect.value : "",
+          observacao: observacaoPressaoInput ? observacaoPressaoInput.value.trim() : ""
+        }
+      : null,
+    glicose: temGlicose
+      ? {
+          valor: glicose,
+          momento: momentoGlicoseSelect ? momentoGlicoseSelect.value : "",
+          observacao: observacaoGlicoseInput ? observacaoGlicoseInput.value.trim() : ""
+        }
+      : null
+  };
+
+  registro.leitura = gerarLeituraSaude(registro);
+
+  const historico = obterHistoricoSaude();
+
+  historico.push(registro);
+
+  localStorage.setItem("historicoSaude", JSON.stringify(historico));
+
+  limparCamposSaude();
+  carregarHistoricoSaude();
+
+  const btn = byId("btnSalvarSaude");
+
+  if (btn) {
+    const textoOriginal = btn.innerHTML;
+
+    btn.innerHTML = '<i class="bi bi-check-circle"></i> Saúde salva!';
+    btn.style.background = "#10b981";
+
+    setTimeout(() => {
+      btn.innerHTML = textoOriginal;
+      btn.style.background = "";
+    }, 1800);
+  }
+}
+
+function limparCamposSaude() {
+  const ids = [
+    "pressaoSistolicaInput",
+    "pressaoDiastolicaInput",
+    "batimentosInput",
+    "observacaoPressaoInput",
+    "glicoseInput",
+    "observacaoGlicoseInput"
+  ];
+
+  ids.forEach(id => {
+    if (byId(id)) byId(id).value = "";
+  });
+
+  if (byId("periodoPressaoSelect")) byId("periodoPressaoSelect").value = "";
+  if (byId("momentoGlicoseSelect")) byId("momentoGlicoseSelect").value = "";
+}
+
+function gerarLeituraSaude(registro) {
+  const mensagens = [];
+
+  if (registro.pressao && registro.pressao.sistolica && registro.pressao.diastolica) {
+    const s = Number(registro.pressao.sistolica);
+    const d = Number(registro.pressao.diastolica);
+
+    if (s >= 180 || d >= 120) {
+      mensagens.push("⚠️ Pressão muito alta registrada. Se houver dor no peito, falta de ar, fraqueza, alteração na visão, dor de cabeça forte ou mal-estar intenso, procure atendimento imediatamente.");
+    } else if (s >= 140 || d >= 90) {
+      mensagens.push("🔴 Pressão acima do esperado. Hoje a Luma sugere evitar treino intenso, observar sintomas e acompanhar novas medições.");
+    } else if (s >= 130 || d >= 80) {
+      mensagens.push("🟠 Pressão em faixa de atenção. Pode ser útil observar estresse, sono, sal, hidratação e esforço físico do dia.");
+    } else if (s < 90 || d < 60) {
+      mensagens.push("🔵 Pressão baixa registrada. Se houver tontura, fraqueza ou desmaio, procure orientação profissional.");
+    } else {
+      mensagens.push("🟢 Pressão registrada em uma faixa comum para acompanhamento.");
+    }
+
+    if (registro.pressao.batimentos) {
+      const bpm = Number(registro.pressao.batimentos);
+
+      if (bpm > 110) {
+        mensagens.push("💓 Batimentos elevados registrados. Observe se foi após esforço, ansiedade, café ou algum sintoma.");
+      } else if (bpm < 50) {
+        mensagens.push("💓 Batimentos baixos registrados. Se houver tontura ou fraqueza, busque orientação.");
+      }
+    }
+  }
+
+  if (registro.glicose && registro.glicose.valor) {
+    const valor = Number(registro.glicose.valor);
+    const momento = registro.glicose.momento || "";
+
+    if (valor < 70) {
+      mensagens.push("⚠️ Glicose baixa registrada. Se houver tremor, suor frio, confusão, fraqueza ou mal-estar, procure orientação rapidamente.");
+    } else if (momento === "jejum" && valor >= 126) {
+      mensagens.push("🔴 Glicose em jejum elevada. A Luma recomenda acompanhar a tendência e conversar com seu médico.");
+    } else if (momento === "jejum" && valor >= 100) {
+      mensagens.push("🟠 Glicose em jejum em atenção. Vale comparar com alimentação, sono e rotina dos últimos dias.");
+    } else if (momento === "apos_refeicao" && valor >= 250) {
+      mensagens.push("🔴 Glicose pós-refeição muito elevada registrada. Acompanhe sintomas e procure orientação profissional.");
+    } else if (momento === "apos_refeicao" && valor >= 180) {
+      mensagens.push("🟠 Glicose pós-refeição acima do ideal para muitas pessoas. Vale observar o que foi consumido.");
+    } else {
+      mensagens.push("🟢 Glicose registrada para acompanhamento da sua rotina.");
+    }
+  }
+
+  if (mensagens.length === 0) {
+    mensagens.push("Registro salvo. A Luma vai acompanhar a tendência com os próximos dados.");
+  }
+
+  mensagens.push("\n📌 Observação: essa leitura é apenas informativa e não substitui avaliação médica.");
+
+  return mensagens.join("\n\n");
+}
+
+function carregarHistoricoSaude() {
+  const lista = byId("historicoSaudeLista");
+  const historico = obterHistoricoSaude();
+
+  if (!lista) {
+    atualizarResumoSaude();
+    atualizarGraficosSaude();
+    return;
+  }
+
+  lista.innerHTML = "";
+
+  const ordenado = [...historico].sort((a, b) => b.id - a.id);
+
+  ordenado.forEach(item => {
+    const pressaoTxt = item.pressao && item.pressao.sistolica && item.pressao.diastolica
+      ? `❤️ Pressão: ${item.pressao.sistolica}/${item.pressao.diastolica} mmHg${item.pressao.batimentos ? ` • ${item.pressao.batimentos} bpm` : ""}`
+      : "";
+
+    const glicoseTxt = item.glicose && item.glicose.valor
+      ? `💧 Glicose: ${item.glicose.valor} mg/dL${item.glicose.momento ? ` • ${formatarMomentoGlicose(item.glicose.momento)}` : ""}`
+      : "";
+
+    const detalhes = [pressaoTxt, glicoseTxt].filter(Boolean).join("<br>");
+
+    lista.innerHTML += `
+      <div class="history-item">
+        <div class="history-info">
+          <span class="history-date">${item.dataTexto}</span>
+          <span class="history-medidas">${detalhes}</span>
+        </div>
+
+        <div class="history-actions">
+          <button class="btn-delete" onclick="event.stopPropagation(); deletarRegistroSaude(${item.id})">Excluir</button>
+        </div>
+      </div>
+    `;
+  });
+
+  atualizarResumoSaude();
+  atualizarGraficosSaude();
+}
+
+function atualizarResumoSaude() {
+  const status = byId("statusSaudeTexto");
+  const historico = obterHistoricoSaude();
+
+  if (!status) return;
+
+  if (historico.length === 0) {
+    status.innerText = "Registre sua pressão ou glicose para a Luma acompanhar seus dados com mais cuidado.";
+    return;
+  }
+
+  const ultimo = [...historico].sort((a, b) => b.id - a.id)[0];
+
+  status.innerText = ultimo.leitura || gerarLeituraSaude(ultimo);
+}
+
+function deletarRegistroSaude(id) {
+  if (!confirm("Excluir este registro de saúde?")) return;
+
+  const historico = obterHistoricoSaude();
+
+  localStorage.setItem(
+    "historicoSaude",
+    JSON.stringify(historico.filter(item => item.id !== id))
+  );
+
+  carregarHistoricoSaude();
+}
+
+function exportarSaudeCSV() {
+  const historico = obterHistoricoSaude().sort((a, b) => b.id - a.id);
+
+  if (historico.length === 0) {
+    alert("Nenhum registro de saúde para exportar.");
+    return;
+  }
+
+  let csv = "Data,Sistolica,Diastolica,Batimentos,Periodo Pressao,Observacao Pressao,Glicose,Momento Glicose,Observacao Glicose\n";
+
+  historico.forEach(item => {
+    const p = item.pressao || {};
+    const g = item.glicose || {};
+
+    csv += [
+      item.dataRaw || "",
+      p.sistolica || "",
+      p.diastolica || "",
+      p.batimentos || "",
+      formatarPeriodoPressao(p.periodo || ""),
+      limparCampoCSV(p.observacao || ""),
+      g.valor || "",
+      formatarMomentoGlicose(g.momento || ""),
+      limparCampoCSV(g.observacao || "")
+    ].join(",") + "\n";
+  });
+
+  const blob = new Blob([csv], {
+    type: "text/csv;charset=utf-8;"
+  });
+
+  const link = document.createElement("a");
+
+  link.href = URL.createObjectURL(blob);
+  link.download = "historico_saude_luma.csv";
+  link.click();
+}
+
+function limparCampoCSV(valor) {
+  return String(valor || "").replace(/,/g, " ").replace(/\n/g, " ");
+}
+
+function formatarPeriodoPressao(periodo) {
+  const mapa = {
+    manha: "Manhã",
+    tarde: "Tarde",
+    noite: "Noite",
+    madrugada: "Madrugada"
+  };
+
+  return mapa[periodo] || periodo || "";
+}
+
+function formatarMomentoGlicose(momento) {
+  const mapa = {
+    jejum: "Jejum",
+    antes_refeicao: "Antes da refeição",
+    apos_refeicao: "Após refeição",
+    antes_dormir: "Antes de dormir",
+    outro: "Outro"
+  };
+
+  return mapa[momento] || momento || "";
+}
+
+function inicializarSaudeSwiper() {
+  if (typeof Swiper === "undefined") return;
+  if (!document.querySelector(".saudeSwiper")) return;
+
+  if (saudeSwiper) {
+    saudeSwiper.update();
+    return;
+  }
+
+  saudeSwiper = new Swiper(".saudeSwiper", {
+    slidesPerView: 1,
+    spaceBetween: 12,
+    pagination: {
+      el: ".saude-swiper-pagination",
+      clickable: true
+    },
+    observer: true,
+    observeParents: true,
+    on: {
+      slideChangeTransitionEnd: function() {
+        atualizarGraficosSaude();
+      }
+    }
+  });
+}
+
+function atualizarGraficosSaude() {
+  inicializarSaudeSwiper();
+
+  const card = byId("cardGraficosSaude");
+  const historico = obterHistoricoSaude();
+
+  const temPressao = historico.some(item => item.pressao && item.pressao.sistolica && item.pressao.diastolica);
+  const temGlicose = historico.some(item => item.glicose && item.glicose.valor);
+
+  if (card) {
+    card.style.display = temPressao || temGlicose ? "block" : "none";
+  }
+
+  setTimeout(() => {
+    renderizarGraficoPressaoSaude();
+    renderizarGraficoGlicoseSaude();
+
+    if (saudeSwiper) {
+      saudeSwiper.update();
+    }
+  }, 80);
+}
+
+function renderizarGraficoPressaoSaude() {
+  const canvas = byId("graficoPressaoSaude");
+
+  if (!canvas || typeof Chart === "undefined") return;
+
+  const historico = obterHistoricoSaude()
+    .filter(item => item.pressao && item.pressao.sistolica && item.pressao.diastolica)
+    .sort((a, b) => new Date(a.dataRaw) - new Date(b.dataRaw))
+    .slice(-10);
+
+  if (graficoPressaoSaude) {
+    graficoPressaoSaude.destroy();
+    graficoPressaoSaude = null;
+  }
+
+  if (historico.length === 0) return;
+
+  const temaAtual = document.documentElement.getAttribute("data-theme");
+  const dark = temaAtual === "dark";
+
+  const corTexto = dark ? "#94a3b8" : "#64748b";
+  const corGrid = dark ? "rgba(148, 163, 184, 0.18)" : "rgba(100, 116, 139, 0.18)";
+
+  const ctx = canvas.getContext("2d");
+
+  graficoPressaoSaude = new Chart(ctx, {
+    type: "line",
+    data: {
+      labels: historico.map(item => formatarDataCurta(item.dataRaw)),
+      datasets: [
+        {
+          label: "Sistólica",
+          data: historico.map(item => Number(item.pressao.sistolica) || 0),
+          borderColor: "#ef4444",
+          backgroundColor: "rgba(239, 68, 68, 0.10)",
+          borderWidth: 3,
+          tension: 0.35,
+          pointRadius: 5,
+          pointHoverRadius: 7,
+          fill: false
+        },
+        {
+          label: "Diastólica",
+          data: historico.map(item => Number(item.pressao.diastolica) || 0),
+          borderColor: "#a855f7",
+          backgroundColor: "rgba(168, 85, 247, 0.10)",
+          borderWidth: 3,
+          tension: 0.35,
+          pointRadius: 5,
+          pointHoverRadius: 7,
+          fill: false
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: {
+        duration: 700,
+        easing: "easeOutQuart"
+      },
+      plugins: {
+        legend: {
+          display: true,
+          labels: {
+            color: corTexto,
+            usePointStyle: true,
+            boxWidth: 8,
+            boxHeight: 8,
+            font: {
+              size: 11,
+              weight: "700"
+            }
+          }
+        },
+        title: {
+          display: true,
+          text: "Pressão por data",
+          color: corTexto,
+          font: {
+            size: 15,
+            weight: "800"
+          },
+          padding: {
+            bottom: 14
+          }
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: false,
+          suggestedMin: 50,
+          suggestedMax: 180,
+          grid: {
+            color: corGrid,
+            drawBorder: false
+          },
+          ticks: {
+            color: corTexto,
+            font: {
+              size: 11,
+              weight: "700"
+            }
+          }
+        },
+        x: {
+          grid: {
+            display: false,
+            drawBorder: false
+          },
+          ticks: {
+            color: corTexto,
+            font: {
+              size: 12,
+              weight: "800"
+            }
+          }
+        }
+      }
+    }
+  });
+}
+
+function renderizarGraficoGlicoseSaude() {
+  const canvas = byId("graficoGlicoseSaude");
+
+  if (!canvas || typeof Chart === "undefined") return;
+
+  const historico = obterHistoricoSaude()
+    .filter(item => item.glicose && item.glicose.valor)
+    .sort((a, b) => new Date(a.dataRaw) - new Date(b.dataRaw))
+    .slice(-10);
+
+  if (graficoGlicoseSaude) {
+    graficoGlicoseSaude.destroy();
+    graficoGlicoseSaude = null;
+  }
+
+  if (historico.length === 0) return;
+
+  const temaAtual = document.documentElement.getAttribute("data-theme");
+  const dark = temaAtual === "dark";
+
+  const corTexto = dark ? "#94a3b8" : "#64748b";
+  const corGrid = dark ? "rgba(148, 163, 184, 0.18)" : "rgba(100, 116, 139, 0.18)";
+
+  const ctx = canvas.getContext("2d");
+
+  const gradiente = ctx.createLinearGradient(0, 0, 0, 210);
+  gradiente.addColorStop(0, "rgba(14, 165, 233, 0.45)");
+  gradiente.addColorStop(1, "rgba(14, 165, 233, 0.00)");
+
+  graficoGlicoseSaude = new Chart(ctx, {
+    type: "line",
+    data: {
+      labels: historico.map(item => formatarDataCurta(item.dataRaw)),
+      datasets: [
+        {
+          label: "Glicose",
+          data: historico.map(item => Number(item.glicose.valor) || 0),
+          borderColor: "#0ea5e9",
+          backgroundColor: gradiente,
+          borderWidth: 4,
+          tension: 0.42,
+          pointRadius: 6,
+          pointHoverRadius: 7,
+          pointBorderWidth: 4,
+          pointBackgroundColor: dark ? "#1e293b" : "#ffffff",
+          pointBorderColor: "#0ea5e9",
+          fill: true
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: {
+        duration: 700,
+        easing: "easeOutQuart"
+      },
+      plugins: {
+        legend: {
+          display: true,
+          labels: {
+            color: corTexto,
+            usePointStyle: true,
+            boxWidth: 8,
+            boxHeight: 8,
+            font: {
+              size: 11,
+              weight: "700"
+            }
+          }
+        },
+        title: {
+          display: true,
+          text: "Glicose por data",
+          color: corTexto,
+          font: {
+            size: 15,
+            weight: "800"
+          },
+          padding: {
+            bottom: 14
+          }
+        },
+        tooltip: {
+          callbacks: {
+            label: function(context) {
+              const valor = context.parsed.y || 0;
+              return `Glicose: ${valor} mg/dL`;
+            }
+          }
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: false,
+          suggestedMin: 60,
+          suggestedMax: Math.max(...historico.map(item => Number(item.glicose.valor) || 0), 180) * 1.12,
+          grid: {
+            color: corGrid,
+            drawBorder: false
+          },
+          ticks: {
+            color: corTexto,
+            font: {
+              size: 11,
+              weight: "700"
+            }
+          }
+        },
+        x: {
+          grid: {
+            display: false,
+            drawBorder: false
+          },
+          ticks: {
+            color: corTexto,
+            font: {
+              size: 12,
+              weight: "800"
+            }
+          }
+        }
+      }
+    }
+  });
 }
 
 /* ==========================================
@@ -1376,7 +2032,12 @@ async function calcularCaloriasComIA() {
     agua: refeicoesAtuais.agua || 0,
     data: byId("dataAlimentacaoInput")
       ? byId("dataAlimentacaoInput").value
-      : new Date().toISOString().split("T")[0]
+      : new Date().toISOString().split("T")[0],
+    saudeHoje: obterSaudePorData(
+      byId("dataAlimentacaoInput")
+        ? byId("dataAlimentacaoInput").value
+        : new Date().toISOString().split("T")[0]
+    )
   };
 
   let resposta;
@@ -1864,6 +2525,7 @@ function alternarTema() {
 
   atualizarGraficos();
   atualizarGraficosKcalCarrossel();
+  atualizarGraficosSaude();
 }
 
 function configurarDataPadrao() {
@@ -2339,6 +3001,18 @@ const tutorialPassos = [
     texto: "A Luma compara o que você consumiu com uma meta personalizada de calorias."
   },
   {
+    aba: "saude",
+    alvo: ".card-saude-aviso",
+    titulo: "Saúde diária",
+    texto: "Nesta área você registra pressão, glicose e sinais importantes para acompanhar sua rotina com mais segurança."
+  },
+  {
+    aba: "saude",
+    alvo: "#btnSalvarSaude",
+    titulo: "Salve seus dados de saúde",
+    texto: "Depois de medir pressão ou glicose, salve o registro para gerar histórico, gráficos e leitura da Luma."
+  },
+  {
     aba: "exercicio",
     alvo: "#btnGerarTreinoIA",
     titulo: "Treino com I.A",
@@ -2354,7 +3028,7 @@ const tutorialPassos = [
     aba: "dashboard",
     alvo: "#btnMenuLuma",
     titulo: "Menu rápido",
-    texto: "Use este botão para navegar entre Evolução, Diário, Treino e I.A de forma rápida."
+    texto: "Use este botão para navegar entre Evolução, Diário, Saúde, Treino e I.A de forma rápida."
   }
 ];
 
@@ -2443,7 +3117,7 @@ function criarEstruturaTutorial() {
       <p id="tutorialTexto" class="tutorial-texto"></p>
 
       <div class="tutorial-progress-area">
-        <div id="tutorialProgressoTexto" class="tutorial-progress-text">Passo 1 de 7</div>
+        <div id="tutorialProgressoTexto" class="tutorial-progress-text">Passo 1 de 9</div>
 
         <div class="tutorial-progress-bar">
           <div id="tutorialProgressoFill" class="tutorial-progress-fill"></div>
@@ -2619,6 +3293,7 @@ function removerDestaquesTutorial() {
 
 window.addEventListener("resize", function() {
   atualizarGraficosKcalCarrossel();
+  atualizarGraficosSaude();
 });
 
 /* ==========================================
@@ -2633,4 +3308,5 @@ window.abrirModalTreino = abrirModalTreino;
 window.fecharModalTreino = fecharModalTreino;
 window.deletarTreino = deletarTreino;
 window.deletarRegistro = deletarRegistro;
+window.deletarRegistroSaude = deletarRegistroSaude;
 window.compartilharTreinoModal = compartilharTreinoModal;

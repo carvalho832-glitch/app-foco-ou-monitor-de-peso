@@ -1,8 +1,16 @@
 const API_BASE_URL = "https://luma-gemini-api.onrender.com";
 
 let meuSwiper = null;
-let instanciasGraficos = { peso: null, cintura: null, quadril: null };
+let kcalSwiper = null;
+
+let instanciasGraficos = {
+  peso: null,
+  cintura: null,
+  quadril: null
+};
+
 let graficoKcalTrend = null;
+let graficoKcalData = null;
 
 document.addEventListener("DOMContentLoaded", iniciarApp);
 
@@ -117,6 +125,11 @@ function trocarAba(abaId, elementoBotao) {
 
     carregarRefeicoesDoDia();
     carregarMetaKcalSalva();
+
+    setTimeout(() => {
+      inicializarKcalSwiper();
+      atualizarGraficosKcalCarrossel();
+    }, 250);
   }
 
   if (abaId === "exercicio") {
@@ -1247,28 +1260,28 @@ function renderizarCalorias() {
         ? "As calorias serão estimadas ao salvar o diário."
         : "Atualize a meta de kcal para a Luma comparar seu consumo.";
 
-      atualizarGraficoKcalTrend();
+      atualizarGraficosKcalCarrossel();
       return;
     }
 
     if (refeicoesAtuais.assinaturaKcal !== assinaturaAtual) {
       observacao.innerText = "Você alterou alimentos. Salve o diário para recalcular as kcal.";
 
-      atualizarGraficoKcalTrend();
+      atualizarGraficosKcalCarrossel();
       return;
     }
 
     if (metaKcal && metaKcal.observacao) {
       observacao.innerText = metaKcal.observacao;
 
-      atualizarGraficoKcalTrend();
+      atualizarGraficosKcalCarrossel();
       return;
     }
 
     observacao.innerText = kcal.observacao || "Estimativa aproximada calculada pela Luma.";
   }
 
-  atualizarGraficoKcalTrend();
+  atualizarGraficosKcalCarrossel();
 }
 
 async function salvarRefeicoes() {
@@ -1380,8 +1393,235 @@ async function calcularCaloriasComIA() {
 }
 
 /* ==========================================
-   GRÁFICO DE KCAL COM META DA LUMA
+   CARROSSEL E GRÁFICOS DE KCAL
 ========================================== */
+
+function inicializarKcalSwiper() {
+  if (typeof Swiper === "undefined") return;
+  if (!document.querySelector(".kcalSwiper")) return;
+
+  if (kcalSwiper) {
+    kcalSwiper.update();
+    return;
+  }
+
+  kcalSwiper = new Swiper(".kcalSwiper", {
+    slidesPerView: 1,
+    spaceBetween: 12,
+    pagination: {
+      el: ".kcal-swiper-pagination",
+      clickable: true
+    },
+    observer: true,
+    observeParents: true,
+    on: {
+      slideChangeTransitionEnd: function() {
+        atualizarGraficosKcalCarrossel();
+      }
+    }
+  });
+}
+
+function atualizarGraficosKcalCarrossel() {
+  inicializarKcalSwiper();
+
+  setTimeout(() => {
+    atualizarGraficoKcalData();
+    atualizarGraficoKcalTrend();
+
+    if (kcalSwiper) {
+      kcalSwiper.update();
+    }
+  }, 80);
+}
+
+function obterDadosKcalPorData() {
+  const historicoAlimentacao = JSON.parse(localStorage.getItem("historicoAlimentacao") || "{}");
+  const entradas = [];
+
+  Object.keys(historicoAlimentacao).forEach(dataISO => {
+    const diario = historicoAlimentacao[dataISO];
+
+    if (!diario || !diario.kcal || typeof diario.kcal.total === "undefined") return;
+
+    entradas.push({
+      dataISO: dataISO,
+      label: formatarDataCurta(dataISO),
+      total: Number(diario.kcal.total) || 0
+    });
+  });
+
+  entradas.sort((a, b) => new Date(a.dataISO) - new Date(b.dataISO));
+
+  const ultimos = entradas.slice(-7);
+
+  if (ultimos.length > 0) {
+    return ultimos;
+  }
+
+  const inputData = byId("dataAlimentacaoInput");
+  const dataAtual = inputData && inputData.value ? inputData.value : new Date().toISOString().split("T")[0];
+
+  const totalAtual =
+    refeicoesAtuais.kcal && typeof refeicoesAtuais.kcal.total !== "undefined"
+      ? Number(refeicoesAtuais.kcal.total) || 0
+      : 0;
+
+  return [
+    {
+      dataISO: dataAtual,
+      label: formatarDataCurta(dataAtual),
+      total: totalAtual
+    }
+  ];
+}
+
+function formatarDataCurta(dataISO) {
+  if (!dataISO || !dataISO.includes("-")) return dataISO || "";
+
+  const partes = dataISO.split("-");
+  return `${partes[2]}/${partes[1]}`;
+}
+
+function atualizarGraficoKcalData() {
+  const canvas = byId("kcalDataChart");
+
+  if (!canvas || typeof Chart === "undefined") return;
+
+  const metaKcal = obterMetaKcalSalva();
+  const metaValor = metaKcal && metaKcal.metaKcal ? Number(metaKcal.metaKcal) || 0 : 0;
+
+  const dadosPorData = obterDadosKcalPorData();
+
+  const labels = dadosPorData.map(item => item.label);
+  const dados = dadosPorData.map(item => item.total);
+  const dadosMeta = labels.map(() => metaValor || null);
+
+  const temaAtual = document.documentElement.getAttribute("data-theme");
+  const dark = temaAtual === "dark";
+
+  const corTexto = dark ? "#94a3b8" : "#64748b";
+  const corGrid = dark ? "rgba(148, 163, 184, 0.18)" : "rgba(100, 116, 139, 0.18)";
+
+  const ctx = canvas.getContext("2d");
+
+  if (graficoKcalData) {
+    graficoKcalData.destroy();
+    graficoKcalData = null;
+  }
+
+  const gradiente = ctx.createLinearGradient(0, 0, 0, 210);
+  gradiente.addColorStop(0, "rgba(14, 165, 233, 0.50)");
+  gradiente.addColorStop(1, "rgba(14, 165, 233, 0.00)");
+
+  graficoKcalData = new Chart(ctx, {
+    type: "line",
+    data: {
+      labels: labels,
+      datasets: [
+        {
+          label: "Kcal do dia",
+          data: dados,
+          borderColor: "#0ea5e9",
+          backgroundColor: gradiente,
+          borderWidth: 4,
+          tension: 0.42,
+          pointRadius: 6,
+          pointHoverRadius: 7,
+          pointBorderWidth: 4,
+          pointBackgroundColor: dark ? "#1e293b" : "#ffffff",
+          pointBorderColor: "#0ea5e9",
+          fill: true
+        },
+        {
+          label: "Meta Luma",
+          data: dadosMeta,
+          borderColor: "#a855f7",
+          borderWidth: 2,
+          borderDash: [8, 7],
+          tension: 0,
+          pointRadius: 0,
+          fill: false
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: {
+        duration: 700,
+        easing: "easeOutQuart"
+      },
+      plugins: {
+        legend: {
+          display: true,
+          labels: {
+            color: corTexto,
+            usePointStyle: true,
+            boxWidth: 8,
+            boxHeight: 8,
+            font: {
+              size: 11,
+              weight: "700"
+            }
+          }
+        },
+        title: {
+          display: true,
+          text: "Kcal por data",
+          color: corTexto,
+          font: {
+            size: 15,
+            weight: "800"
+          },
+          padding: {
+            bottom: 14
+          }
+        },
+        tooltip: {
+          callbacks: {
+            label: function(context) {
+              const valor = context.parsed.y || 0;
+              return `${context.dataset.label}: ${valor} kcal`;
+            }
+          }
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          suggestedMax: metaValor
+            ? Math.max(metaValor, ...dados) * 1.18
+            : Math.max(...dados, 600),
+          grid: {
+            color: corGrid,
+            drawBorder: false
+          },
+          ticks: {
+            color: corTexto,
+            font: {
+              size: 11,
+              weight: "700"
+            }
+          }
+        },
+        x: {
+          grid: {
+            display: false,
+            drawBorder: false
+          },
+          ticks: {
+            color: corTexto,
+            font: {
+              size: 12,
+              weight: "800"
+            }
+          }
+        }
+      }
+    }
+  });
+}
 
 function atualizarGraficoKcalTrend() {
   const canvas = byId("kcalTrendChart");
@@ -1517,9 +1757,6 @@ function atualizarGraficoKcalTrend() {
             font: {
               size: 11,
               weight: "700"
-            },
-            callback: function(value) {
-              return value;
             }
           }
         },
@@ -1590,7 +1827,7 @@ function alternarTema() {
   }
 
   atualizarGraficos();
-  atualizarGraficoKcalTrend();
+  atualizarGraficosKcalCarrossel();
 }
 
 function configurarDataPadrao() {
@@ -2345,7 +2582,7 @@ function removerDestaquesTutorial() {
 ========================================== */
 
 window.addEventListener("resize", function() {
-  atualizarGraficoKcalTrend();
+  atualizarGraficosKcalCarrossel();
 });
 
 /* ==========================================

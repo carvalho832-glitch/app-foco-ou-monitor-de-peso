@@ -316,7 +316,7 @@ async function atualizarMetaKcalComIA() {
 
     alert(
       "Não consegui calcular a meta de kcal agora.\n\n" +
-      erro.message
+      "Motivo: " + erro.message
     );
 
     btn.innerHTML = textoOriginal;
@@ -507,7 +507,7 @@ async function solicitarAnaliseIA() {
 
   } catch (erro) {
     console.error(erro);
-    alert("Erro ao gerar análise da IA:\n\n" + erro.message);
+    alert("Erro ao gerar análise da IA:\n\nMotivo: " + erro.message);
   } finally {
     loading.style.display = "none";
     btnIA.style.display = "block";
@@ -630,7 +630,7 @@ async function gerarTreinoIA() {
 
     alert(
       "Erro ao gerar treino:\n\n" +
-      erro.message +
+      "Motivo: " + erro.message +
       "\n\nSe persistir, veja os logs do Render."
     );
 
@@ -1352,7 +1352,11 @@ async function salvarRefeicoes() {
 
     renderizarCalorias();
 
-    alert("Diário salvo, mas não consegui calcular as calorias agora.");
+    alert(
+      "Diário salvo, mas não consegui calcular as calorias agora.\n\n" +
+      "Motivo: " + erro.message
+    );
+
   } finally {
     setTimeout(() => {
       btn.disabled = false;
@@ -1363,30 +1367,62 @@ async function salvarRefeicoes() {
 }
 
 async function calcularCaloriasComIA() {
-  const resposta = await fetch(`${API_BASE_URL}/calcular-calorias`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      perfilUsuario: obterPerfilUsuario(),
-      metaKcalLuma: obterMetaKcalSalva(),
-      cafe: refeicoesAtuais.cafe || [],
-      almoco: refeicoesAtuais.almoco || [],
-      jantar: refeicoesAtuais.jantar || [],
-      agua: refeicoesAtuais.agua || 0,
-      data: byId("dataAlimentacaoInput") ? byId("dataAlimentacaoInput").value : new Date().toISOString().split("T")[0]
-    })
-  });
+  const payload = {
+    perfilUsuario: obterPerfilUsuario(),
+    metaKcalLuma: obterMetaKcalSalva(),
+    cafe: refeicoesAtuais.cafe || [],
+    almoco: refeicoesAtuais.almoco || [],
+    jantar: refeicoesAtuais.jantar || [],
+    agua: refeicoesAtuais.agua || 0,
+    data: byId("dataAlimentacaoInput")
+      ? byId("dataAlimentacaoInput").value
+      : new Date().toISOString().split("T")[0]
+  };
 
-  if (!resposta.ok) {
-    throw new Error("Erro ao conectar com a API de calorias. Status: " + resposta.status);
+  let resposta;
+
+  try {
+    resposta = await fetch(`${API_BASE_URL}/calcular-calorias`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(payload)
+    });
+  } catch (erroRede) {
+    throw new Error(
+      "Falha de conexão com a API. Verifique se o servidor do Render está ativo."
+    );
   }
 
-  const resultado = await resposta.json();
+  let resultado;
+
+  try {
+    resultado = await resposta.json();
+  } catch (erroJson) {
+    throw new Error(
+      "A API respondeu, mas não devolveu um JSON válido. Status: " + resposta.status
+    );
+  }
+
+  if (!resposta.ok) {
+    throw new Error(
+      resultado.erro ||
+      resultado.message ||
+      "Erro na API de calorias. Status: " + resposta.status
+    );
+  }
 
   if (!resultado.sucesso) {
-    throw new Error(resultado.erro || "Erro ao calcular calorias.");
+    throw new Error(
+      resultado.erro ||
+      resultado.message ||
+      "A API respondeu, mas não conseguiu calcular as calorias."
+    );
+  }
+
+  if (!resultado.calorias) {
+    throw new Error("A API não retornou o objeto 'calorias'.");
   }
 
   return resultado.calorias;

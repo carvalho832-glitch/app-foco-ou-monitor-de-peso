@@ -375,7 +375,8 @@ function montarDadosMetaKcal() {
     diarioHoje: historicoAlimentacao[hojeISO] || null,
     ultimosTreinos: historicoTreinos.slice(-7),
     saudeHoje: obterSaudePorData(hojeISO),
-    ultimosRegistrosSaude: historicoSaude.slice(-7)
+    ultimosRegistrosSaude: historicoSaude.slice(-7),
+    contextoSaudeLuma: gerarContextoSaudeLuma()
   };
 }
 
@@ -553,7 +554,8 @@ function montarDadosParaIA() {
     diarioHoje: historicoAlimentacao[hojeISO] || null,
     ultimosTreinos: historicoTreinos.slice(-5),
     saudeHoje: obterSaudePorData(hojeISO),
-    ultimosRegistrosSaude: historicoSaude.slice(-7)
+    ultimosRegistrosSaude: historicoSaude.slice(-7),
+    contextoSaudeLuma: gerarContextoSaudeLuma()
   };
 }
 
@@ -572,7 +574,10 @@ function extrairBlocoIA(texto, inicio, fim) {
 }
 
 function exibirRespostaIA(plano, dica) {
-  if (byId("iaTextoPlano")) byId("iaTextoPlano").innerText = plano;
+  const blocoSaude = montarBlocoSaudeParaTela("plano");
+  const planoFinal = blocoSaude ? `${blocoSaude}\n\n${plano}` : plano;
+
+  if (byId("iaTextoPlano")) byId("iaTextoPlano").innerText = planoFinal;
   if (byId("iaTextoDica")) byId("iaTextoDica").innerText = dica;
   if (byId("iaRespostaContainer")) byId("iaRespostaContainer").style.display = "block";
 
@@ -701,7 +706,8 @@ function montarDadosTreinoIA() {
     diarioHoje: historicoAlimentacao[hojeISO] || null,
     ultimosTreinos: historicoTreinos.slice(-7),
     saudeHoje: obterSaudePorData(hojeISO),
-    ultimosRegistrosSaude: historicoSaude.slice(-7)
+    ultimosRegistrosSaude: historicoSaude.slice(-7),
+    contextoSaudeLuma: gerarContextoSaudeLuma()
   };
 }
 
@@ -711,7 +717,10 @@ function exibirTreinoIA(treino, recolhido = true) {
 
   if (!container || !texto) return;
 
-  texto.innerText = treino;
+  const blocoSaude = montarBlocoSaudeParaTela("treino");
+  const treinoFinal = blocoSaude ? `${blocoSaude}\n\n${treino}` : treino;
+
+  texto.innerText = treinoFinal;
   container.style.display = "block";
 
   if (recolhido) {
@@ -927,6 +936,185 @@ function gerarLeituraSaude(registro) {
   mensagens.push("\n📌 Observação: essa leitura é apenas informativa e não substitui avaliação médica.");
 
   return mensagens.join("\n\n");
+}
+
+function gerarContextoSaudeLuma() {
+  const hojeISO = new Date().toISOString().split("T")[0];
+  const historico = obterHistoricoSaude().sort((a, b) => a.id - b.id);
+
+  const saudeHoje = obterSaudePorData(hojeISO);
+  const ultimoRegistro = saudeHoje || historico[historico.length - 1] || null;
+
+  if (!ultimoRegistro) {
+    return {
+      temDados: false,
+      nivel: "sem_dados",
+      resumo: "Nenhum dado de saúde registrado ainda.",
+      ajustePlano: "",
+      ajusteTreino: ""
+    };
+  }
+
+  const mensagens = [];
+  let nivel = "normal";
+  let evitarIntenso = false;
+  let procurarAtendimento = false;
+
+  if (ultimoRegistro.pressao && ultimoRegistro.pressao.sistolica && ultimoRegistro.pressao.diastolica) {
+    const s = Number(ultimoRegistro.pressao.sistolica);
+    const d = Number(ultimoRegistro.pressao.diastolica);
+
+    if (s >= 180 || d >= 120) {
+      nivel = "urgente";
+      evitarIntenso = true;
+      procurarAtendimento = true;
+
+      mensagens.push(
+        `Pressão registrada: ${s}/${d} mmHg. Valor muito alto. Se houver dor no peito, falta de ar, fraqueza, alteração na visão, dor de cabeça forte ou mal-estar intenso, procure atendimento imediatamente.`
+      );
+
+    } else if (s >= 140 || d >= 90) {
+      nivel = "alerta";
+      evitarIntenso = true;
+
+      mensagens.push(
+        `Pressão registrada: ${s}/${d} mmHg. Está acima do esperado. Hoje é melhor evitar treino intenso e priorizar algo leve.`
+      );
+
+    } else if (s >= 130 || d >= 80) {
+      if (nivel !== "alerta" && nivel !== "urgente") nivel = "atencao";
+      evitarIntenso = true;
+
+      mensagens.push(
+        `Pressão registrada: ${s}/${d} mmHg. Está em faixa de atenção. A Luma recomenda observar estresse, sono, sal e hidratação.`
+      );
+
+    } else if (s < 90 || d < 60) {
+      if (nivel !== "alerta" && nivel !== "urgente") nivel = "atencao";
+      evitarIntenso = true;
+
+      mensagens.push(
+        `Pressão registrada: ${s}/${d} mmHg. Está baixa. Se houver tontura, fraqueza ou mal-estar, evite esforço e procure orientação.`
+      );
+
+    } else {
+      mensagens.push(
+        `Pressão registrada: ${s}/${d} mmHg. Sem alerta importante no momento.`
+      );
+    }
+
+    if (ultimoRegistro.pressao.batimentos) {
+      const bpm = Number(ultimoRegistro.pressao.batimentos);
+
+      if (bpm > 110) {
+        if (nivel !== "urgente") nivel = "alerta";
+        evitarIntenso = true;
+
+        mensagens.push(
+          `Batimentos registrados: ${bpm} bpm. Está elevado. Observe se foi após esforço, ansiedade, café ou algum sintoma.`
+        );
+      } else if (bpm < 50) {
+        if (nivel !== "urgente") nivel = "atencao";
+        evitarIntenso = true;
+
+        mensagens.push(
+          `Batimentos registrados: ${bpm} bpm. Está baixo. Se houver tontura ou fraqueza, procure orientação.`
+        );
+      }
+    }
+  }
+
+  if (ultimoRegistro.glicose && ultimoRegistro.glicose.valor) {
+    const valor = Number(ultimoRegistro.glicose.valor);
+    const momento = ultimoRegistro.glicose.momento || "";
+
+    if (valor < 70) {
+      nivel = "alerta";
+      evitarIntenso = true;
+
+      mensagens.push(
+        `Glicose registrada: ${valor} mg/dL. Está baixa. Se houver tremor, suor frio, confusão, fraqueza ou mal-estar, procure orientação rapidamente.`
+      );
+
+    } else if (momento === "jejum" && valor >= 126) {
+      if (nivel !== "urgente") nivel = "alerta";
+
+      mensagens.push(
+        `Glicose em jejum: ${valor} mg/dL. Está elevada. A Luma recomenda acompanhar a tendência e conversar com seu médico.`
+      );
+
+    } else if (momento === "jejum" && valor >= 100) {
+      if (nivel !== "alerta" && nivel !== "urgente") nivel = "atencao";
+
+      mensagens.push(
+        `Glicose em jejum: ${valor} mg/dL. Está em atenção. Vale observar alimentação, sono e rotina dos últimos dias.`
+      );
+
+    } else if (momento === "apos_refeicao" && valor >= 250) {
+      if (nivel !== "urgente") nivel = "alerta";
+
+      mensagens.push(
+        `Glicose após refeição: ${valor} mg/dL. Está muito elevada. Acompanhe sintomas e procure orientação profissional.`
+      );
+
+    } else if (momento === "apos_refeicao" && valor >= 180) {
+      if (nivel !== "alerta" && nivel !== "urgente") nivel = "atencao";
+
+      mensagens.push(
+        `Glicose após refeição: ${valor} mg/dL. Está acima do ideal para muitas pessoas. Vale revisar o que foi consumido.`
+      );
+
+    } else {
+      mensagens.push(
+        `Glicose registrada: ${valor} mg/dL. Sem alerta importante no momento.`
+      );
+    }
+  }
+
+  let ajustePlano = "";
+  let ajusteTreino = "";
+
+  if (procurarAtendimento) {
+    ajustePlano =
+      "Hoje a prioridade é segurança. A Luma recomenda não fazer treino e procurar atendimento se houver sintomas.";
+    ajusteTreino =
+      "Treino não recomendado agora. Priorize repouso e orientação profissional, principalmente se houver sintomas.";
+  } else if (evitarIntenso) {
+    ajustePlano =
+      "Hoje a Luma recomenda uma rotina mais leve, boa hidratação, refeições equilibradas e atenção aos sinais do corpo.";
+    ajusteTreino =
+      "Prefira caminhada leve, alongamento ou descanso. Evite corrida intensa, treino pesado ou esforço alto hoje.";
+  } else {
+    ajustePlano =
+      "Sem alerta importante nos dados de saúde registrados. A Luma pode seguir com plano equilibrado.";
+    ajusteTreino =
+      "Sem alerta importante nos dados de saúde registrados. Treino leve ou moderado pode ser considerado conforme disposição.";
+  }
+
+  return {
+    temDados: true,
+    nivel: nivel,
+    data: ultimoRegistro.dataRaw,
+    resumo: mensagens.join(" "),
+    ajustePlano: ajustePlano,
+    ajusteTreino: ajusteTreino,
+    registro: ultimoRegistro
+  };
+}
+
+function montarBlocoSaudeParaTela(tipo = "plano") {
+  const contexto = gerarContextoSaudeLuma();
+
+  if (!contexto.temDados) return "";
+
+  const titulo = "🩺 Ajuste de saúde da Luma";
+
+  const aviso =
+    tipo === "treino"
+      ? contexto.ajusteTreino
+      : contexto.ajustePlano;
+
+  return `${titulo}\n${contexto.resumo}\n\n${aviso}\n\n📌 A Luma não substitui médico, não altera medicação e não faz diagnóstico.`;
 }
 
 function carregarHistoricoSaude() {
@@ -2023,6 +2211,10 @@ async function salvarRefeicoes() {
 }
 
 async function calcularCaloriasComIA() {
+  const dataAtual = byId("dataAlimentacaoInput")
+    ? byId("dataAlimentacaoInput").value
+    : new Date().toISOString().split("T")[0];
+
   const payload = {
     perfilUsuario: obterPerfilUsuario(),
     metaKcalLuma: obterMetaKcalSalva(),
@@ -2030,14 +2222,9 @@ async function calcularCaloriasComIA() {
     almoco: refeicoesAtuais.almoco || [],
     jantar: refeicoesAtuais.jantar || [],
     agua: refeicoesAtuais.agua || 0,
-    data: byId("dataAlimentacaoInput")
-      ? byId("dataAlimentacaoInput").value
-      : new Date().toISOString().split("T")[0],
-    saudeHoje: obterSaudePorData(
-      byId("dataAlimentacaoInput")
-        ? byId("dataAlimentacaoInput").value
-        : new Date().toISOString().split("T")[0]
-    )
+    data: dataAtual,
+    saudeHoje: obterSaudePorData(dataAtual),
+    contextoSaudeLuma: gerarContextoSaudeLuma()
   };
 
   let resposta;

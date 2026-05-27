@@ -945,6 +945,7 @@ button i {
     radial-gradient(circle at 90% 8%, rgba(14, 165, 233, 0.13), transparent 36%),
     linear-gradient(135deg, rgba(168, 85, 247, 0.08), rgba(14, 165, 233, 0.06), rgba(16, 185, 129, 0.04));
   border: 1px solid rgba(168, 85, 247, 0.24);
+  padding-bottom: 14px;
 }
 
 [data-theme="dark"] .card-lembretes-luma {
@@ -974,7 +975,7 @@ button i {
   gap: 12px;
   position: relative;
   z-index: 1;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
 }
 
 .lembretes-header h3 {
@@ -1035,7 +1036,7 @@ button i {
   z-index: 1;
   width: 100%;
   padding: 13px 14px;
-  margin-bottom: 14px;
+  margin-bottom: 10px;
   border-radius: 15px;
   font-size: 14px;
   font-weight: 900;
@@ -1049,12 +1050,46 @@ button i {
   transform: translateY(-1px);
 }
 
-.lembretes-grid {
+.lembretes-scroll {
   position: relative;
   z-index: 1;
-  display: grid;
-  grid-template-columns: 1fr;
+  display: flex;
   gap: 12px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 4px 2px 12px;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+}
+
+.lembretes-scroll::-webkit-scrollbar {
+  height: 6px;
+}
+
+.lembretes-scroll::-webkit-scrollbar-track {
+  background: rgba(100, 116, 139, 0.12);
+  border-radius: 999px;
+}
+
+.lembretes-scroll::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #a855f7, #0ea5e9);
+  border-radius: 999px;
+}
+
+.lembrete-card-scroll {
+  min-width: 255px;
+  max-width: 255px;
+  scroll-snap-align: start;
+  margin-bottom: 0;
+}
+
+.lembrete-card-scroll .lembrete-topo {
+  min-height: 58px;
+}
+
+.lembrete-card-scroll input[type="time"],
+.lembrete-card-scroll select {
+  margin-top: 2px;
 }
 
 .lembrete-item {
@@ -1180,7 +1215,7 @@ button i {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 10px;
-  margin-top: 14px;
+  margin-top: 10px;
 }
 
 .btn-salvar-lembretes,
@@ -2127,6 +2162,11 @@ button i {
   .saude-pill {
     font-size: 10px;
     padding: 5px 8px;
+  }
+
+  .lembrete-card-scroll {
+    min-width: 235px;
+    max-width: 235px;
   }
 
   .lembrete-info strong {

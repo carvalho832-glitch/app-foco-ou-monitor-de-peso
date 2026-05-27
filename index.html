@@ -9,7 +9,7 @@
 
   <title>EvoluaFit I.A. - Jornada Saudável</title>
 
-  <link rel="stylesheet" href="style.css?v=14">
+  <link rel="stylesheet" href="style.css?v=15">
   <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
@@ -330,6 +330,148 @@
       </button>
     </div>
 
+    <!-- ABA SAÚDE -->
+    <div id="aba-saude" class="aba-conteudo" style="display: none;">
+      <header>
+        <h1>Saúde</h1>
+        <p>Acompanhe pressão, glicose e sinais importantes do dia</p>
+      </header>
+
+      <div class="card card-saude-aviso">
+        <h3><i class="bi bi-shield-check"></i> Acompanhamento seguro</h3>
+        <p>
+          A Luma ajuda a organizar seus registros, mas não substitui médico, não faz diagnóstico
+          e não altera medicação. Em caso de sintomas fortes ou valores muito altos, procure atendimento.
+        </p>
+      </div>
+
+      <div class="card">
+        <div class="input-group">
+          <span style="font-size: 12px; color: var(--text-muted); font-weight: 600; margin-bottom: 4px;">
+            Data do registro:
+          </span>
+          <input type="date" id="dataSaudeInput">
+        </div>
+      </div>
+
+      <div class="card card-saude card-pressao">
+        <div class="saude-card-title">
+          <h3><i class="bi bi-heart-pulse"></i> Pressão arterial</h3>
+          <span class="saude-pill">mmHg</span>
+        </div>
+
+        <div class="perfil-grid">
+          <div class="input-field">
+            <span>Sistólica</span>
+            <input type="number" id="pressaoSistolicaInput" placeholder="Ex: 120">
+          </div>
+
+          <div class="input-field">
+            <span>Diastólica</span>
+            <input type="number" id="pressaoDiastolicaInput" placeholder="Ex: 80">
+          </div>
+        </div>
+
+        <div class="perfil-grid">
+          <div class="input-field">
+            <span>Batimentos</span>
+            <input type="number" id="batimentosInput" placeholder="Ex: 72">
+          </div>
+
+          <div class="input-field">
+            <span>Horário</span>
+            <select id="periodoPressaoSelect" class="perfil-select">
+              <option value="">Selecione</option>
+              <option value="manha">Manhã</option>
+              <option value="tarde">Tarde</option>
+              <option value="noite">Noite</option>
+              <option value="madrugada">Madrugada</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="input-field">
+          <span>Observação</span>
+          <input type="text" id="observacaoPressaoInput" placeholder="Ex: dor de cabeça, estresse, após caminhada...">
+        </div>
+      </div>
+
+      <div class="card card-saude card-glicose">
+        <div class="saude-card-title">
+          <h3><i class="bi bi-droplet"></i> Glicose</h3>
+          <span class="saude-pill">mg/dL</span>
+        </div>
+
+        <div class="perfil-grid">
+          <div class="input-field">
+            <span>Valor</span>
+            <input type="number" id="glicoseInput" placeholder="Ex: 95">
+          </div>
+
+          <div class="input-field">
+            <span>Momento</span>
+            <select id="momentoGlicoseSelect" class="perfil-select">
+              <option value="">Selecione</option>
+              <option value="jejum">Jejum</option>
+              <option value="antes_refeicao">Antes da refeição</option>
+              <option value="apos_refeicao">Após refeição</option>
+              <option value="antes_dormir">Antes de dormir</option>
+              <option value="outro">Outro</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="input-field">
+          <span>Observação</span>
+          <input type="text" id="observacaoGlicoseInput" placeholder="Ex: após jantar, senti tontura, comi doce...">
+        </div>
+      </div>
+
+      <button id="btnSalvarSaude" class="btn-saude-salvar">
+        <i class="bi bi-check-circle"></i> Salvar Registro de Saúde
+      </button>
+
+      <div class="card card-saude-resumo" id="cardResumoSaude">
+        <div class="ia-secao-titulo">
+          <i class="bi bi-stars"></i> LEITURA DA LUMA
+        </div>
+
+        <div id="statusSaudeTexto" class="ia-texto-conteudo">
+          Registre sua pressão ou glicose para a Luma acompanhar seus dados com mais cuidado.
+        </div>
+      </div>
+
+      <div class="card" id="cardGraficosSaude" style="display: none;">
+        <div class="swiper-container saudeSwiper">
+          <div class="swiper-wrapper">
+
+            <div class="swiper-slide saude-chart-slide">
+              <canvas id="graficoPressaoSaude"></canvas>
+            </div>
+
+            <div class="swiper-slide saude-chart-slide">
+              <canvas id="graficoGlicoseSaude"></canvas>
+            </div>
+
+          </div>
+
+          <div class="swiper-pagination saude-swiper-pagination"></div>
+        </div>
+      </div>
+
+      <div class="history-section">
+        <div class="history-header">
+          <div class="history-title">Histórico de Saúde</div>
+
+          <button id="btnExportarSaude" class="btn-secondary">
+            <i class="bi bi-download"></i> CSV
+          </button>
+        </div>
+
+        <div class="history-list" id="historicoSaudeLista"></div>
+      </div>
+    </div>
+
     <!-- ABA TREINO -->
     <div id="aba-exercicio" class="aba-conteudo" style="display: none;">
       <header>
@@ -591,6 +733,11 @@
           <span>Diário</span>
         </button>
 
+        <button class="floating-item" data-aba="saude" onclick="trocarAba('saude', this)">
+          <i class="bi bi-heart-pulse"></i>
+          <span>Saúde</span>
+        </button>
+
         <button class="floating-item" data-aba="exercicio" onclick="trocarAba('exercicio', this)">
           <i class="bi bi-activity"></i>
           <span>Treino</span>
@@ -612,7 +759,7 @@
   <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-  <script src="script.js?v=9"></script>
+  <script src="script.js?v=12"></script>
 
   <script>
     if ("serviceWorker" in navigator) {

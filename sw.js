@@ -1,22 +1,23 @@
-const CACHE_NAME = "monitor-peso-v44-menu-animated";
+const CACHE_NAME = "monitor-peso-v47-menu-diario-fix";
 
 const APP_FILES = [
   "./",
   "./index.html",
-  "./style.css",
-  "./menu-animated.css",
-  "./script.js",
+  "./style.css?v=18",
+  "./menu-animated.css?v=47",
+  "./script.js?v=17",
   "./cloud-sync.js",
   "./manifest.json",
   "./icon.svg"
 ];
 
 self.addEventListener("install", (event) => {
+  self.skipWaiting();
+
   event.waitUntil(
     caches
       .open(CACHE_NAME)
       .then((cache) => cache.addAll(APP_FILES))
-      .then(() => self.skipWaiting())
       .catch((error) => {
         console.log("Erro ao instalar cache:", error);
       })
@@ -63,7 +64,7 @@ self.addEventListener("fetch", (event) => {
 
   if (request.mode === "navigate") {
     event.respondWith(
-      fetch(request)
+      fetch(request, { cache: "no-store" })
         .then((response) => {
           const clone = response.clone();
 
@@ -74,6 +75,24 @@ self.addEventListener("fetch", (event) => {
           return response;
         })
         .catch(() => caches.match("./index.html"))
+    );
+
+    return;
+  }
+
+  if (url.pathname.endsWith("/menu-animated.css") || url.pathname.endsWith("menu-animated.css")) {
+    event.respondWith(
+      fetch(request, { cache: "no-store" })
+        .then((networkResponse) => {
+          const clone = networkResponse.clone();
+
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(request, clone);
+          });
+
+          return networkResponse;
+        })
+        .catch(() => caches.match(request))
     );
 
     return;

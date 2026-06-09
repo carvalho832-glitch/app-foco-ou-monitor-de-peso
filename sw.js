@@ -1,4 +1,4 @@
-const CACHE_NAME = "monitor-peso-v43-menu-animated";
+const CACHE_NAME = "monitor-peso-v44-menu-animated";
 
 const APP_FILES = [
   "./",

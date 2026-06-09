@@ -14,7 +14,13 @@
   setTimeout(iniciarFotoRefeicaoLuma, 1600);
 
   function iniciarFotoRefeicaoLuma() {
-    if (document.getElementById("inputFotoRefeicaoLuma")) return;
+    removerStatusAntigoForaDoDiario();
+
+    if (document.getElementById("inputFotoRefeicaoLuma")) {
+      inserirBotoesNasRefeicoes();
+      criarStatusCompacto();
+      return;
+    }
 
     const abaDiario = document.getElementById("aba-alimentacao");
 
@@ -23,6 +29,16 @@
     criarEstilosFotoRefeicao();
     criarInputFoto();
     inserirBotoesNasRefeicoes();
+  }
+
+  function removerStatusAntigoForaDoDiario() {
+    const abaDiario = document.getElementById("aba-alimentacao");
+
+    document.querySelectorAll("#fotoRefeicaoLumaStatus").forEach((status) => {
+      if (!abaDiario || !abaDiario.contains(status)) {
+        status.remove();
+      }
+    });
   }
 
   function criarInputFoto() {
@@ -74,20 +90,28 @@
   }
 
   function criarStatusCompacto() {
+    removerStatusAntigoForaDoDiario();
+
     if (document.getElementById("fotoRefeicaoLumaStatus")) return;
 
     const abaDiario = document.getElementById("aba-alimentacao");
-    const referencia = document.getElementById("btnSalvarAlimentacao") || document.getElementById("aguaAtualDisplay");
 
-    if (!abaDiario || !referencia) return;
+    if (!abaDiario) return;
+
+    const referencia =
+      abaDiario.querySelector("#btnSalvarAlimentacao") ||
+      abaDiario.querySelector("#aguaAtualDisplay") ||
+      abaDiario.querySelector("#tags-cafe");
+
+    if (!referencia) return;
 
     const status = document.createElement("div");
     status.id = "fotoRefeicaoLumaStatus";
     status.className = "foto-refeicao-inline-status";
     status.innerText = "📸 Tire uma foto da refeição para a Luma estimar os alimentos e kcal.";
 
-    const local = referencia.parentElement || referencia;
-    local.insertAdjacentElement("beforebegin", status);
+    const cardReferencia = referencia.closest(".card") || referencia.parentElement || abaDiario;
+    cardReferencia.insertAdjacentElement("beforebegin", status);
   }
 
   function criarEstilosFotoRefeicao() {
@@ -139,6 +163,10 @@
         font-size: 12.5px;
         line-height: 1.35;
         white-space: pre-line;
+      }
+
+      #aba-alimentacao .foto-refeicao-inline-status {
+        display: block;
       }
 
       [data-theme="dark"] .foto-refeicao-inline-status {

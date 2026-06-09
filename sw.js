@@ -1,4 +1,4 @@
-const CACHE_NAME = "monitor-peso-v50-cloud-menu-fix";
+const CACHE_NAME = "monitor-peso-v51-food-photo-v3";
 
 const APP_FILES = [
   "./",
@@ -6,8 +6,9 @@ const APP_FILES = [
   "./style.css?v=18",
   "./menu-animated.css?v=47",
   "./script.js?v=17",
-  "./cloud-loader.js?v=1",
-  "./cloud-sync.js?v=1",
+  "./cloud-loader.js?v=2",
+  "./cloud-sync.js?v=2",
+  "./food-photo.js?v=3",
   "./manifest.json",
   "./icon.svg"
 ];
@@ -87,7 +88,9 @@ self.addEventListener("fetch", (event) => {
     url.pathname.endsWith("/cloud-loader.js") ||
     url.pathname.endsWith("cloud-loader.js") ||
     url.pathname.endsWith("/cloud-sync.js") ||
-    url.pathname.endsWith("cloud-sync.js")
+    url.pathname.endsWith("cloud-sync.js") ||
+    url.pathname.endsWith("/food-photo.js") ||
+    url.pathname.endsWith("food-photo.js")
   ) {
     event.respondWith(
       fetch(request, { cache: "no-store" })

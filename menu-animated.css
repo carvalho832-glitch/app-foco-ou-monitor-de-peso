@@ -1,1 +1,271 @@
-.floating-main{width:66px;height:66px;background:linear-gradient(135deg,#7c3aed,#a855f7,#ec4899,#0ea5e9);background-size:260% 260%;animation:lumaMenuPulse 2.6s ease-in-out infinite,lumaMenuGradient 5s ease infinite}.floating-main i{animation:lumaMenuStarFloat 2.4s ease-in-out infinite}.floating-main:active{transform:scale(.94)}.floating-main::before{inset:-7px;animation:lumaMenuRotate 3.4s linear infinite}.floating-main::after{inset:-16px;animation:lumaMenuGlow 2.2s ease-in-out infinite}.floating-nav.open .floating-main{transform:rotate(45deg) scale(1.03);background:linear-gradient(135deg,#ef4444,#ec4899,#7c3aed)}.floating-menu{bottom:78px;background:rgba(255,255,255,.86);box-shadow:0 20px 46px rgba(15,23,42,.16),inset 0 1px 0 rgba(255,255,255,.65);transform:translateY(22px) scale(.88);transition:opacity .28s ease,transform .34s cubic-bezier(.2,1.35,.35,1)}[data-theme="dark"] .floating-menu{background:rgba(30,41,59,.88);box-shadow:0 20px 48px rgba(0,0,0,.38),inset 0 1px 0 rgba(255,255,255,.08)}.floating-nav.open .floating-menu{opacity:1;transform:translateY(0) scale(1)}.floating-item{height:64px;border-radius:21px;transform:translateY(18px) scale(.72) rotate(-8deg);transition:transform .3s cubic-bezier(.2,1.35,.35,1),opacity .25s ease,background .25s ease,color .25s ease,box-shadow .25s ease;position:relative;overflow:hidden}.floating-item::before{content:"";position:absolute;inset:0;background:linear-gradient(135deg,rgba(168,85,247,.18),rgba(14,165,233,.12),rgba(236,72,153,.12));opacity:0;transition:opacity .25s ease}.floating-item i{position:relative;z-index:2;transition:transform .28s cubic-bezier(.2,1.4,.4,1),text-shadow .25s ease}.floating-item span{position:relative;z-index:2}.floating-item:hover{color:var(--luma-purple);transform:translateY(-4px) scale(1.05);box-shadow:0 14px 28px rgba(168,85,247,.18),0 0 0 4px rgba(168,85,247,.08)}.floating-item:hover::before{opacity:1}.floating-item:hover i{transform:translateY(-2px) scale(1.18) rotate(-8deg);text-shadow:0 0 14px rgba(168,85,247,.45)}.floating-item.active{background:linear-gradient(135deg,#0ea5e9,#2563eb,#7c3aed);box-shadow:0 13px 26px rgba(37,99,235,.28),0 0 0 4px rgba(14,165,233,.1)}.floating-item.active i{animation:lumaActiveIconBounce 1.8s ease-in-out infinite}.floating-nav.open .floating-item{opacity:1;transform:translateY(0) scale(1) rotate(0)}.floating-nav.open .floating-item:nth-child(1){transition-delay:.03s}.floating-nav.open .floating-item:nth-child(2){transition-delay:.09s}.floating-nav.open .floating-item:nth-child(3){transition-delay:.15s}.floating-nav.open .floating-item:nth-child(4){transition-delay:.21s}.floating-nav.open .floating-item:nth-child(5){transition-delay:.27s}.floating-nav.open .floating-item:nth-child(1) i{animation:lumaMenuIconPop .55s ease .1s both}.floating-nav.open .floating-item:nth-child(2) i{animation:lumaMenuIconPop .55s ease .18s both}.floating-nav.open .floating-item:nth-child(3) i{animation:lumaMenuIconPop .55s ease .26s both}.floating-nav.open .floating-item:nth-child(4) i{animation:lumaMenuIconPop .55s ease .34s both}.floating-nav.open .floating-item:nth-child(5) i{animation:lumaMenuIconPop .55s ease .42s both}.floating-item[data-aba="alimentacao"] i::before{content:"📘"!important;font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif!important;background:none!important;-webkit-mask:none!important;mask:none!important;width:auto!important;height:auto!important;font-size:23px!important;line-height:1!important;display:block!important}@keyframes lumaMenuGradient{0%{background-position:0 50%}50%{background-position:100% 50%}100%{background-position:0 50%}}@keyframes lumaMenuRotate{to{transform:rotate(360deg)}}@keyframes lumaMenuPulse{0%,100%{box-shadow:0 14px 34px rgba(168,85,247,.38),0 0 0 0 rgba(168,85,247,.38)}50%{box-shadow:0 18px 42px rgba(168,85,247,.55),0 0 0 11px rgba(168,85,247,.03)}}@keyframes lumaMenuGlow{0%,100%{opacity:.55;transform:scale(.92)}50%{opacity:1;transform:scale(1.08)}}@keyframes lumaMenuStarFloat{0%,100%{transform:translateY(0) rotate(0) scale(1)}50%{transform:translateY(-2px) rotate(-8deg) scale(1.08)}}@keyframes lumaMenuIconPop{0%{transform:translateY(8px) scale(.55) rotate(-18deg);opacity:0}65%{transform:translateY(-3px) scale(1.22) rotate(7deg);opacity:1}100%{transform:translateY(0) scale(1) rotate(0);opacity:1}}@keyframes lumaActiveIconBounce{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-2px) scale(1.12)}}
+.floating-main {
+  width: 66px;
+  height: 66px;
+  background: linear-gradient(135deg, #7c3aed, #a855f7, #ec4899, #0ea5e9);
+  background-size: 260% 260%;
+  animation: lumaMenuPulse 2.6s ease-in-out infinite, lumaMenuGradient 5s ease infinite;
+}
+
+.floating-main i {
+  animation: lumaMenuStarFloat 2.4s ease-in-out infinite;
+}
+
+.floating-main:active {
+  transform: scale(0.94);
+}
+
+.floating-main::before {
+  inset: -7px;
+  animation: lumaMenuRotate 3.4s linear infinite;
+}
+
+.floating-main::after {
+  inset: -16px;
+  animation: lumaMenuGlow 2.2s ease-in-out infinite;
+}
+
+.floating-nav.open .floating-main {
+  transform: rotate(45deg) scale(1.03);
+  background: linear-gradient(135deg, #ef4444, #ec4899, #7c3aed);
+}
+
+.floating-menu {
+  bottom: 78px;
+  background: rgba(255, 255, 255, 0.86);
+  box-shadow:
+    0 20px 46px rgba(15, 23, 42, 0.16),
+    inset 0 1px 0 rgba(255, 255, 255, 0.65);
+  transform: translateY(22px) scale(0.88);
+  transition:
+    opacity 0.28s ease,
+    transform 0.34s cubic-bezier(0.2, 1.35, 0.35, 1);
+}
+
+[data-theme="dark"] .floating-menu {
+  background: rgba(30, 41, 59, 0.88);
+  box-shadow:
+    0 20px 48px rgba(0, 0, 0, 0.38),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.floating-nav.open .floating-menu {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+.floating-item {
+  height: 64px;
+  border-radius: 21px;
+  transform: translateY(18px) scale(0.72) rotate(-8deg);
+  transition:
+    transform 0.3s cubic-bezier(0.2, 1.35, 0.35, 1),
+    opacity 0.25s ease,
+    background 0.25s ease,
+    color 0.25s ease,
+    box-shadow 0.25s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.floating-item::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(168, 85, 247, 0.18),
+    rgba(14, 165, 233, 0.12),
+    rgba(236, 72, 153, 0.12)
+  );
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+
+.floating-item i {
+  position: relative;
+  z-index: 2;
+  transition:
+    transform 0.28s cubic-bezier(0.2, 1.4, 0.4, 1),
+    text-shadow 0.25s ease;
+}
+
+.floating-item span {
+  position: relative;
+  z-index: 2;
+}
+
+.floating-item:hover {
+  color: var(--luma-purple);
+  transform: translateY(-4px) scale(1.05);
+  box-shadow:
+    0 14px 28px rgba(168, 85, 247, 0.18),
+    0 0 0 4px rgba(168, 85, 247, 0.08);
+}
+
+.floating-item:hover::before {
+  opacity: 1;
+}
+
+.floating-item:hover i {
+  transform: translateY(-2px) scale(1.18) rotate(-8deg);
+  text-shadow: 0 0 14px rgba(168, 85, 247, 0.45);
+}
+
+.floating-item.active {
+  background: linear-gradient(135deg, #0ea5e9, #2563eb, #7c3aed);
+  box-shadow:
+    0 13px 26px rgba(37, 99, 235, 0.28),
+    0 0 0 4px rgba(14, 165, 233, 0.1);
+}
+
+.floating-item.active i {
+  animation: lumaActiveIconBounce 1.8s ease-in-out infinite;
+}
+
+.floating-nav.open .floating-item {
+  opacity: 1;
+  transform: translateY(0) scale(1) rotate(0);
+}
+
+.floating-nav.open .floating-item:nth-child(1) {
+  transition-delay: 0.03s;
+}
+
+.floating-nav.open .floating-item:nth-child(2) {
+  transition-delay: 0.09s;
+}
+
+.floating-nav.open .floating-item:nth-child(3) {
+  transition-delay: 0.15s;
+}
+
+.floating-nav.open .floating-item:nth-child(4) {
+  transition-delay: 0.21s;
+}
+
+.floating-nav.open .floating-item:nth-child(5) {
+  transition-delay: 0.27s;
+}
+
+.floating-nav.open .floating-item:nth-child(1) i {
+  animation: lumaMenuIconPop 0.55s ease 0.1s both;
+}
+
+.floating-nav.open .floating-item:nth-child(2) i {
+  animation: lumaMenuIconPop 0.55s ease 0.18s both;
+}
+
+.floating-nav.open .floating-item:nth-child(3) i {
+  animation: lumaMenuIconPop 0.55s ease 0.26s both;
+}
+
+.floating-nav.open .floating-item:nth-child(4) i {
+  animation: lumaMenuIconPop 0.55s ease 0.34s both;
+}
+
+.floating-nav.open .floating-item:nth-child(5) i {
+  animation: lumaMenuIconPop 0.55s ease 0.42s both;
+}
+
+/* Correção extra do ícone Diário */
+.floating-item[data-aba="alimentacao"] i::before {
+  content: "\F446" !important;
+  font-family: "bootstrap-icons" !important;
+  font-style: normal !important;
+  font-weight: normal !important;
+  font-variant: normal !important;
+  text-transform: none !important;
+  line-height: 1 !important;
+  display: inline-block !important;
+  font-size: 23px !important;
+  background: none !important;
+  mask: none !important;
+  -webkit-mask: none !important;
+}
+
+@keyframes lumaMenuGradient {
+  0% {
+    background-position: 0 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0 50%;
+  }
+}
+
+@keyframes lumaMenuRotate {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes lumaMenuPulse {
+  0%,
+  100% {
+    box-shadow:
+      0 14px 34px rgba(168, 85, 247, 0.38),
+      0 0 0 0 rgba(168, 85, 247, 0.38);
+  }
+
+  50% {
+    box-shadow:
+      0 18px 42px rgba(168, 85, 247, 0.55),
+      0 0 0 11px rgba(168, 85, 247, 0.03);
+  }
+}
+
+@keyframes lumaMenuGlow {
+  0%,
+  100% {
+    opacity: 0.55;
+    transform: scale(0.92);
+  }
+
+  50% {
+    opacity: 1;
+    transform: scale(1.08);
+  }
+}
+
+@keyframes lumaMenuStarFloat {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0) scale(1);
+  }
+
+  50% {
+    transform: translateY(-2px) rotate(-8deg) scale(1.08);
+  }
+}
+
+@keyframes lumaMenuIconPop {
+  0% {
+    transform: translateY(8px) scale(0.55) rotate(-18deg);
+    opacity: 0;
+  }
+
+  65% {
+    transform: translateY(-3px) scale(1.22) rotate(7deg);
+    opacity: 1;
+  }
+
+  100% {
+    transform: translateY(0) scale(1) rotate(0);
+    opacity: 1;
+  }
+}
+
+@keyframes lumaActiveIconBounce {
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+  }
+
+  50% {
+    transform: translateY(-2px) scale(1.12);
+  }
+}

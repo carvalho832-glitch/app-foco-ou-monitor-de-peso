@@ -1,12 +1,42 @@
-const CACHE_NAME = "monitor-peso-v39";
+const CACHE_NAME = "monitor-peso-v40-cloud";
 
 const APP_FILES = [
   "./",
   "./index.html",
   "./style.css",
   "./script.js",
+  "./cloud-sync.js",
   "./manifest.json"
 ];
+
+const CLOUD_SCRIPTS = `
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="cloud-sync.js?v=1"></script>
+`;
+
+function injetarScriptsDaNuvem(html) {
+  if (!html || html.includes("cloud-sync.js")) {
+    return html;
+  }
+
+  if (html.includes("</body>")) {
+    return html.replace("</body>", `${CLOUD_SCRIPTS}\n</body>`);
+  }
+
+  return `${html}\n${CLOUD_SCRIPTS}`;
+}
+
+function respostaHtml(html, responseOriginal) {
+  const headers = new Headers(responseOriginal ? responseOriginal.headers : {});
+  headers.set("Content-Type", "text/html; charset=utf-8");
+  headers.set("Cache-Control", "no-cache");
+
+  return new Response(injetarScriptsDaNuvem(html), {
+    status: responseOriginal ? responseOriginal.status : 200,
+    statusText: responseOriginal ? responseOriginal.statusText : "OK",
+    headers
+  });
+}
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
@@ -45,7 +75,7 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  if (url.hostname.includes("onrender.com")) {
+  if (url.hostname.includes("onrender.com") || url.hostname.includes("supabase.co")) {
     event.respondWith(fetch(request));
     return;
   }
@@ -53,16 +83,23 @@ self.addEventListener("fetch", (event) => {
   if (request.mode === "navigate") {
     event.respondWith(
       fetch(request)
-        .then((response) => {
-          const clone = response.clone();
+        .then((response) => response.text().then((html) => {
+          const htmlFinal = injetarScriptsDaNuvem(html);
 
           caches.open(CACHE_NAME).then((cache) => {
-            cache.put("./index.html", clone);
+            cache.put("./index.html", new Response(htmlFinal, {
+              headers: {
+                "Content-Type": "text/html; charset=utf-8"
+              }
+            }));
           });
 
-          return response;
-        })
-        .catch(() => caches.match("./index.html"))
+          return respostaHtml(htmlFinal, response);
+        }))
+        .catch(() => caches.match("./index.html").then((cachedResponse) => {
+          if (!cachedResponse) return caches.match("./index.html");
+          return cachedResponse.text().then((html) => respostaHtml(html, cachedResponse));
+        }))
     );
 
     return;

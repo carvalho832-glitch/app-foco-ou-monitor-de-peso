@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Diagnóstico de Dados - EvoluaFit I.A.</title>
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --text: #0f172a;
+      --muted: #64748b;
+      --border: #e2e8f0;
+      --primary: #2563eb;
+      --success: #10b981;
+      --warning: #f97316;
+      --danger: #ef4444;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 20px;
+      min-height: 100vh;
+      background: radial-gradient(circle at top, #dbeafe 0, var(--bg) 42%);
+      color: var(--text);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 860px;
+      margin: 0 auto;
+    }
+
+    .hero {
+      margin-bottom: 18px;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: 28px;
+      letter-spacing: -0.04em;
+    }
+
+    p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .card {
+      background: rgba(255, 255, 255, 0.92);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 18px;
+      margin: 14px 0;
+      box-shadow: 0 16px 40px rgba(15, 23, 42, 0.08);
+      backdrop-filter: blur(10px);
+    }
+
+    .status {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+      gap: 12px;
+    }
+
+    .item {
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 14px;
+      background: #f8fafc;
+    }
+
+    .item small {
+      display: block;
+      color: var(--muted);
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .item strong {
+      display: block;
+      font-size: 22px;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 10px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 800;
+      margin-top: 12px;
+    }
+
+    .ok {
+      background: rgba(16, 185, 129, 0.12);
+      color: #047857;
+    }
+
+    .warn {
+      background: rgba(249, 115, 22, 0.14);
+      color: #c2410c;
+    }
+
+    .danger {
+      background: rgba(239, 68, 68, 0.12);
+      color: #b91c1c;
+    }
+
+    .buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    button, .btn-link {
+      border: 0;
+      border-radius: 13px;
+      padding: 12px 14px;
+      background: var(--primary);
+      color: #fff;
+      font-weight: 800;
+      font-size: 14px;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    button.secondary, .btn-link.secondary {
+      background: #0f172a;
+    }
+
+    button.success {
+      background: var(--success);
+    }
+
+    button.warning {
+      background: var(--warning);
+    }
+
+    input[type="file"] {
+      width: 100%;
+      padding: 12px;
+      border: 1px dashed var(--border);
+      border-radius: 14px;
+      background: #f8fafc;
+      margin-top: 12px;
+    }
+
+    pre {
+      white-space: pre-wrap;
+      word-break: break-word;
+      background: #0f172a;
+      color: #e2e8f0;
+      padding: 14px;
+      border-radius: 14px;
+      max-height: 320px;
+      overflow: auto;
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .keys-list {
+      display: grid;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .key-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+      padding: 10px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: #f8fafc;
+      font-size: 13px;
+    }
+
+    .key-row code {
+      font-weight: 800;
+    }
+
+    .muted {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .footer-note {
+      margin-top: 18px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+  </style>
+</head>
+<body>
+  <main class="container">
+    <section class="hero">
+      <h1>Diagnóstico dos dados locais</h1>
+      <p>Esta página verifica os dados salvos no navegador deste aparelho. Ela não apaga nada. É um painel de resgate, tipo lanterninha no porão do app.</p>
+    </section>
+
+    <section class="card">
+      <h2>Resumo encontrado</h2>
+      <div class="status" id="statusGrid"></div>
+      <div id="statusGeral"></div>
+      <div class="buttons">
+        <button onclick="analisarDados()">🔎 Verificar novamente</button>
+        <button class="success" onclick="exportarBackup()">⬇️ Exportar backup JSON</button>
+        <a class="btn-link secondary" href="./index.html">↩️ Voltar para o app</a>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Restaurar backup</h2>
+      <p>Use apenas um arquivo JSON exportado por esta página. A restauração substitui as chaves do app com os dados do arquivo.</p>
+      <input type="file" id="arquivoBackup" accept="application/json,.json">
+      <div class="buttons">
+        <button class="warning" onclick="importarBackup()">📦 Importar backup</button>
+      </div>
+      <p class="footer-note">Dica: antes de importar qualquer coisa, exporte o backup atual para ter uma cópia de segurança.</p>
+    </section>
+
+    <section class="card">
+      <h2>Chaves do app</h2>
+      <p class="muted">Aqui aparecem as chaves principais usadas pelo EvoluaFit I.A. no localStorage.</p>
+      <div class="keys-list" id="keysList"></div>
+    </section>
+
+    <section class="card">
+      <h2>Prévia técnica</h2>
+      <p class="muted">Mostra uma prévia curta dos dados encontrados. Não compartilhe se tiver informações pessoais.</p>
+      <pre id="preview">Carregando...</pre>
+    </section>
+  </main>
+
+  <script>
+    const APP_KEYS = [
+      "historicoPeso",
+      "historicoAlimentacao",
+      "historicoTreinos",
+      "historicoSaude",
+      "usuarioAltura",
+      "usuarioMeta",
+      "usuarioMetaKcal",
+      "usuarioPerfil",
+      "usuarioTema",
+      "analiseIACache",
+      "treinoIACache",
+      "lumaLembretes"
+    ];
+
+    const POSSIVEIS_KEYS_ANTIGAS = [
+      "historico",
+      "pesos",
+      "pesoHistorico",
+      "dadosPeso",
+      "alimentacao",
+      "diarioAlimentacao",
+      "treinos",
+      "atividades",
+      "historicoAtividades"
+    ];
+
+    function lerJSON(chave, fallback) {
+      try {
+        const valor = localStorage.getItem(chave);
+        if (!valor) return fallback;
+        return JSON.parse(valor);
+      } catch (erro) {
+        return fallback;
+      }
+    }
+
+    function contarPeso() {
+      const dados = lerJSON("historicoPeso", []);
+      return Array.isArray(dados) ? dados.length : 0;
+    }
+
+    function contarDiarios() {
+      const dados = lerJSON("historicoAlimentacao", {});
+      return dados && typeof dados === "object" && !Array.isArray(dados) ? Object.keys(dados).length : 0;
+    }
+
+    function contarTreinos() {
+      const dados = lerJSON("historicoTreinos", []);
+      return Array.isArray(dados) ? dados.length : 0;
+    }
+
+    function contarSaude() {
+      const dados = lerJSON("historicoSaude", []);
+      return Array.isArray(dados) ? dados.length : 0;
+    }
+
+    function criarItem(label, valor, detalhe) {
+      return `
+        <div class="item">
+          <small>${label}</small>
+          <strong>${valor}</strong>
+          <span class="muted">${detalhe}</span>
+        </div>
+      `;
+    }
+
+    function tamanhoValor(valor) {
+      if (!valor) return "vazio";
+      const kb = new Blob([valor]).size / 1024;
+      return kb < 1 ? `${valor.length} caracteres` : `${kb.toFixed(1)} KB`;
+    }
+
+    function analisarDados() {
+      const peso = contarPeso();
+      const diarios = contarDiarios();
+      const treinos = contarTreinos();
+      const saude = contarSaude();
+
+      document.getElementById("statusGrid").innerHTML =
+        criarItem("Pesagens", peso, "chave historicoPeso") +
+        criarItem("Diários/calorias", diarios, "chave historicoAlimentacao") +
+        criarItem("Treinos/atividades", treinos, "chave historicoTreinos") +
+        criarItem("Saúde", saude, "chave historicoSaude");
+
+      const total = peso + diarios + treinos + saude;
+      const status = document.getElementById("statusGeral");
+
+      if (total > 0) {
+        status.innerHTML = `<div class="pill ok">✅ Dados encontrados neste navegador</div>`;
+      } else {
+        const antigasEncontradas = POSSIVEIS_KEYS_ANTIGAS.filter(chave => localStorage.getItem(chave));
+
+        if (antigasEncontradas.length > 0) {
+          status.innerHTML = `<div class="pill warn">⚠️ Não achei nas chaves atuais, mas encontrei possíveis chaves antigas: ${antigasEncontradas.join(", ")}</div>`;
+        } else {
+          status.innerHTML = `<div class="pill danger">⚠️ Nenhum dado do app foi encontrado neste navegador. Pode ter sido outro navegador, outro domínio, app reinstalado ou armazenamento apagado.</div>`;
+        }
+      }
+
+      renderizarKeys();
+      renderizarPreview();
+    }
+
+    function renderizarKeys() {
+      const lista = document.getElementById("keysList");
+      const linhas = APP_KEYS.map(chave => {
+        const valor = localStorage.getItem(chave);
+        const existe = valor !== null;
+        return `
+          <div class="key-row">
+            <div>
+              <code>${chave}</code><br>
+              <span class="muted">${existe ? tamanhoValor(valor) : "não encontrada"}</span>
+            </div>
+            <strong>${existe ? "✅" : "—"}</strong>
+          </div>
+        `;
+      });
+
+      lista.innerHTML = linhas.join("");
+    }
+
+    function montarBackup() {
+      const dados = {
+        app: "EvoluaFit I.A.",
+        versaoBackup: 1,
+        origem: location.origin,
+        criadoEm: new Date().toLocaleString("pt-BR"),
+        chaves: {}
+      };
+
+      APP_KEYS.forEach(chave => {
+        const valor = localStorage.getItem(chave);
+        if (valor !== null) dados.chaves[chave] = valor;
+      });
+
+      return dados;
+    }
+
+    function exportarBackup() {
+      const backup = montarBackup();
+      const blob = new Blob([JSON.stringify(backup, null, 2)], { type: "application/json;charset=utf-8" });
+      const link = document.createElement("a");
+      const data = new Date().toISOString().slice(0, 10);
+
+      link.href = URL.createObjectURL(blob);
+      link.download = `backup-evoluafit-${data}.json`;
+      link.click();
+      URL.revokeObjectURL(link.href);
+    }
+
+    function importarBackup() {
+      const input = document.getElementById("arquivoBackup");
+      const arquivo = input.files && input.files[0];
+
+      if (!arquivo) {
+        alert("Escolha um arquivo de backup JSON primeiro.");
+        return;
+      }
+
+      const leitor = new FileReader();
+
+      leitor.onload = function(event) {
+        try {
+          const backup = JSON.parse(event.target.result);
+
+          if (!backup || !backup.chaves || typeof backup.chaves !== "object") {
+            throw new Error("Arquivo sem o formato esperado.");
+          }
+
+          const chaves = Object.keys(backup.chaves).filter(chave => APP_KEYS.includes(chave));
+
+          if (chaves.length === 0) {
+            throw new Error("Nenhuma chave compatível encontrada no backup.");
+          }
+
+          const confirmar = confirm(`Vou restaurar ${chaves.length} chave(s) do app. Continuar?`);
+          if (!confirmar) return;
+
+          chaves.forEach(chave => {
+            localStorage.setItem(chave, String(backup.chaves[chave]));
+          });
+
+          analisarDados();
+          alert("Backup restaurado com sucesso. Volte para o app e atualize a página.");
+        } catch (erro) {
+          alert("Não consegui importar o backup. Motivo: " + erro.message);
+        }
+      };
+
+      leitor.readAsText(arquivo);
+    }
+
+    function renderizarPreview() {
+      const preview = {};
+
+      APP_KEYS.forEach(chave => {
+        const valor = localStorage.getItem(chave);
+        if (!valor) return;
+
+        try {
+          preview[chave] = JSON.parse(valor);
+        } catch (erro) {
+          preview[chave] = valor;
+        }
+      });
+
+      const texto = JSON.stringify(preview, null, 2);
+      document.getElementById("preview").textContent = texto.length > 7000
+        ? texto.slice(0, 7000) + "\n... prévia cortada para não pesar a tela"
+        : texto || "Nenhum dado encontrado.";
+    }
+
+    analisarDados();
+  </script>
+</body>
+</html>

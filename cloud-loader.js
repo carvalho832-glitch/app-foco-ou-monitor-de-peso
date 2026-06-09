@@ -28,8 +28,23 @@
     document.body.appendChild(script);
   }
 
+  function dispararDOMContentLoadedExtra() {
+    try {
+      document.dispatchEvent(new Event("DOMContentLoaded", {
+        bubbles: true,
+        cancelable: true
+      }));
+    } catch (erro) {
+      const evento = document.createEvent("Event");
+      evento.initEvent("DOMContentLoaded", true, true);
+      document.dispatchEvent(evento);
+    }
+  }
+
   function carregarCloudSync() {
-    carregarScript("cloud-sync.js?v=1", "luma-cloud-sync-script");
+    carregarScript("cloud-sync.js?v=2", "luma-cloud-sync-script", function () {
+      setTimeout(dispararDOMContentLoadedExtra, 120);
+    });
   }
 
   if (window.supabase && window.supabase.createClient) {

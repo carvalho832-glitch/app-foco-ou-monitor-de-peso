@@ -42,7 +42,7 @@
   }
 
   function carregarFotoRefeicao() {
-    carregarScript("food-photo.js?v=2", "luma-food-photo-script");
+    carregarScript("food-photo.js?v=3", "luma-food-photo-script");
   }
 
   function carregarCloudSync() {

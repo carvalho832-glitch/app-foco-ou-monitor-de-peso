@@ -41,9 +41,14 @@
     }
   }
 
+  function carregarFotoRefeicao() {
+    carregarScript("food-photo.js?v=1", "luma-food-photo-script");
+  }
+
   function carregarCloudSync() {
     carregarScript("cloud-sync.js?v=2", "luma-cloud-sync-script", function () {
       setTimeout(dispararDOMContentLoadedExtra, 120);
+      setTimeout(carregarFotoRefeicao, 250);
     });
   }
 

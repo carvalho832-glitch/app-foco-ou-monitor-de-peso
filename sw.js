@@ -1,4 +1,4 @@
-const CACHE_NAME = "monitor-peso-v40-cloud";
+const CACHE_NAME = "monitor-peso-v41-pwa-cloud";
 
 const APP_FILES = [
   "./",
@@ -6,7 +6,8 @@ const APP_FILES = [
   "./style.css",
   "./script.js",
   "./cloud-sync.js",
-  "./manifest.json"
+  "./manifest.json",
+  "./icon.svg"
 ];
 
 const CLOUD_SCRIPTS = `

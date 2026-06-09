@@ -1,4 +1,4 @@
-const CACHE_NAME = "monitor-peso-v47-menu-diario-fix";
+const CACHE_NAME = "monitor-peso-v50-cloud-menu-fix";
 
 const APP_FILES = [
   "./",
@@ -6,7 +6,8 @@ const APP_FILES = [
   "./style.css?v=18",
   "./menu-animated.css?v=47",
   "./script.js?v=17",
-  "./cloud-sync.js",
+  "./cloud-loader.js?v=1",
+  "./cloud-sync.js?v=1",
   "./manifest.json",
   "./icon.svg"
 ];
@@ -80,7 +81,14 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  if (url.pathname.endsWith("/menu-animated.css") || url.pathname.endsWith("menu-animated.css")) {
+  if (
+    url.pathname.endsWith("/menu-animated.css") ||
+    url.pathname.endsWith("menu-animated.css") ||
+    url.pathname.endsWith("/cloud-loader.js") ||
+    url.pathname.endsWith("cloud-loader.js") ||
+    url.pathname.endsWith("/cloud-sync.js") ||
+    url.pathname.endsWith("cloud-sync.js")
+  ) {
     event.respondWith(
       fetch(request, { cache: "no-store" })
         .then((networkResponse) => {

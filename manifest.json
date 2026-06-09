@@ -1,64 +1,21 @@
-const CACHE_NAME = "luma-cache-v10";
-
-const urlsToCache = [
-  "./",
-  "./index.html",
-  "./style.css?v=10",
-  "./script.js?v=10",
-  "./manifest.json"
-];
-
-self.addEventListener("install", event => {
-  self.skipWaiting();
-
-  event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => {
-      return cache.addAll(urlsToCache);
-    })
-  );
-});
-
-self.addEventListener("activate", event => {
-  event.waitUntil(
-    caches.keys().then(cacheNames => {
-      return Promise.all(
-        cacheNames.map(cacheName => {
-          if (cacheName !== CACHE_NAME) {
-            return caches.delete(cacheName);
-          }
-        })
-      );
-    })
-  );
-
-  self.clients.claim();
-});
-
-self.addEventListener("fetch", event => {
-  const request = event.request;
-
-  if (request.method !== "GET") return;
-
-  if (
-    request.url.includes("onrender.com") ||
-    request.url.includes("unpkg.com") ||
-    request.url.includes("cdn.jsdelivr.net")
-  ) {
-    event.respondWith(fetch(request));
-    return;
-  }
-
-  event.respondWith(
-    fetch(request)
-      .then(response => {
-        const copy = response.clone();
-
-        caches.open(CACHE_NAME).then(cache => {
-          cache.put(request, copy);
-        });
-
-        return response;
-      })
-      .catch(() => caches.match(request))
-  );
-});
+{
+  "name": "EvoluaFit I.A.",
+  "short_name": "EvoluaFit",
+  "description": "Acompanhe peso, calorias, treinos, saúde e evolução com IA.",
+  "lang": "pt-BR",
+  "start_url": "./index.html?v=41",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0f172a",
+  "theme_color": "#0f172a",
+  "categories": ["health", "fitness", "lifestyle"],
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

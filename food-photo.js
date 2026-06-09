@@ -3,66 +3,91 @@
   window.__lumaFoodPhotoStarted = true;
 
   const FOTO_FOOD_API = "https://luma-gemini-api.onrender.com";
+  const NOMES_REFEICOES = {
+    cafe: "Café",
+    almoco: "Almoço",
+    jantar: "Jantar"
+  };
 
   document.addEventListener("DOMContentLoaded", iniciarFotoRefeicaoLuma);
   setTimeout(iniciarFotoRefeicaoLuma, 600);
   setTimeout(iniciarFotoRefeicaoLuma, 1600);
 
   function iniciarFotoRefeicaoLuma() {
-    if (document.getElementById("cardFotoRefeicaoLuma")) return;
+    if (document.getElementById("inputFotoRefeicaoLuma")) return;
 
     const abaDiario = document.getElementById("aba-alimentacao");
-    const cardAgua = document.querySelector(".card-water");
 
-    if (!abaDiario || !cardAgua) return;
+    if (!abaDiario) return;
 
     criarEstilosFotoRefeicao();
+    criarInputFoto();
+    inserirBotoesNasRefeicoes();
+  }
 
-    const card = document.createElement("div");
-    card.id = "cardFotoRefeicaoLuma";
-    card.className = "card foto-refeicao-luma-card";
+  function criarInputFoto() {
+    const input = document.createElement("input");
+    input.id = "inputFotoRefeicaoLuma";
+    input.type = "file";
+    input.accept = "image/*";
+    input.setAttribute("capture", "environment");
+    input.style.display = "none";
+    input.addEventListener("change", analisarFotoSelecionada);
 
-    card.innerHTML = `
-      <div class="foto-refeicao-luma-header">
-        <div>
-          <h3><i class="bi bi-camera"></i> Luma por foto</h3>
-          <p>Fotografe a refeição e a Luma estima os itens e calorias.</p>
-        </div>
-        <span class="foto-refeicao-luma-pill">Beta</span>
-      </div>
+    document.body.appendChild(input);
+  }
 
-      <div class="foto-refeicao-luma-actions">
-        <button type="button" class="foto-refeicao-luma-btn" data-refeicao="cafe">
-          📸 Café
-        </button>
-        <button type="button" class="foto-refeicao-luma-btn" data-refeicao="almoco">
-          📸 Almoço
-        </button>
-        <button type="button" class="foto-refeicao-luma-btn" data-refeicao="jantar">
-          📸 Jantar
-        </button>
-      </div>
+  function inserirBotoesNasRefeicoes() {
+    ["cafe", "almoco", "jantar"].forEach((refeicao) => {
+      const customInput = document.getElementById(`custom-${refeicao}`);
+      const tagsContainer = document.getElementById(`tags-${refeicao}`);
 
-      <input id="inputFotoRefeicaoLuma" type="file" accept="image/*" capture="environment" style="display:none;">
+      if (!customInput && !tagsContainer) return;
+      if (document.getElementById(`btnFotoRefeicao_${refeicao}`)) return;
 
-      <div id="fotoRefeicaoLumaPreview" class="foto-refeicao-luma-preview" style="display:none;"></div>
-      <div id="fotoRefeicaoLumaStatus" class="foto-refeicao-luma-status">
-        Dica: tire a foto de cima, com boa luz, mostrando o prato todo.
-      </div>
-    `;
+      const botao = document.createElement("button");
+      botao.id = `btnFotoRefeicao_${refeicao}`;
+      botao.type = "button";
+      botao.className = "foto-refeicao-inline-btn";
+      botao.innerHTML = `<i class="bi bi-camera"></i> Foto`;
+      botao.setAttribute("aria-label", `Analisar foto do ${NOMES_REFEICOES[refeicao]}`);
 
-    abaDiario.insertBefore(card, cardAgua);
-
-    const input = document.getElementById("inputFotoRefeicaoLuma");
-
-    card.querySelectorAll(".foto-refeicao-luma-btn").forEach((botao) => {
       botao.addEventListener("click", function () {
-        input.dataset.refeicao = botao.dataset.refeicao || "cafe";
+        const input = document.getElementById("inputFotoRefeicaoLuma");
+        if (!input) return;
+
+        input.dataset.refeicao = refeicao;
         input.click();
       });
+
+      const customContainer = customInput ? customInput.parentElement : null;
+
+      if (customContainer) {
+        customContainer.classList.add("foto-refeicao-custom-row");
+        customContainer.appendChild(botao);
+      } else if (tagsContainer && tagsContainer.parentElement) {
+        tagsContainer.parentElement.insertBefore(botao, tagsContainer);
+      }
     });
 
-    input.addEventListener("change", analisarFotoSelecionada);
+    criarStatusCompacto();
+  }
+
+  function criarStatusCompacto() {
+    if (document.getElementById("fotoRefeicaoLumaStatus")) return;
+
+    const abaDiario = document.getElementById("aba-alimentacao");
+    const referencia = document.getElementById("btnSalvarAlimentacao") || document.getElementById("aguaAtualDisplay");
+
+    if (!abaDiario || !referencia) return;
+
+    const status = document.createElement("div");
+    status.id = "fotoRefeicaoLumaStatus";
+    status.className = "foto-refeicao-inline-status";
+    status.innerText = "📸 Tire uma foto da refeição para a Luma estimar os alimentos e kcal.";
+
+    const local = referencia.parentElement || referencia;
+    local.insertAdjacentElement("beforebegin", status);
   }
 
   function criarEstilosFotoRefeicao() {
@@ -71,84 +96,54 @@
     const style = document.createElement("style");
     style.id = "foto-refeicao-luma-style";
     style.innerHTML = `
-      .foto-refeicao-luma-card {
-        border: 1px solid rgba(14, 165, 233, 0.22);
-        background: linear-gradient(135deg, rgba(14, 165, 233, 0.10), rgba(168, 85, 247, 0.08), rgba(255,255,255,0.96));
-      }
-
-      [data-theme="dark"] .foto-refeicao-luma-card {
-        background: linear-gradient(135deg, rgba(14, 165, 233, 0.16), rgba(168, 85, 247, 0.12), rgba(15, 23, 42, 0.96));
-      }
-
-      .foto-refeicao-luma-header {
+      .foto-refeicao-custom-row {
         display: flex;
-        justify-content: space-between;
-        gap: 12px;
-        align-items: flex-start;
-        margin-bottom: 14px;
-      }
-
-      .foto-refeicao-luma-header h3 {
-        margin-bottom: 4px;
-      }
-
-      .foto-refeicao-luma-header p {
-        margin: 0;
-        font-size: 13px;
-        color: var(--text-muted);
-        line-height: 1.35;
-      }
-
-      .foto-refeicao-luma-pill {
-        padding: 6px 9px;
-        border-radius: 999px;
-        background: rgba(14, 165, 233, 0.16);
-        color: #0284c7;
-        font-size: 11px;
-        font-weight: 800;
-      }
-
-      .foto-refeicao-luma-actions {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
+        align-items: center;
         gap: 8px;
       }
 
-      .foto-refeicao-luma-btn {
-        border: 0;
-        border-radius: 16px;
-        padding: 12px 8px;
-        font-weight: 800;
-        font-size: 13px;
-        color: #ffffff;
-        background: linear-gradient(135deg, #0ea5e9, #7c3aed);
-        box-shadow: 0 10px 22px rgba(14, 165, 233, 0.18);
+      .foto-refeicao-custom-row input {
+        flex: 1;
+        min-width: 0;
       }
 
-      .foto-refeicao-luma-btn:disabled {
+      .foto-refeicao-inline-btn {
+        border: 0;
+        min-width: 74px;
+        height: 42px;
+        padding: 0 11px;
+        border-radius: 14px;
+        color: #ffffff;
+        font-size: 13px;
+        font-weight: 850;
+        white-space: nowrap;
+        background: linear-gradient(135deg, #0ea5e9, #7c3aed);
+        box-shadow: 0 9px 18px rgba(14, 165, 233, 0.18);
+      }
+
+      .foto-refeicao-inline-btn i {
+        margin-right: 3px;
+      }
+
+      .foto-refeicao-inline-btn:disabled {
         opacity: 0.65;
       }
 
-      .foto-refeicao-luma-preview {
-        margin-top: 12px;
-        border-radius: 16px;
-        overflow: hidden;
-        border: 1px solid rgba(148, 163, 184, 0.25);
-      }
-
-      .foto-refeicao-luma-preview img {
-        display: block;
-        width: 100%;
-        max-height: 220px;
-        object-fit: cover;
-      }
-
-      .foto-refeicao-luma-status {
-        margin-top: 12px;
-        font-size: 13px;
+      .foto-refeicao-inline-status {
+        margin: 10px 0 14px;
+        padding: 10px 12px;
+        border-radius: 15px;
+        background: rgba(14, 165, 233, 0.09);
+        border: 1px solid rgba(14, 165, 233, 0.14);
         color: var(--text-muted);
+        font-size: 12.5px;
         line-height: 1.35;
         white-space: pre-line;
+      }
+
+      [data-theme="dark"] .foto-refeicao-inline-status {
+        background: rgba(14, 165, 233, 0.13);
+        border-color: rgba(14, 165, 233, 0.20);
       }
     `;
 
@@ -163,19 +158,13 @@
     if (!arquivo) return;
 
     const status = document.getElementById("fotoRefeicaoLumaStatus");
-    const preview = document.getElementById("fotoRefeicaoLumaPreview");
-    const botoes = document.querySelectorAll(".foto-refeicao-luma-btn");
+    const botoes = document.querySelectorAll(".foto-refeicao-inline-btn");
 
     try {
       botoes.forEach((botao) => botao.disabled = true);
-      if (status) status.innerText = "📸 Luma analisando a foto...";
+      if (status) status.innerText = `📸 Luma analisando a foto do ${NOMES_REFEICOES[refeicao]}...`;
 
       const imagem = await reduzirImagemParaBase64(arquivo);
-
-      if (preview) {
-        preview.style.display = "block";
-        preview.innerHTML = `<img src="${imagem.dataUrl}" alt="Foto da refeição analisada pela Luma">`;
-      }
 
       const resposta = await fetch(`${FOTO_FOOD_API}/analisar-foto-refeicao`, {
         method: "POST",
@@ -204,9 +193,8 @@
         const nomes = itens.map((item) => item.nome).filter(Boolean).join(", ");
 
         status.innerText =
-          `✅ Foto analisada: ${nomes || "itens adicionados"}.\n` +
-          `🔥 Estimativa: ${Number(analise.totalKcal) || 0} kcal.\n` +
-          `Toque em Salvar Diário para guardar no histórico.`;
+          `✅ ${NOMES_REFEICOES[refeicao]} analisado: ${nomes || "itens adicionados"}.\n` +
+          `🔥 Estimativa: ${Number(analise.totalKcal) || 0} kcal. Toque em Salvar Diário para guardar.`;
       }
 
     } catch (erro) {
@@ -230,6 +218,7 @@
 
     try {
       if (typeof gerarContextoSaudeLuma === "function") contextoSaude = gerarContextoSaudeLuma();
+
       if (typeof obterSaudePorData === "function") {
         const dataAtual = document.getElementById("dataAlimentacaoInput")
           ? document.getElementById("dataAlimentacaoInput").value

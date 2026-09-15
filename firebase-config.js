@@ -1,11 +1,10 @@
 // Configuração pública do app Web no Firebase.
-// Cole aqui o objeto mostrado em Firebase Console > Configurações do projeto > Seus apps > Web.
-// Essas chaves identificam o projeto; a segurança dos dados deve ser feita pelas regras do Firestore.
-window.EVOLUAFIT_FIREBASE_CONFIG = window.EVOLUAFIT_FIREBASE_CONFIG || {
-  apiKey: "",
-  authDomain: "",
-  projectId: "",
-  storageBucket: "",
-  messagingSenderId: "",
-  appId: ""
+// Segurança dos dados deve ser aplicada pelas regras do Firestore e pelo Authentication.
+window.EVOLUAFIT_FIREBASE_CONFIG = {
+  apiKey: "AIzaSyBI_3nO_ayUaa3TdvjLgXSIcAg03-X2G0o",
+  authDomain: "evoluafit-abb15.firebaseapp.com",
+  projectId: "evoluafit-abb15",
+  storageBucket: "evoluafit-abb15.firebasestorage.app",
+  messagingSenderId: "922367953312",
+  appId: "1:922367953312:web:0bf0a827c08c3c5c99bcc5"
 };

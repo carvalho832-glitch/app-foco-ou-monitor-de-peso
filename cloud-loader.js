@@ -9,9 +9,7 @@
     }
 
     const script = document.createElement("script");
-
     if (id) script.id = id;
-
     script.src = src;
     script.async = false;
 
@@ -21,7 +19,6 @@
 
     script.onerror = function () {
       console.log("Erro ao carregar:", src);
-
       if (callback) callback();
     };
 
@@ -45,21 +42,41 @@
     carregarScript("food-photo.js?v=3", "luma-food-photo-script");
   }
 
-  function carregarCloudSync() {
-    carregarScript("cloud-sync.js?v=2", "luma-cloud-sync-script", function () {
+  function carregarIntegracaoFirebase() {
+    carregarScript("firebase-cloud.js?v=1", "evoluafit-firebase-cloud", function () {
       setTimeout(dispararDOMContentLoadedExtra, 120);
       setTimeout(carregarFotoRefeicao, 250);
     });
   }
 
-  if (window.supabase && window.supabase.createClient) {
-    carregarCloudSync();
-    return;
+  function carregarFirestore() {
+    carregarScript(
+      "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore-compat.js",
+      "evoluafit-firebase-firestore",
+      carregarIntegracaoFirebase
+    );
   }
 
-  carregarScript(
-    "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2",
-    "luma-supabase-js",
-    carregarCloudSync
-  );
+  function carregarAuth() {
+    carregarScript(
+      "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth-compat.js",
+      "evoluafit-firebase-auth",
+      carregarFirestore
+    );
+  }
+
+  function carregarFirebaseApp() {
+    if (window.firebase && window.firebase.initializeApp) {
+      carregarAuth();
+      return;
+    }
+
+    carregarScript(
+      "https://www.gstatic.com/firebasejs/12.19.0/firebase-app-compat.js",
+      "evoluafit-firebase-app",
+      carregarAuth
+    );
+  }
+
+  carregarScript("firebase-config.js?v=1", "evoluafit-firebase-config", carregarFirebaseApp);
 })();

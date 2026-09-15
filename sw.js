@@ -1,4 +1,4 @@
-const CACHE_NAME = "monitor-peso-v51-food-photo-v3";
+const CACHE_NAME = "monitor-peso-v52-firebase-apk";
 
 const APP_FILES = [
   "./",
@@ -6,8 +6,9 @@ const APP_FILES = [
   "./style.css?v=18",
   "./menu-animated.css?v=47",
   "./script.js?v=17",
-  "./cloud-loader.js?v=2",
-  "./cloud-sync.js?v=2",
+  "./cloud-loader.js?v=1",
+  "./firebase-config.js?v=1",
+  "./firebase-cloud.js?v=1",
   "./food-photo.js?v=3",
   "./manifest.json",
   "./icon.svg"
@@ -36,7 +37,6 @@ self.addEventListener("activate", (event) => {
             if (cacheName !== CACHE_NAME) {
               return caches.delete(cacheName);
             }
-
             return null;
           })
         );
@@ -49,13 +49,15 @@ self.addEventListener("fetch", (event) => {
   const request = event.request;
   const url = new URL(request.url);
 
-  if (request.method !== "GET") {
-    return;
-  }
+  if (request.method !== "GET") return;
 
   if (
     url.hostname.includes("onrender.com") ||
     url.hostname.includes("supabase.co") ||
+    url.hostname.includes("firebaseio.com") ||
+    url.hostname.includes("firebaseapp.com") ||
+    url.hostname.includes("googleapis.com") ||
+    url.hostname.includes("gstatic.com") ||
     url.hostname.includes("cdn.jsdelivr.net") ||
     url.hostname.includes("unpkg.com") ||
     url.hostname.includes("tile.openstreetmap.org")
@@ -69,16 +71,11 @@ self.addEventListener("fetch", (event) => {
       fetch(request, { cache: "no-store" })
         .then((response) => {
           const clone = response.clone();
-
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put("./index.html", clone);
-          });
-
+          caches.open(CACHE_NAME).then((cache) => cache.put("./index.html", clone));
           return response;
         })
         .catch(() => caches.match("./index.html"))
     );
-
     return;
   }
 
@@ -87,8 +84,10 @@ self.addEventListener("fetch", (event) => {
     url.pathname.endsWith("menu-animated.css") ||
     url.pathname.endsWith("/cloud-loader.js") ||
     url.pathname.endsWith("cloud-loader.js") ||
-    url.pathname.endsWith("/cloud-sync.js") ||
-    url.pathname.endsWith("cloud-sync.js") ||
+    url.pathname.endsWith("/firebase-config.js") ||
+    url.pathname.endsWith("firebase-config.js") ||
+    url.pathname.endsWith("/firebase-cloud.js") ||
+    url.pathname.endsWith("firebase-cloud.js") ||
     url.pathname.endsWith("/food-photo.js") ||
     url.pathname.endsWith("food-photo.js")
   ) {
@@ -96,33 +95,21 @@ self.addEventListener("fetch", (event) => {
       fetch(request, { cache: "no-store" })
         .then((networkResponse) => {
           const clone = networkResponse.clone();
-
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(request, clone);
-          });
-
+          caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
           return networkResponse;
         })
         .catch(() => caches.match(request))
     );
-
     return;
   }
 
   event.respondWith(
     caches.match(request).then((cachedResponse) => {
-      if (cachedResponse) {
-        return cachedResponse;
-      }
-
+      if (cachedResponse) return cachedResponse;
       return fetch(request)
         .then((networkResponse) => {
           const clone = networkResponse.clone();
-
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(request, clone);
-          });
-
+          caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
           return networkResponse;
         })
         .catch(() => caches.match("./index.html"));
@@ -132,33 +119,21 @@ self.addEventListener("fetch", (event) => {
 
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
-
   const data = event.notification.data || {};
   const urlParaAbrir = data.url || "./index.html";
 
   event.waitUntil(
     clients
-      .matchAll({
-        type: "window",
-        includeUncontrolled: true
-      })
+      .matchAll({ type: "window", includeUncontrolled: true })
       .then((clientList) => {
         for (const client of clientList) {
           if ("focus" in client) {
             client.focus();
-
-            if ("navigate" in client) {
-              return client.navigate(urlParaAbrir);
-            }
-
+            if ("navigate" in client) return client.navigate(urlParaAbrir);
             return null;
           }
         }
-
-        if (clients.openWindow) {
-          return clients.openWindow(urlParaAbrir);
-        }
-
+        if (clients.openWindow) return clients.openWindow(urlParaAbrir);
         return null;
       })
   );
@@ -174,27 +149,20 @@ self.addEventListener("push", (event) => {
 
   if (event.data) {
     try {
-      dados = {
-        ...dados,
-        ...event.data.json()
-      };
+      dados = { ...dados, ...event.data.json() };
     } catch (erro) {
       dados.body = event.data.text();
     }
   }
 
-  const opcoes = {
-    body: dados.body,
-    tag: dados.tag || "luma-push",
-    renotify: true,
-    silent: false,
-    data: {
-      url: dados.url || "./index.html"
-    }
-  };
-
   event.waitUntil(
-    self.registration.showNotification(dados.title, opcoes)
+    self.registration.showNotification(dados.title, {
+      body: dados.body,
+      tag: dados.tag || "luma-push",
+      renotify: true,
+      silent: false,
+      data: { url: dados.url || "./index.html" }
+    })
   );
 });
 
@@ -205,9 +173,7 @@ self.addEventListener("notificationclose", (event) => {
 self.addEventListener("message", (event) => {
   const dados = event.data || {};
 
-  if (dados.type === "SKIP_WAITING") {
-    self.skipWaiting();
-  }
+  if (dados.type === "SKIP_WAITING") self.skipWaiting();
 
   if (dados.type === "SHOW_NOTIFICATION") {
     const titulo = dados.title || "Luma lembra você";
@@ -218,9 +184,7 @@ self.addEventListener("message", (event) => {
       tag: dados.tag || "luma-message",
       renotify: true,
       silent: false,
-      data: {
-        url: dados.url || "./index.html"
-      }
+      data: { url: dados.url || "./index.html" }
     });
   }
 });

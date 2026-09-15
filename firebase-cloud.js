@@ -45,7 +45,10 @@
     }
 
     if (!window.firebase || !window.firebase.initializeApp) {
-      atualizarStatusNuvem("Não consegui carregar o Firebase. Verifique a internet e reabra o app.", "erro");
+      atualizarStatusNuvem(
+        "Não consegui carregar o Firebase. Verifique a internet e reabra o app.",
+        "erro"
+      );
       atualizarPill("Erro", "erro");
       return;
     }
@@ -84,8 +87,8 @@
     const style = document.createElement("style");
     style.id = "evoluafit-cloud-style";
     style.innerHTML = `
-      .cloud-card-evoluafit { border: 1px solid rgba(14,165,233,.22); background: linear-gradient(135deg, rgba(14,165,233,.10), rgba(255,255,255,.96)); }
-      [data-theme="dark"] .cloud-card-evoluafit { background: linear-gradient(135deg, rgba(14,165,233,.14), rgba(15,23,42,.96)); }
+      .cloud-card-evoluafit { border:1px solid rgba(14,165,233,.22); background:linear-gradient(135deg,rgba(14,165,233,.10),rgba(255,255,255,.96)); }
+      [data-theme="dark"] .cloud-card-evoluafit { background:linear-gradient(135deg,rgba(14,165,233,.14),rgba(15,23,42,.96)); }
       .cloud-header-evoluafit { display:flex; justify-content:space-between; gap:12px; align-items:flex-start; margin-bottom:12px; }
       .cloud-header-evoluafit h3 { margin-bottom:4px; }
       .cloud-header-evoluafit p { margin:0; font-size:13px; color:var(--text-muted); line-height:1.35; }
@@ -94,9 +97,9 @@
       .cloud-pill-evoluafit.erro { background:rgba(239,68,68,.14); color:#dc2626; }
       .cloud-form-evoluafit { display:grid; gap:10px; }
       .cloud-form-evoluafit input { width:100%; border:1px solid var(--border-color); border-radius:14px; padding:13px 14px; background:var(--card-bg); color:var(--text-main); font-size:14px; outline:none; }
-      .cloud-actions-evoluafit, .cloud-logged-actions-evoluafit { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+      .cloud-actions-evoluafit,.cloud-logged-actions-evoluafit { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
       .cloud-logged-actions-evoluafit { margin-top:10px; }
-      .cloud-actions-evoluafit button, .cloud-logged-actions-evoluafit button { border:0; border-radius:14px; padding:12px 10px; font-weight:800; font-size:13px; cursor:pointer; }
+      .cloud-actions-evoluafit button,.cloud-logged-actions-evoluafit button { border:0; border-radius:14px; padding:12px 10px; font-weight:800; font-size:13px; cursor:pointer; }
       .cloud-btn-primary-evoluafit { background:#2563eb; color:#fff; }
       .cloud-btn-success-evoluafit { background:#10b981; color:#fff; }
       .cloud-btn-dark-evoluafit { background:#0f172a; color:#fff; }
@@ -105,7 +108,7 @@
       .cloud-status-evoluafit.ok { background:rgba(16,185,129,.13); color:#047857; }
       .cloud-status-evoluafit.erro { background:rgba(239,68,68,.12); color:#b91c1c; }
       .cloud-user-evoluafit { padding:10px 12px; border-radius:14px; background:rgba(14,165,233,.10); color:var(--text-main); font-size:13px; font-weight:800; word-break:break-word; }
-      @media (max-width:420px) { .cloud-actions-evoluafit, .cloud-logged-actions-evoluafit { grid-template-columns:1fr; } }
+      @media (max-width:420px) { .cloud-actions-evoluafit,.cloud-logged-actions-evoluafit { grid-template-columns:1fr; } }
     `;
     document.head.appendChild(style);
   }
@@ -155,7 +158,7 @@
     ligarClique("btnCloudEntrarEvoluaFit", entrarNuvem);
     ligarClique("btnCloudCriarEvoluaFit", criarContaNuvem);
     ligarClique("btnCloudSairEvoluaFit", sairNuvem);
-    ligarClique("btnCloudSalvarEvoluaFit", salvarTudoNaNuvem);
+    ligarClique("btnCloudSalvarEvoluaFit", () => salvarTudoNaNuvem(false));
     ligarClique("btnCloudRestaurarEvoluaFit", () => restaurarTudoDaNuvem(false));
     ligarClique("btnCloudBackupEvoluaFit", exportarBackupLocalNuvem);
   }
@@ -170,11 +173,17 @@
     const loginArea = document.getElementById("cloudLoginAreaEvoluaFit");
     const logadoArea = document.getElementById("cloudLogadoAreaEvoluaFit");
     const usuarioBox = document.getElementById("cloudUsuarioEvoluaFit");
+
     if (loginArea) loginArea.style.display = logado ? "none" : "grid";
     if (logadoArea) logadoArea.style.display = logado ? "block" : "none";
-    if (usuarioBox && usuarioAtual) usuarioBox.innerText = `Conectado: ${usuarioAtual.email || usuarioAtual.uid}`;
+    if (usuarioBox && usuarioAtual) {
+      usuarioBox.innerText = `Conectado: ${usuarioAtual.email || usuarioAtual.uid}`;
+    }
+
     atualizarPill(logado ? "Online" : "Offline", logado ? "ok" : "");
-    if (!logado) atualizarStatusNuvem("Entre ou crie uma conta para ativar o backup no Firebase.", "");
+    if (!logado) {
+      atualizarStatusNuvem("Entre ou crie uma conta para ativar o backup no Firebase.", "");
+    }
   }
 
   function atualizarPill(texto, tipo) {
@@ -194,38 +203,47 @@
   function obterCredenciaisTela() {
     const email = ((document.getElementById("cloudEmailEvoluaFit") || {}).value || "").trim();
     const senha = ((document.getElementById("cloudSenhaEvoluaFit") || {}).value || "").trim();
+
     if (!email || !senha) {
       atualizarStatusNuvem("Digite e-mail e senha para continuar.", "erro");
       return null;
     }
+
     if (senha.length < 6) {
       atualizarStatusNuvem("A senha precisa ter pelo menos 6 caracteres.", "erro");
       return null;
     }
+
     return { email, senha };
   }
 
   async function criarContaNuvem() {
     const credenciais = obterCredenciaisTela();
     if (!credenciais || !auth) return;
+
     atualizarStatusNuvem("Criando sua conta no Firebase...", "");
     criandoContaAgora = true;
+
     try {
       const resultado = await auth.createUserWithEmailAndPassword(credenciais.email, credenciais.senha);
       usuarioAtual = resultado.user;
       autoSyncLiberado = true;
       await salvarTudoNaNuvem(true);
-      atualizarStatusNuvem("Conta criada. Seus dados atuais já foram salvos na nuvem.", "ok");
+      atualizarTelaNuvem();
+      atualizarStatusNuvem("Conta criada. Seus próximos registros serão sincronizados automaticamente.", "ok");
     } catch (erro) {
       atualizarStatusNuvem(`Erro ao criar conta: ${traduzirErro(erro)}`, "erro");
     } finally {
-      criandoContaAgora = false;
+      setTimeout(() => {
+        criandoContaAgora = false;
+      }, 500);
     }
   }
 
   async function entrarNuvem() {
     const credenciais = obterCredenciaisTela();
     if (!credenciais || !auth) return;
+
     atualizarStatusNuvem("Entrando na sua conta...", "");
     try {
       await auth.signInWithEmailAndPassword(credenciais.email, credenciais.senha);
@@ -244,24 +262,56 @@
 
   async function prepararSessaoNuvem() {
     if (!usuarioAtual || !db) return;
+
     atualizarStatusNuvem("Verificando seu backup no Firebase...", "");
+
     try {
       const snap = await documentoUsuario().get();
+      const dadosLocais = lerDadosLocais();
+      const localTemDados = temDadosObjeto(dadosLocais);
+
       if (!snap.exists) {
         autoSyncLiberado = true;
-        if (temDadosLocais()) await salvarTudoNaNuvem(true);
-        else atualizarStatusNuvem("Conta conectada. Seus próximos registros serão sincronizados automaticamente.", "ok");
+        if (localTemDados) {
+          await salvarTudoNaNuvem(true);
+          atualizarStatusNuvem("Conta conectada. Dados deste aparelho enviados para a nuvem.", "ok");
+        } else {
+          atualizarStatusNuvem("Conta conectada. Seus próximos registros serão sincronizados automaticamente.", "ok");
+        }
         return;
       }
 
-      if (!temDadosLocais()) {
+      const conteudo = snap.data() || {};
+      const dadosNuvem = conteudo.dados || {};
+      const nuvemTemDados = temDadosObjeto(dadosNuvem);
+
+      if (!localTemDados && !nuvemTemDados) {
+        autoSyncLiberado = true;
+        atualizarStatusNuvem("Conta conectada. O backup está vazio e aguardando seus primeiros registros.", "ok");
+        return;
+      }
+
+      if (!localTemDados && nuvemTemDados) {
         await restaurarTudoDaNuvem(true);
+        return;
+      }
+
+      if (localTemDados && !nuvemTemDados) {
+        autoSyncLiberado = true;
+        await salvarTudoNaNuvem(true);
+        atualizarStatusNuvem("Conta conectada. Dados deste aparelho enviados para a nuvem.", "ok");
+        return;
+      }
+
+      if (dadosIguais(dadosLocais, dadosNuvem)) {
+        autoSyncLiberado = true;
+        atualizarStatusNuvem("Conta conectada e sincronizada com o Firebase.", "ok");
         return;
       }
 
       autoSyncLiberado = false;
       atualizarStatusNuvem(
-        "Existe um backup no Firebase e também há dados neste aparelho. Escolha Salvar na nuvem para manter os dados deste aparelho ou Restaurar da nuvem para usar o backup.",
+        "Há dados diferentes neste aparelho e no Firebase. Escolha Salvar na nuvem para manter este aparelho ou Restaurar da nuvem para usar o backup.",
         ""
       );
     } catch (erro) {
@@ -273,10 +323,6 @@
     return db.collection("usuarios").doc(usuarioAtual.uid);
   }
 
-  function temDadosLocais() {
-    return CHAVES_SINCRONIZADAS.some((chave) => localStorage.getItem(chave) !== null);
-  }
-
   function lerDadosLocais() {
     const dados = {};
     CHAVES_SINCRONIZADAS.forEach((chave) => {
@@ -286,9 +332,26 @@
     return dados;
   }
 
+  function temDadosObjeto(dados) {
+    return CHAVES_SINCRONIZADAS.some((chave) =>
+      Object.prototype.hasOwnProperty.call(dados || {}, chave)
+    );
+  }
+
+  function dadosIguais(a, b) {
+    return CHAVES_SINCRONIZADAS.every((chave) => {
+      const temA = Object.prototype.hasOwnProperty.call(a || {}, chave);
+      const temB = Object.prototype.hasOwnProperty.call(b || {}, chave);
+      if (temA !== temB) return false;
+      if (!temA) return true;
+      return String(a[chave]) === String(b[chave]);
+    });
+  }
+
   async function salvarTudoNaNuvem(silencioso) {
     if (!usuarioAtual || !db || restaurandoDaNuvem) return;
     if (!silencioso) atualizarStatusNuvem("Salvando seus dados no Firebase...", "");
+
     try {
       await documentoUsuario().set(
         {
@@ -299,6 +362,7 @@
         },
         { merge: true }
       );
+
       autoSyncLiberado = true;
       if (!silencioso) atualizarStatusNuvem("Backup salvo no Firebase com sucesso.", "ok");
     } catch (erro) {
@@ -309,24 +373,34 @@
   async function restaurarTudoDaNuvem(silencioso) {
     if (!usuarioAtual || !db) return;
     if (!silencioso) atualizarStatusNuvem("Restaurando seus dados do Firebase...", "");
+
     try {
       const snap = await documentoUsuario().get();
       if (!snap.exists) {
-        atualizarStatusNuvem("Ainda não existe backup para esta conta.", "erro");
         autoSyncLiberado = true;
+        atualizarStatusNuvem("Ainda não existe backup para esta conta.", "erro");
         return;
       }
 
       const conteudo = snap.data() || {};
       const dados = conteudo.dados || {};
+      const chavesParaRestaurar = CHAVES_SINCRONIZADAS.filter((chave) =>
+        Object.prototype.hasOwnProperty.call(dados, chave)
+      );
+
+      if (chavesParaRestaurar.length === 0) {
+        autoSyncLiberado = true;
+        atualizarStatusNuvem("Conta conectada. O backup está vazio e não há nada para restaurar.", "ok");
+        return;
+      }
+
       restaurandoDaNuvem = true;
-      CHAVES_SINCRONIZADAS.forEach((chave) => {
-        if (Object.prototype.hasOwnProperty.call(dados, chave)) {
-          localSetItemOriginal(chave, String(dados[chave]));
-        }
+      chavesParaRestaurar.forEach((chave) => {
+        localSetItemOriginal(chave, String(dados[chave]));
       });
       restaurandoDaNuvem = false;
       autoSyncLiberado = true;
+
       atualizarStatusNuvem("Dados restaurados. Atualizando o app...", "ok");
       setTimeout(() => window.location.reload(), 450);
     } catch (erro) {
@@ -343,6 +417,7 @@
       localSetItemOriginal(chave, valor);
       if (!CHAVES_SINCRONIZADAS.includes(chave)) return;
       if (!usuarioAtual || restaurandoDaNuvem || !autoSyncLiberado) return;
+
       clearTimeout(timerSync);
       timerSync = setTimeout(() => salvarTudoNaNuvem(true), 900);
     };
@@ -354,6 +429,7 @@
       exportadoEm: new Date().toISOString(),
       dados: lerDadosLocais()
     };
+
     const blob = new Blob([JSON.stringify(backup, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
@@ -377,6 +453,7 @@
       "auth/network-request-failed": "falha de conexão com a internet",
       "permission-denied": "as regras do Firestore bloquearam o acesso"
     };
+
     return mensagens[codigo] || (erro && erro.message) || "erro desconhecido";
   }
 

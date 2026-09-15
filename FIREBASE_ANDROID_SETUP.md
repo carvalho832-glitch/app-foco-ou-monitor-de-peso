@@ -6,9 +6,10 @@ A branch `feature/firebase-android-apk` prepara o app para Android com Capacitor
 
 1. Abra o Firebase Console e crie um projeto.
 2. Em **Authentication > Sign-in method**, ative **E-mail/senha**.
-3. Em **Firestore Database**, crie o banco.
-4. Em **Configurações do projeto > Seus apps**, registre um app Web.
-5. Copie o objeto `firebaseConfig`.
+3. Em **Authentication > Settings > Authorized domains**, adicione `localhost` caso ele não apareça. Projetos Firebase criados depois de 28/04/2025 não incluem `localhost` automaticamente, e o Capacitor usa o host local do WebView.
+4. Em **Firestore Database**, crie o banco.
+5. Em **Configurações do projeto > Seus apps**, registre um app Web.
+6. Copie o objeto `firebaseConfig`.
 
 ## 2. Configurar o app
 

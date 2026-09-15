@@ -15,6 +15,18 @@ on:
       - "package.json"
       - "capacitor.config.json"
       - ".github/workflows/build-android-apk.yml"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "*.html"
+      - "*.css"
+      - "*.js"
+      - "*.json"
+      - "scripts/**"
+      - "package.json"
+      - "capacitor.config.json"
+      - ".github/workflows/build-android-apk.yml"
 
 jobs:
   build-apk:

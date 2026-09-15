@@ -13,28 +13,7 @@ A branch `feature/firebase-android-apk` prepara o app para Android com Capacitor
 
 ## 2. Configurar o app
 
-Há duas opções.
-
-### Opção A - configurar no código
-
-Edite `firebase-config.js` e substitua os campos vazios pelo objeto fornecido pelo Firebase.
-
-### Opção B - configurar só no APK gerado pelo GitHub Actions
-
-Crie no repositório um secret chamado `FIREBASE_WEB_CONFIG` contendo somente o JSON do objeto de configuração, por exemplo:
-
-```json
-{
-  "apiKey": "...",
-  "authDomain": "...",
-  "projectId": "...",
-  "storageBucket": "...",
-  "messagingSenderId": "...",
-  "appId": "..."
-}
-```
-
-O workflow injeta esse conteúdo em `firebase-config.js` durante a compilação.
+Edite `firebase-config.js` e substitua os campos vazios pelo objeto fornecido pelo Firebase. O objeto de configuração Web identifica o projeto; a proteção dos dados fica nas regras do Firestore.
 
 ## 3. Publicar as regras do Firestore
 

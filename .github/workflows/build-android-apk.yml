@@ -52,24 +52,6 @@ jobs:
       - name: Install dependencies
         run: npm install --no-audit --no-fund
 
-      - name: Inject Firebase config when secret exists
-        env:
-          FIREBASE_WEB_CONFIG: ${{ secrets.FIREBASE_WEB_CONFIG }}
-        run: |
-          if [ -n "$FIREBASE_WEB_CONFIG" ]; then
-            node - <<'NODE'
-            const fs = require('fs');
-            const config = JSON.parse(process.env.FIREBASE_WEB_CONFIG);
-            fs.writeFileSync(
-              'firebase-config.js',
-              'window.EVOLUAFIT_FIREBASE_CONFIG = ' + JSON.stringify(config, null, 2) + ';\n'
-            );
-            console.log('Firebase config injected for Android build.');
-            NODE
-          else
-            echo "FIREBASE_WEB_CONFIG secret not set. APK will be built with cloud setup pending."
-          fi
-
       - name: Prepare web assets
         run: npm run prepare:web
 

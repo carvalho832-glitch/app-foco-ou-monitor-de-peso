@@ -26,6 +26,7 @@
   let timerSync = null;
   let restaurandoDaNuvem = false;
   let autoSyncLiberado = false;
+  let criandoContaAgora = false;
 
   document.addEventListener("DOMContentLoaded", iniciarFirebaseEvoluaFit);
 
@@ -66,7 +67,7 @@
         autoSyncLiberado = false;
         atualizarTelaNuvem();
 
-        if (usuarioAtual) {
+        if (usuarioAtual && !criandoContaAgora) {
           await prepararSessaoNuvem();
         }
       });
@@ -208,6 +209,7 @@
     const credenciais = obterCredenciaisTela();
     if (!credenciais || !auth) return;
     atualizarStatusNuvem("Criando sua conta no Firebase...", "");
+    criandoContaAgora = true;
     try {
       const resultado = await auth.createUserWithEmailAndPassword(credenciais.email, credenciais.senha);
       usuarioAtual = resultado.user;
@@ -216,6 +218,8 @@
       atualizarStatusNuvem("Conta criada. Seus dados atuais já foram salvos na nuvem.", "ok");
     } catch (erro) {
       atualizarStatusNuvem(`Erro ao criar conta: ${traduzirErro(erro)}`, "erro");
+    } finally {
+      criandoContaAgora = false;
     }
   }
 

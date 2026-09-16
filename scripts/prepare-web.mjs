@@ -12,6 +12,7 @@ const arquivos = [
   "cloud-loader.js",
   "firebase-config.js",
   "firebase-cloud.js",
+  "native-backup.js",
   "cloud-sync.js",
   "food-photo.js",
   "manifest.json",

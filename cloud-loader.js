@@ -42,8 +42,13 @@
     carregarScript("food-photo.js?v=3", "luma-food-photo-script");
   }
 
+  function carregarBackupNativo() {
+    carregarScript("native-backup.js?v=1", "evoluafit-native-backup");
+  }
+
   function carregarIntegracaoFirebase() {
     carregarScript("firebase-cloud.js?v=1", "evoluafit-firebase-cloud", function () {
+      carregarBackupNativo();
       setTimeout(dispararDOMContentLoadedExtra, 120);
       setTimeout(carregarFotoRefeicao, 250);
     });

@@ -47,7 +47,7 @@
   }
 
   function carregarIntegracaoFirebase() {
-    carregarScript("firebase-cloud.js?v=1", "evoluafit-firebase-cloud", function () {
+    carregarScript("firebase-cloud.js?v=2", "evoluafit-firebase-cloud", function () {
       carregarBackupNativo();
       setTimeout(dispararDOMContentLoadedExtra, 120);
       setTimeout(carregarFotoRefeicao, 250);

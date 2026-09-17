@@ -43,6 +43,8 @@
     carregarScript("health-v3.js?v=1", "evoluafit-health-v3");
     carregarScript("food-v3.js?v=1", "evoluafit-food-v3");
     carregarScript("account-v3.js?v=1", "evoluafit-account-v3");
+    carregarScript("third-wave-v4.js?v=1", "evoluafit-third-wave-v4");
+    carregarScript("third-wave-goals-sync.js?v=1", "evoluafit-third-wave-goals-sync");
   }
 
   function carregarFotoRefeicao() {

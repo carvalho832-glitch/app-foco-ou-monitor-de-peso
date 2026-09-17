@@ -17,7 +17,7 @@ const arquivos = [
   "third-wave-v4.js",
   "third-wave-goals-sync.js",
   "third-wave-hotfix-v5.js",
-  "luma-medication-v6.js",
+  "luma-medication-v7.js",
   "firebase-config.js",
   "firebase-cloud.js",
   "native-backup.js",

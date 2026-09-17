@@ -45,6 +45,7 @@
     carregarScript("account-v3.js?v=1", "evoluafit-account-v3");
     carregarScript("third-wave-v4.js?v=1", "evoluafit-third-wave-v4");
     carregarScript("third-wave-goals-sync.js?v=1", "evoluafit-third-wave-goals-sync");
+    carregarScript("third-wave-hotfix-v5.js?v=1", "evoluafit-third-wave-hotfix-v5");
   }
 
   function carregarFotoRefeicao() {

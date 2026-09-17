@@ -1,4 +1,4 @@
-const CACHE_NAME = "monitor-peso-v54-second-wave";
+const CACHE_NAME = "monitor-peso-v55-third-wave";
 
 const APP_FILES = [
   "./",
@@ -6,11 +6,13 @@ const APP_FILES = [
   "./style.css?v=18",
   "./menu-animated.css?v=47",
   "./script.js?v=17",
-  "./cloud-loader.js?v=2",
+  "./cloud-loader.js?v=3",
   "./dashboard-v2.js?v=1",
   "./health-v3.js?v=1",
   "./food-v3.js?v=1",
   "./account-v3.js?v=1",
+  "./third-wave-v4.js?v=1",
+  "./third-wave-goals-sync.js?v=1",
   "./firebase-config.js?v=1",
   "./firebase-cloud.js?v=2",
   "./native-backup.js?v=1",
@@ -83,6 +85,10 @@ self.addEventListener("fetch", (event) => {
     url.pathname.endsWith("food-v3.js") ||
     url.pathname.endsWith("/account-v3.js") ||
     url.pathname.endsWith("account-v3.js") ||
+    url.pathname.endsWith("/third-wave-v4.js") ||
+    url.pathname.endsWith("third-wave-v4.js") ||
+    url.pathname.endsWith("/third-wave-goals-sync.js") ||
+    url.pathname.endsWith("third-wave-goals-sync.js") ||
     url.pathname.endsWith("/firebase-config.js") ||
     url.pathname.endsWith("firebase-config.js") ||
     url.pathname.endsWith("/firebase-cloud.js") ||

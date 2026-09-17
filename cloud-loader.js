@@ -38,6 +38,10 @@
     }
   }
 
+  function carregarDashboardV2() {
+    carregarScript("dashboard-v2.js?v=1", "evoluafit-dashboard-v2");
+  }
+
   function carregarFotoRefeicao() {
     carregarScript("food-photo.js?v=3", "luma-food-photo-script");
   }
@@ -83,5 +87,6 @@
     );
   }
 
+  carregarDashboardV2();
   carregarScript("firebase-config.js?v=1", "evoluafit-firebase-config", carregarFirebaseApp);
 })();

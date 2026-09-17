@@ -1,4 +1,4 @@
-const CACHE_NAME = "monitor-peso-v53-account-ui";
+const CACHE_NAME = "monitor-peso-v54-second-wave";
 
 const APP_FILES = [
   "./",
@@ -7,6 +7,10 @@ const APP_FILES = [
   "./menu-animated.css?v=47",
   "./script.js?v=17",
   "./cloud-loader.js?v=2",
+  "./dashboard-v2.js?v=1",
+  "./health-v3.js?v=1",
+  "./food-v3.js?v=1",
+  "./account-v3.js?v=1",
   "./firebase-config.js?v=1",
   "./firebase-cloud.js?v=2",
   "./native-backup.js?v=1",
@@ -17,39 +21,27 @@ const APP_FILES = [
 
 self.addEventListener("install", (event) => {
   self.skipWaiting();
-
   event.waitUntil(
-    caches
-      .open(CACHE_NAME)
-      .then((cache) => cache.addAll(APP_FILES))
-      .catch((error) => {
-        console.log("Erro ao instalar cache:", error);
-      })
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(APP_FILES)).catch((error) => {
+      console.log("Erro ao instalar cache:", error);
+    })
   );
 });
 
 self.addEventListener("activate", (event) => {
   event.waitUntil(
-    caches
-      .keys()
-      .then((cacheNames) => {
-        return Promise.all(
-          cacheNames.map((cacheName) => {
-            if (cacheName !== CACHE_NAME) {
-              return caches.delete(cacheName);
-            }
-            return null;
-          })
-        );
-      })
-      .then(() => self.clients.claim())
+    caches.keys().then((cacheNames) => {
+      return Promise.all(cacheNames.map((cacheName) => {
+        if (cacheName !== CACHE_NAME) return caches.delete(cacheName);
+        return null;
+      }));
+    }).then(() => self.clients.claim())
   );
 });
 
 self.addEventListener("fetch", (event) => {
   const request = event.request;
   const url = new URL(request.url);
-
   if (request.method !== "GET") return;
 
   if (
@@ -69,13 +61,11 @@ self.addEventListener("fetch", (event) => {
 
   if (request.mode === "navigate") {
     event.respondWith(
-      fetch(request, { cache: "no-store" })
-        .then((response) => {
-          const clone = response.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put("./index.html", clone));
-          return response;
-        })
-        .catch(() => caches.match("./index.html"))
+      fetch(request, { cache: "no-store" }).then((response) => {
+        const clone = response.clone();
+        caches.open(CACHE_NAME).then((cache) => cache.put("./index.html", clone));
+        return response;
+      }).catch(() => caches.match("./index.html"))
     );
     return;
   }
@@ -85,6 +75,14 @@ self.addEventListener("fetch", (event) => {
     url.pathname.endsWith("menu-animated.css") ||
     url.pathname.endsWith("/cloud-loader.js") ||
     url.pathname.endsWith("cloud-loader.js") ||
+    url.pathname.endsWith("/dashboard-v2.js") ||
+    url.pathname.endsWith("dashboard-v2.js") ||
+    url.pathname.endsWith("/health-v3.js") ||
+    url.pathname.endsWith("health-v3.js") ||
+    url.pathname.endsWith("/food-v3.js") ||
+    url.pathname.endsWith("food-v3.js") ||
+    url.pathname.endsWith("/account-v3.js") ||
+    url.pathname.endsWith("account-v3.js") ||
     url.pathname.endsWith("/firebase-config.js") ||
     url.pathname.endsWith("firebase-config.js") ||
     url.pathname.endsWith("/firebase-cloud.js") ||
@@ -95,13 +93,11 @@ self.addEventListener("fetch", (event) => {
     url.pathname.endsWith("food-photo.js")
   ) {
     event.respondWith(
-      fetch(request, { cache: "no-store" })
-        .then((networkResponse) => {
-          const clone = networkResponse.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
-          return networkResponse;
-        })
-        .catch(() => caches.match(request))
+      fetch(request, { cache: "no-store" }).then((networkResponse) => {
+        const clone = networkResponse.clone();
+        caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
+        return networkResponse;
+      }).catch(() => caches.match(request))
     );
     return;
   }
@@ -109,13 +105,11 @@ self.addEventListener("fetch", (event) => {
   event.respondWith(
     caches.match(request).then((cachedResponse) => {
       if (cachedResponse) return cachedResponse;
-      return fetch(request)
-        .then((networkResponse) => {
-          const clone = networkResponse.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
-          return networkResponse;
-        })
-        .catch(() => caches.match("./index.html"));
+      return fetch(request).then((networkResponse) => {
+        const clone = networkResponse.clone();
+        caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
+        return networkResponse;
+      }).catch(() => caches.match("./index.html"));
     })
   );
 });
@@ -124,21 +118,18 @@ self.addEventListener("notificationclick", (event) => {
   event.notification.close();
   const data = event.notification.data || {};
   const urlParaAbrir = data.url || "./index.html";
-
   event.waitUntil(
-    clients
-      .matchAll({ type: "window", includeUncontrolled: true })
-      .then((clientList) => {
-        for (const client of clientList) {
-          if ("focus" in client) {
-            client.focus();
-            if ("navigate" in client) return client.navigate(urlParaAbrir);
-            return null;
-          }
+    clients.matchAll({ type: "window", includeUncontrolled: true }).then((clientList) => {
+      for (const client of clientList) {
+        if ("focus" in client) {
+          client.focus();
+          if ("navigate" in client) return client.navigate(urlParaAbrir);
+          return null;
         }
-        if (clients.openWindow) return clients.openWindow(urlParaAbrir);
-        return null;
-      })
+      }
+      if (clients.openWindow) return clients.openWindow(urlParaAbrir);
+      return null;
+    })
   );
 });
 
@@ -149,15 +140,10 @@ self.addEventListener("push", (event) => {
     tag: "luma-push",
     url: "./index.html"
   };
-
   if (event.data) {
-    try {
-      dados = { ...dados, ...event.data.json() };
-    } catch (erro) {
-      dados.body = event.data.text();
-    }
+    try { dados = { ...dados, ...event.data.json() }; }
+    catch (erro) { dados.body = event.data.text(); }
   }
-
   event.waitUntil(
     self.registration.showNotification(dados.title, {
       body: dados.body,
@@ -175,13 +161,10 @@ self.addEventListener("notificationclose", (event) => {
 
 self.addEventListener("message", (event) => {
   const dados = event.data || {};
-
   if (dados.type === "SKIP_WAITING") self.skipWaiting();
-
   if (dados.type === "SHOW_NOTIFICATION") {
     const titulo = dados.title || "Luma lembra você";
     const mensagem = dados.body || "Você tem um lembrete da Luma.";
-
     self.registration.showNotification(titulo, {
       body: mensagem,
       tag: dados.tag || "luma-message",

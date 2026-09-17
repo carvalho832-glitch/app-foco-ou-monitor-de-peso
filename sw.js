@@ -1,4 +1,4 @@
-const CACHE_NAME = "monitor-peso-v56-luma-medication";
+const CACHE_NAME = "monitor-peso-v57-luma-medication-refined";
 
 const APP_FILES = [
   "./",
@@ -6,7 +6,7 @@ const APP_FILES = [
   "./style.css?v=18",
   "./menu-animated.css?v=47",
   "./script.js?v=17",
-  "./cloud-loader.js?v=4",
+  "./cloud-loader.js?v=5",
   "./dashboard-v2.js?v=1",
   "./health-v3.js?v=1",
   "./food-v3.js?v=1",
@@ -14,7 +14,7 @@ const APP_FILES = [
   "./third-wave-v4.js?v=1",
   "./third-wave-goals-sync.js?v=1",
   "./third-wave-hotfix-v5.js?v=1",
-  "./luma-medication-v6.js?v=1",
+  "./luma-medication-v7.js?v=1",
   "./firebase-config.js?v=1",
   "./firebase-cloud.js?v=2",
   "./native-backup.js?v=1",
@@ -93,8 +93,8 @@ self.addEventListener("fetch", (event) => {
     url.pathname.endsWith("third-wave-goals-sync.js") ||
     url.pathname.endsWith("/third-wave-hotfix-v5.js") ||
     url.pathname.endsWith("third-wave-hotfix-v5.js") ||
-    url.pathname.endsWith("/luma-medication-v6.js") ||
-    url.pathname.endsWith("luma-medication-v6.js") ||
+    url.pathname.endsWith("/luma-medication-v7.js") ||
+    url.pathname.endsWith("luma-medication-v7.js") ||
     url.pathname.endsWith("/firebase-config.js") ||
     url.pathname.endsWith("firebase-config.js") ||
     url.pathname.endsWith("/firebase-cloud.js") ||

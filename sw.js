@@ -1,4 +1,4 @@
-const CACHE_NAME = "monitor-peso-v52-firebase-apk";
+const CACHE_NAME = "monitor-peso-v53-account-ui";
 
 const APP_FILES = [
   "./",
@@ -6,9 +6,10 @@ const APP_FILES = [
   "./style.css?v=18",
   "./menu-animated.css?v=47",
   "./script.js?v=17",
-  "./cloud-loader.js?v=1",
+  "./cloud-loader.js?v=2",
   "./firebase-config.js?v=1",
-  "./firebase-cloud.js?v=1",
+  "./firebase-cloud.js?v=2",
+  "./native-backup.js?v=1",
   "./food-photo.js?v=3",
   "./manifest.json",
   "./icon.svg"
@@ -88,6 +89,8 @@ self.addEventListener("fetch", (event) => {
     url.pathname.endsWith("firebase-config.js") ||
     url.pathname.endsWith("/firebase-cloud.js") ||
     url.pathname.endsWith("firebase-cloud.js") ||
+    url.pathname.endsWith("/native-backup.js") ||
+    url.pathname.endsWith("native-backup.js") ||
     url.pathname.endsWith("/food-photo.js") ||
     url.pathname.endsWith("food-photo.js")
   ) {

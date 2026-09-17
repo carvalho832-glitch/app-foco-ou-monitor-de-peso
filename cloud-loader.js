@@ -46,6 +46,7 @@
     carregarScript("third-wave-v4.js?v=1", "evoluafit-third-wave-v4");
     carregarScript("third-wave-goals-sync.js?v=1", "evoluafit-third-wave-goals-sync");
     carregarScript("third-wave-hotfix-v5.js?v=1", "evoluafit-third-wave-hotfix-v5");
+    carregarScript("luma-medication-v6.js?v=1", "evoluafit-luma-medication-v6");
   }
 
   function carregarFotoRefeicao() {

@@ -1,4 +1,4 @@
-const CACHE_NAME = "monitor-peso-v55-third-wave";
+const CACHE_NAME = "monitor-peso-v55-third-wave-hotfix";
 
 const APP_FILES = [
   "./",
@@ -13,6 +13,7 @@ const APP_FILES = [
   "./account-v3.js?v=1",
   "./third-wave-v4.js?v=1",
   "./third-wave-goals-sync.js?v=1",
+  "./third-wave-hotfix-v5.js?v=1",
   "./firebase-config.js?v=1",
   "./firebase-cloud.js?v=2",
   "./native-backup.js?v=1",
@@ -89,6 +90,8 @@ self.addEventListener("fetch", (event) => {
     url.pathname.endsWith("third-wave-v4.js") ||
     url.pathname.endsWith("/third-wave-goals-sync.js") ||
     url.pathname.endsWith("third-wave-goals-sync.js") ||
+    url.pathname.endsWith("/third-wave-hotfix-v5.js") ||
+    url.pathname.endsWith("third-wave-hotfix-v5.js") ||
     url.pathname.endsWith("/firebase-config.js") ||
     url.pathname.endsWith("firebase-config.js") ||
     url.pathname.endsWith("/firebase-cloud.js") ||

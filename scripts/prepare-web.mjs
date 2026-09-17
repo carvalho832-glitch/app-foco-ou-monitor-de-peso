@@ -10,6 +10,7 @@ const arquivos = [
   "menu-animated.css",
   "script.js",
   "cloud-loader.js",
+  "dashboard-v2.js",
   "firebase-config.js",
   "firebase-cloud.js",
   "native-backup.js",

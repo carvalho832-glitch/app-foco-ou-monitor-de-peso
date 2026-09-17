@@ -16,6 +16,7 @@ const arquivos = [
   "account-v3.js",
   "third-wave-v4.js",
   "third-wave-goals-sync.js",
+  "third-wave-hotfix-v5.js",
   "firebase-config.js",
   "firebase-cloud.js",
   "native-backup.js",

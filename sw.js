@@ -1,4 +1,4 @@
-const CACHE_NAME = "monitor-peso-v59-luma-health-summary";
+const CACHE_NAME = "monitor-peso-v60-luma-health-wording";
 
 const APP_FILES = [
   "./",
@@ -8,7 +8,7 @@ const APP_FILES = [
   "./script.js?v=18",
   "./cloud-loader.js?v=5",
   "./dashboard-v2.js?v=1",
-  "./health-v3.js?v=2",
+  "./health-v3.js?v=3",
   "./food-v3.js?v=1",
   "./account-v3.js?v=1",
   "./third-wave-v4.js?v=1",

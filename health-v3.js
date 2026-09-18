@@ -33,6 +33,105 @@
     return ({ jejum:"Jejum", antes_refeicao:"Antes da refeição", apos_refeicao:"Após refeição", antes_dormir:"Antes de dormir", outro:"Outro" })[valor] || valor || "";
   }
 
+  function hojeISO() {
+    const d = new Date();
+    const ano = d.getFullYear();
+    const mes = String(d.getMonth() + 1).padStart(2, "0");
+    const dia = String(d.getDate()).padStart(2, "0");
+    return `${ano}-${mes}-${dia}`;
+  }
+
+  function classificarPressao(item) {
+    if (!item || !item.pressao) return null;
+    const s = Number(item.pressao.sistolica);
+    const d = Number(item.pressao.diastolica);
+    if (!s || !d) return null;
+
+    if (s >= 180 || d >= 120) {
+      return { prioridade:3, classe:"alert", rotulo:"Muito alta", texto:`Sua pressão registrada hoje foi ${s}/${d} mmHg e está muito alta pela faixa de referência usada no app.` };
+    }
+    if (s >= 140 || d >= 90) {
+      return { prioridade:2, classe:"attention", rotulo:"Alta", texto:`Sua pressão registrada hoje foi ${s}/${d} mmHg e está alta pela faixa de referência usada no app.` };
+    }
+    if (s >= 130 || d >= 80) {
+      return { prioridade:2, classe:"attention", rotulo:"Atenção", texto:`Sua pressão registrada hoje foi ${s}/${d} mmHg e ficou acima da faixa de acompanhamento usada no app.` };
+    }
+    if (s < 90 || d < 60) {
+      return { prioridade:2, classe:"attention", rotulo:"Baixa", texto:`Sua pressão registrada hoje foi ${s}/${d} mmHg e está baixa pela faixa de referência usada no app.` };
+    }
+    return { prioridade:1, classe:"ok", rotulo:"Sem alerta", texto:`Sua pressão registrada hoje foi ${s}/${d} mmHg e não gerou alerta no app.` };
+  }
+
+  function classificarGlicose(item) {
+    if (!item || !item.glicose) return null;
+    const valor = Number(item.glicose.valor);
+    const quando = item.glicose.momento || "";
+    if (!valor) return null;
+
+    if (valor < 70) {
+      return { prioridade:2, classe:"attention", rotulo:"Baixa", texto:`Sua glicose registrada hoje foi ${valor} mg/dL e está baixa pela faixa de referência usada no app.` };
+    }
+
+    if (quando === "jejum") {
+      if (valor >= 126) return { prioridade:2, classe:"attention", rotulo:"Alta no jejum", texto:`Sua glicose em jejum hoje foi ${valor} mg/dL e está alta pela faixa de referência usada no app.` };
+      if (valor >= 100) return { prioridade:2, classe:"attention", rotulo:"Atenção no jejum", texto:`Sua glicose em jejum hoje foi ${valor} mg/dL e ficou acima da faixa de acompanhamento usada no app.` };
+      return { prioridade:1, classe:"ok", rotulo:"Sem alerta no jejum", texto:`Sua glicose em jejum hoje foi ${valor} mg/dL e não gerou alerta no app.` };
+    }
+
+    if (quando === "apos_refeicao") {
+      if (valor >= 250) return { prioridade:3, classe:"alert", rotulo:"Muito alta", texto:`Sua glicose após refeição hoje foi ${valor} mg/dL e está muito alta pela faixa de referência usada no app.` };
+      if (valor >= 180) return { prioridade:2, classe:"attention", rotulo:"Alta após refeição", texto:`Sua glicose após refeição hoje foi ${valor} mg/dL e está alta pela faixa de referência usada no app.` };
+      return { prioridade:1, classe:"ok", rotulo:"Sem alerta após refeição", texto:`Sua glicose após refeição hoje foi ${valor} mg/dL e não gerou alerta no app.` };
+    }
+
+    return {
+      prioridade:0,
+      classe:"neutral",
+      rotulo:"Registrada",
+      texto:`Sua glicose registrada hoje foi ${valor} mg/dL${quando ? ` (${momento(quando)})` : ""}. O contexto informado não é suficiente para classificar esse valor com segurança no app.`
+    };
+  }
+
+  function resumoHoje(dados) {
+    const hoje = hojeISO();
+    const deHoje = dados.filter(i => i && i.dataRaw === hoje);
+    const p = deHoje.find(i => i.pressao && i.pressao.sistolica && i.pressao.diastolica) || null;
+    const g = deHoje.find(i => i.glicose && i.glicose.valor) || null;
+    const cp = classificarPressao(p);
+    const cg = classificarGlicose(g);
+
+    if (!cp && !cg) {
+      return {
+        prioridade:0,
+        classe:"neutral",
+        rotulo:"Sem medições hoje",
+        texto:"Ainda não há pressão ou glicose registrada hoje. Os cartões acima continuam mostrando seus registros mais recentes."
+      };
+    }
+
+    const partes = [cp && cp.texto, cg && cg.texto].filter(Boolean);
+    const prioridade = Math.max(cp ? cp.prioridade : 0, cg ? cg.prioridade : 0);
+    let fechamento = "";
+
+    if (prioridade >= 3) {
+      fechamento = "Resumo dos dados de hoje: há um alerta importante em uma das medições. Se houver sintomas importantes ou mal-estar, procure atendimento.";
+    } else if (prioridade === 2) {
+      const pontos = [];
+      if (cp && cp.prioridade === 2) pontos.push(`pressão ${cp.rotulo.toLowerCase()}`);
+      if (cg && cg.prioridade === 2) pontos.push(`glicose ${cg.rotulo.toLowerCase()}`);
+      fechamento = `Resumo dos dados de hoje: há ponto de atenção em ${pontos.join(" e ")}.`;
+    } else {
+      fechamento = "Resumo dos dados registrados hoje: não foi identificado alerta pelas faixas de acompanhamento do app.";
+    }
+
+    return {
+      prioridade,
+      classe: prioridade >= 3 ? "alert" : prioridade === 2 ? "attention" : "ok",
+      rotulo: prioridade >= 3 ? "Alerta importante" : prioridade === 2 ? "Atenção hoje" : "Sem alerta",
+      texto: `${partes.join(" ")} ${fechamento}`
+    };
+  }
+
   function estilos() {
     if ($("evolua-health-v3-style")) return;
     const s = document.createElement("style");
@@ -40,6 +139,10 @@
     s.textContent = `
       .health-overview-v3{margin-bottom:12px;padding:14px;border:1px solid var(--border-color);border-radius:18px;background:var(--card-bg)}
       .health-overview-head-v3{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:11px}.health-overview-head-v3 strong{font-size:16px}.health-overview-head-v3 small{display:block;margin-top:3px;color:var(--text-muted);font-size:11px}.health-overview-pill-v3{padding:6px 9px;border-radius:999px;background:rgba(16,185,129,.11);color:#047857;font-size:10px;font-weight:900;white-space:nowrap}
+      .health-overview-pill-v3.attention{background:rgba(245,158,11,.12);color:#b45309}.health-overview-pill-v3.alert{background:rgba(239,68,68,.12);color:#b91c1c}.health-overview-pill-v3.neutral{background:rgba(100,116,139,.11);color:var(--text-muted)}
+      .health-luma-summary-v4{margin-top:10px;padding:11px 12px;border-radius:14px;background:linear-gradient(145deg,rgba(124,58,237,.07),rgba(37,99,235,.045));border:1px solid rgba(124,58,237,.12)}
+      .health-luma-summary-v4 strong{display:flex;align-items:center;gap:6px;margin-bottom:5px;font-size:11px;color:#7c3aed}.health-luma-summary-v4 p{margin:0;color:var(--text-main);font-size:11.5px;line-height:1.5;font-weight:650}
+      .health-luma-summary-v4 small{display:block;margin-top:7px;color:var(--text-muted);font-size:9.5px;line-height:1.35}
       .health-overview-grid-v3{display:grid;grid-template-columns:1fr 1fr;gap:8px}.health-overview-item-v3{padding:11px 12px;border:1px solid var(--border-color);border-radius:14px;background:rgba(148,163,184,.045)}.health-overview-label-v3{color:var(--text-muted);font-size:10px;font-weight:850;text-transform:uppercase}.health-overview-value-v3{margin-top:5px;font-size:18px;line-height:1.1;font-weight:900}.health-overview-sub-v3{margin-top:3px;color:var(--text-muted);font-size:10px}
       #aba-saude .card-saude-aviso{padding:11px 13px;border-radius:14px;background:rgba(14,165,233,.055)}#aba-saude .card-saude-aviso h3{margin-bottom:5px;font-size:13px}#aba-saude .card-saude-aviso p{font-size:11px;line-height:1.45}
       .health-collapsible-v3{margin-bottom:12px}.health-collapse-toggle-v3{width:100%;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 13px;border-radius:14px;background:var(--card-bg);color:var(--text-main);border:1px solid var(--border-color);text-align:left}.health-collapse-toggle-v3 span{display:flex;align-items:center;gap:9px;font-size:13px;font-weight:850}.health-collapse-toggle-v3 small{color:var(--text-muted);font-size:10px;font-weight:700}.health-collapsible-v3.collapsed .health-collapse-body-v3{display:none}.health-collapse-body-v3{margin-top:8px}.health-collapse-body-v3>.card{margin-bottom:0}
@@ -57,7 +160,7 @@
     const card = document.createElement("section");
     card.id = "healthOverviewV3";
     card.className = "health-overview-v3";
-    card.innerHTML = `<div class="health-overview-head-v3"><div><strong>Resumo de saúde</strong><small>Seus registros mais recentes</small></div><span class="health-overview-pill-v3"><i class="bi bi-shield-check"></i> Acompanhamento</span></div><div class="health-overview-grid-v3"><div class="health-overview-item-v3"><div class="health-overview-label-v3">Pressão</div><div id="healthLatestPressureV3" class="health-overview-value-v3">-- / --</div><div id="healthLatestPressureSubV3" class="health-overview-sub-v3">Sem registro</div></div><div class="health-overview-item-v3"><div class="health-overview-label-v3">Glicose</div><div id="healthLatestGlucoseV3" class="health-overview-value-v3">--</div><div id="healthLatestGlucoseSubV3" class="health-overview-sub-v3">Sem registro</div></div></div>`;
+    card.innerHTML = `<div class="health-overview-head-v3"><div><strong>Resumo de saúde da Luma</strong><small>Pressão, glicose e contexto dos seus registros</small></div><span id="healthLumaStatusV4" class="health-overview-pill-v3 neutral"><i class="bi bi-heart-pulse"></i> Sem medições hoje</span></div><div class="health-overview-grid-v3"><div class="health-overview-item-v3"><div class="health-overview-label-v3">Pressão</div><div id="healthLatestPressureV3" class="health-overview-value-v3">-- / --</div><div id="healthLatestPressureSubV3" class="health-overview-sub-v3">Sem registro</div></div><div class="health-overview-item-v3"><div class="health-overview-label-v3">Glicose</div><div id="healthLatestGlucoseV3" class="health-overview-value-v3">--</div><div id="healthLatestGlucoseSubV3" class="health-overview-sub-v3">Sem registro</div></div></div><div class="health-luma-summary-v4"><strong><i class="bi bi-stars"></i> Leitura da Luma</strong><p id="healthLumaSummaryTextV4">Registre pressão ou glicose para receber um resumo de hoje.</p><small>Resumo informativo baseado somente nos dados registrados no app. Não é diagnóstico médico.</small></div>`;
     header.insertAdjacentElement("afterend", card);
   }
 
@@ -111,12 +214,41 @@
 
   function atualizarResumo() {
     const dados = ordenar(historico()).reverse();
+    const hoje = hojeISO();
     const p = dados.find(i => i && i.pressao);
     const g = dados.find(i => i && i.glicose);
+    const pHoje = dados.find(i => i && i.dataRaw === hoje && i.pressao);
+    const gHoje = dados.find(i => i && i.dataRaw === hoje && i.glicose);
+    const cpHoje = classificarPressao(pHoje);
+    const cgHoje = classificarGlicose(gHoje);
+
     if ($("healthLatestPressureV3")) $("healthLatestPressureV3").textContent = p ? `${p.pressao.sistolica || "--"} / ${p.pressao.diastolica || "--"}` : "-- / --";
-    if ($("healthLatestPressureSubV3")) $("healthLatestPressureSubV3").textContent = p ? `${dataCurta(p.dataRaw)}${p.pressao.batimentos ? ` • ${p.pressao.batimentos} bpm` : ""}` : "Sem registro";
+    if ($("healthLatestPressureSubV3")) {
+      if (pHoje && cpHoje) {
+        const bpm = pHoje.pressao.batimentos ? ` • ${pHoje.pressao.batimentos} bpm` : "";
+        $("healthLatestPressureSubV3").textContent = `Hoje • ${cpHoje.rotulo}${bpm}`;
+      } else {
+        $("healthLatestPressureSubV3").textContent = p ? `${dataCurta(p.dataRaw)}${p.pressao.batimentos ? ` • ${p.pressao.batimentos} bpm` : ""}` : "Sem registro";
+      }
+    }
+
     if ($("healthLatestGlucoseV3")) $("healthLatestGlucoseV3").textContent = g ? `${g.glicose.valor || "--"} mg/dL` : "--";
-    if ($("healthLatestGlucoseSubV3")) $("healthLatestGlucoseSubV3").textContent = g ? `${dataCurta(g.dataRaw)}${g.glicose.momento ? ` • ${momento(g.glicose.momento)}` : ""}` : "Sem registro";
+    if ($("healthLatestGlucoseSubV3")) {
+      if (gHoje && cgHoje) {
+        $("healthLatestGlucoseSubV3").textContent = `Hoje • ${cgHoje.rotulo}${gHoje.glicose.momento ? ` • ${momento(gHoje.glicose.momento)}` : ""}`;
+      } else {
+        $("healthLatestGlucoseSubV3").textContent = g ? `${dataCurta(g.dataRaw)}${g.glicose.momento ? ` • ${momento(g.glicose.momento)}` : ""}` : "Sem registro";
+      }
+    }
+
+    const leitura = resumoHoje(dados);
+    const pill = $("healthLumaStatusV4");
+    if (pill) {
+      pill.classList.remove("attention","alert","neutral");
+      if (leitura.classe && leitura.classe !== "ok") pill.classList.add(leitura.classe);
+      pill.innerHTML = `<i class="bi ${leitura.prioridade >= 3 ? "bi-exclamation-triangle" : leitura.prioridade === 2 ? "bi-exclamation-circle" : leitura.prioridade === 1 ? "bi-shield-check" : "bi-heart-pulse"}"></i> ${leitura.rotulo}`;
+    }
+    if ($("healthLumaSummaryTextV4")) $("healthLumaSummaryTextV4").textContent = leitura.texto;
   }
 
   function periodoDados() {

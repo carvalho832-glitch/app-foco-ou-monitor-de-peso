@@ -116,10 +116,25 @@
     if (prioridade >= 3) {
       fechamento = "Resumo dos dados de hoje: há um alerta importante em uma das medições. Se houver sintomas importantes ou mal-estar, procure atendimento.";
     } else if (prioridade === 2) {
-      const pontos = [];
-      if (cp && cp.prioridade === 2) pontos.push(`pressão ${cp.rotulo.toLowerCase()}`);
-      if (cg && cg.prioridade === 2) pontos.push(`glicose ${cg.rotulo.toLowerCase()}`);
-      fechamento = `Resumo dos dados de hoje: há ponto de atenção em ${pontos.join(" e ")}.`;
+      const partesAtencao = [];
+
+      if (cp && cp.prioridade === 2) {
+        if (cp.rotulo === "Baixa") partesAtencao.push("sua pressão está baixa e merece atenção no acompanhamento");
+        else partesAtencao.push("sua pressão merece atenção no acompanhamento");
+      }
+
+      if (cg && cg.prioridade === 2) {
+        if (cg.rotulo === "Baixa") partesAtencao.push("sua glicose está baixa e merece atenção");
+        else if (cg.rotulo.includes("jejum")) partesAtencao.push("sua glicose em jejum merece atenção");
+        else if (cg.rotulo.includes("após")) partesAtencao.push("sua glicose após a refeição merece atenção");
+        else partesAtencao.push("sua glicose merece atenção");
+      }
+
+      fechamento = `Resumo dos dados de hoje: ${partesAtencao.join(". ")}.`;
+
+      if (g && cg && cg.prioridade === 0 && g.glicose.momento) {
+        fechamento += ` A glicose foi registrada ${momento(g.glicose.momento).toLowerCase()} e será interpretada com cautela.`;
+      }
     } else {
       fechamento = "Resumo dos dados registrados hoje: não foi identificado alerta pelas faixas de acompanhamento do app.";
     }

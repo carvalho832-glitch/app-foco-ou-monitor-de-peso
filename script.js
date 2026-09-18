@@ -23,6 +23,14 @@ function byId(id) {
   return document.getElementById(id);
 }
 
+function dataLocalISOApp(data = new Date()) {
+  const d = data instanceof Date ? data : new Date(data);
+  const ano = d.getFullYear();
+  const mes = String(d.getMonth() + 1).padStart(2, "0");
+  const dia = String(d.getDate()).padStart(2, "0");
+  return `${ano}-${mes}-${dia}`;
+}
+
 function addListener(id, evento, funcao) {
   const elemento = byId(id);
 
@@ -878,7 +886,7 @@ function montarDadosMetaKcal() {
   const historicoTreinos = JSON.parse(localStorage.getItem("historicoTreinos") || "[]");
   const historicoSaude = obterHistoricoSaude();
 
-  const hojeISO = new Date().toISOString().split("T")[0];
+  const hojeISO = dataLocalISOApp();
   const altura = parseFloat(localStorage.getItem("usuarioAltura"));
   const metaPeso = localStorage.getItem("usuarioMeta") || "80.0";
 
@@ -900,6 +908,8 @@ function montarDadosMetaKcal() {
     metaPeso: metaPeso,
     historicoPeso: historicoPeso.slice(-10),
     diarioHoje: historicoAlimentacao[hojeISO] || null,
+    aguaConsumidaMl: Number((historicoAlimentacao[hojeISO] || {}).agua) || 0,
+    metaAguaMl: typeof obterMetaAguaDinamica === "function" ? obterMetaAguaDinamica() : 2000,
     ultimosTreinos: historicoTreinos.slice(-7),
     saudeHoje: obterSaudePorData(hojeISO),
     ultimosRegistrosSaude: historicoSaude.slice(-7),
@@ -1069,7 +1079,7 @@ function montarDadosParaIA() {
   const historicoAlimentacao = JSON.parse(localStorage.getItem("historicoAlimentacao") || "{}");
   const historicoTreinos = JSON.parse(localStorage.getItem("historicoTreinos") || "[]");
   const historicoSaude = obterHistoricoSaude();
-  const hojeISO = new Date().toISOString().split("T")[0];
+  const hojeISO = dataLocalISOApp();
 
   return {
     dataHoje: hojeISO,
@@ -1079,6 +1089,8 @@ function montarDadosParaIA() {
     metaPeso: localStorage.getItem("usuarioMeta") || "80.0",
     historicoPeso: historicoPeso.slice(-10),
     diarioHoje: historicoAlimentacao[hojeISO] || null,
+    aguaConsumidaMl: Number((historicoAlimentacao[hojeISO] || {}).agua) || 0,
+    metaAguaMl: typeof obterMetaAguaDinamica === "function" ? obterMetaAguaDinamica() : 2000,
     ultimosTreinos: historicoTreinos.slice(-5),
     saudeHoje: obterSaudePorData(hojeISO),
     ultimosRegistrosSaude: historicoSaude.slice(-7),
@@ -1205,7 +1217,7 @@ function montarDadosTreinoIA() {
   const historicoTreinos = JSON.parse(localStorage.getItem("historicoTreinos") || "[]");
   const historicoSaude = obterHistoricoSaude();
 
-  const hojeISO = new Date().toISOString().split("T")[0];
+  const hojeISO = dataLocalISOApp();
   const altura = parseFloat(localStorage.getItem("usuarioAltura"));
   const metaPeso = localStorage.getItem("usuarioMeta") || "80.0";
 
@@ -1466,7 +1478,7 @@ function gerarLeituraSaude(registro) {
 }
 
 function gerarContextoSaudeLuma() {
-  const hojeISO = new Date().toISOString().split("T")[0];
+  const hojeISO = dataLocalISOApp();
   const historico = obterHistoricoSaude().sort((a, b) => a.id - b.id);
 
   const saudeHoje = obterSaudePorData(hojeISO);
@@ -1632,7 +1644,7 @@ function gerarContextoSaudeLuma() {
 function montarBlocoSaudeParaTela(tipo = "plano") {
   const contexto = gerarContextoSaudeLuma();
 
-  if (!contexto.temDados) return "";
+  if (!contexto.temDados || contexto.nivel === "normal") return "";
 
   const titulo = "🩺 Ajuste de saúde da Luma";
 

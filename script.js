@@ -2426,13 +2426,15 @@ function fecharModalTreino() {
 const itensPreProgramados = {
   cafe: ["Pão Francês", "Fruta", "Iogurte", "Café Preto", "Suco", "Ovos", "Biscoito"],
   almoco: ["Arroz", "Feijão", "Frango", "Carne", "Salada", "Legumes", "Macarrão"],
-  jantar: ["Sopa", "Salada", "Frango", "Omelete", "Pão", "Iogurte", "Fruta"]
+  jantar: ["Sopa", "Salada", "Frango", "Omelete", "Pão", "Iogurte", "Fruta"],
+  ceia: ["Iogurte", "Fruta", "Leite", "Chá", "Aveia", "Castanhas", "Pão"]
 };
 
 let refeicoesAtuais = {
   cafe: [],
   almoco: [],
   jantar: [],
+  ceia: [],
   agua: 0,
   kcal: null,
   assinaturaKcal: null
@@ -2440,7 +2442,7 @@ let refeicoesAtuais = {
 
 function configurarDataAlimentacaoPadrao() {
   if (byId("dataAlimentacaoInput")) {
-    byId("dataAlimentacaoInput").value = new Date().toISOString().split("T")[0];
+    byId("dataAlimentacaoInput").value = typeof dataLocalISOApp === "function" ? dataLocalISOApp() : new Date().toISOString().split("T")[0];
   }
 }
 
@@ -2459,6 +2461,7 @@ function carregarRefeicoesDoDia() {
     if (!Array.isArray(refeicoesAtuais.cafe)) refeicoesAtuais.cafe = [];
     if (!Array.isArray(refeicoesAtuais.almoco)) refeicoesAtuais.almoco = [];
     if (!Array.isArray(refeicoesAtuais.jantar)) refeicoesAtuais.jantar = [];
+    if (!Array.isArray(refeicoesAtuais.ceia)) refeicoesAtuais.ceia = [];
     if (typeof refeicoesAtuais.kcal === "undefined") refeicoesAtuais.kcal = null;
     if (typeof refeicoesAtuais.assinaturaKcal === "undefined") refeicoesAtuais.assinaturaKcal = null;
 
@@ -2467,6 +2470,7 @@ function carregarRefeicoesDoDia() {
       cafe: [],
       almoco: [],
       jantar: [],
+      ceia: [],
       agua: 0,
       kcal: null,
       assinaturaKcal: null
@@ -2516,7 +2520,7 @@ function renderizarAgua() {
 }
 
 function renderizarTagsDeComida() {
-  ["cafe", "almoco", "jantar"].forEach(refeicao => {
+  ["cafe", "almoco", "jantar", "ceia"].forEach(refeicao => {
     const container = byId(`tags-${refeicao}`);
 
     if (!container) return;
@@ -2583,7 +2587,8 @@ function obterAssinaturaRefeicoes() {
   return JSON.stringify({
     cafe: [...(refeicoesAtuais.cafe || [])].sort(),
     almoco: [...(refeicoesAtuais.almoco || [])].sort(),
-    jantar: [...(refeicoesAtuais.jantar || [])].sort()
+    jantar: [...(refeicoesAtuais.jantar || [])].sort(),
+    ceia: [...(refeicoesAtuais.ceia || [])].sort()
   });
 }
 
@@ -2604,6 +2609,7 @@ function renderizarCalorias() {
   if (byId("kcal-cafe")) byId("kcal-cafe").innerText = kcal && typeof kcal.cafe !== "undefined" ? kcal.cafe : "--";
   if (byId("kcal-almoco")) byId("kcal-almoco").innerText = kcal && typeof kcal.almoco !== "undefined" ? kcal.almoco : "--";
   if (byId("kcal-jantar")) byId("kcal-jantar").innerText = kcal && typeof kcal.jantar !== "undefined" ? kcal.jantar : "--";
+  if (byId("kcal-ceia")) byId("kcal-ceia").innerText = kcal && typeof kcal.ceia !== "undefined" ? kcal.ceia : "--";
   if (byId("kcal-total")) byId("kcal-total").innerText = kcal && typeof kcal.total !== "undefined" ? kcal.total : "--";
 
   const metaDisplay = byId("kcal-meta-luma");
@@ -2686,7 +2692,8 @@ async function salvarRefeicoes() {
   const temAlimento =
     refeicoesAtuais.cafe.length > 0 ||
     refeicoesAtuais.almoco.length > 0 ||
-    refeicoesAtuais.jantar.length > 0;
+    refeicoesAtuais.jantar.length > 0 ||
+    refeicoesAtuais.ceia.length > 0;
 
   try {
     if (temAlimento && refeicoesAtuais.assinaturaKcal !== assinaturaAtual) {
@@ -2696,6 +2703,7 @@ async function salvarRefeicoes() {
         cafe: Number(calorias.cafe) || 0,
         almoco: Number(calorias.almoco) || 0,
         jantar: Number(calorias.jantar) || 0,
+        ceia: Number(calorias.ceia) || 0,
         total: Number(calorias.total) || 0,
         observacao: calorias.observacao || "Estimativa aproximada calculada pela Luma."
       };
@@ -2708,6 +2716,7 @@ async function salvarRefeicoes() {
         cafe: 0,
         almoco: 0,
         jantar: 0,
+        ceia: 0,
         total: 0,
         observacao: "Nenhum alimento registrado."
       };
@@ -2760,6 +2769,7 @@ async function calcularCaloriasComIA() {
     cafe: refeicoesAtuais.cafe || [],
     almoco: refeicoesAtuais.almoco || [],
     jantar: refeicoesAtuais.jantar || [],
+    ceia: refeicoesAtuais.ceia || [],
     agua: refeicoesAtuais.agua || 0,
     data: dataAtual,
     saudeHoje: obterSaudePorData(dataAtual),

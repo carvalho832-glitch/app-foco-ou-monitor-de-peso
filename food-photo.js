@@ -67,7 +67,7 @@
       botao.type = "button";
       botao.className = "foto-refeicao-inline-btn";
       botao.innerHTML = `<i class="bi bi-camera"></i> Foto`;
-      botao.setAttribute("aria-label", `Analisar foto do ${NOMES_REFEICOES[refeicao]}`);
+      botao.setAttribute("aria-label", `Analisar foto: ${NOMES_REFEICOES[refeicao]}`);
 
       botao.addEventListener("click", function () {
         const input = document.getElementById("inputFotoRefeicaoLuma");
@@ -191,7 +191,7 @@
 
     try {
       botoes.forEach((botao) => botao.disabled = true);
-      if (status) status.innerText = `📸 Luma analisando a foto do ${NOMES_REFEICOES[refeicao]}...`;
+      if (status) status.innerText = `📸 Luma analisando ${NOMES_REFEICOES[refeicao].toLowerCase()}...`;
 
       const imagem = await reduzirImagemParaBase64(arquivo);
 
@@ -222,7 +222,7 @@
         const nomes = itens.map((item) => item.nome).filter(Boolean).join(", ");
 
         status.innerText =
-          `✅ ${NOMES_REFEICOES[refeicao]} analisado: ${nomes || "itens adicionados"}.\n` +
+          `✅ ${NOMES_REFEICOES[refeicao]}: ${nomes || "itens adicionados"}.\n` +
           `🔥 Estimativa: ${Number(analise.totalKcal) || 0} kcal. Toque em Salvar Diário para guardar.`;
       }
 

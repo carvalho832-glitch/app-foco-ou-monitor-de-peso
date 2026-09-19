@@ -887,6 +887,7 @@ function montarDadosMetaKcal() {
   const historicoSaude = obterHistoricoSaude();
 
   const hojeISO = dataLocalISOApp();
+  const diarioHoje = historicoAlimentacao[hojeISO] || null;
   const altura = parseFloat(localStorage.getItem("usuarioAltura"));
   const metaPeso = localStorage.getItem("usuarioMeta") || "80.0";
 
@@ -1090,8 +1091,9 @@ function montarDadosParaIA() {
     altura: localStorage.getItem("usuarioAltura"),
     metaPeso: localStorage.getItem("usuarioMeta") || "80.0",
     historicoPeso: historicoPeso.slice(-10),
-    diarioHoje: historicoAlimentacao[hojeISO] || null,
-    aguaConsumidaMl: Number((historicoAlimentacao[hojeISO] || {}).agua) || 0,
+    diarioHoje,
+    horariosRefeicoesHoje: diarioHoje && diarioHoje.registrosFoto ? diarioHoje.registrosFoto : null,
+    aguaConsumidaMl: Number((diarioHoje || {}).agua) || 0,
     metaAguaMl: typeof obterMetaAguaDinamica === "function" ? obterMetaAguaDinamica() : 2000,
     ultimosTreinos: historicoTreinos.slice(-5),
     saudeHoje: obterSaudePorData(hojeISO),

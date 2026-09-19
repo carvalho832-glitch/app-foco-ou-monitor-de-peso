@@ -1,11 +1,11 @@
-const CACHE_NAME = "monitor-peso-v62-meal-photo-times";
+const CACHE_NAME = "monitor-peso-v63-meal-photo-times";
 
 const APP_FILES = [
   "./",
   "./index.html",
   "./style.css?v=19",
   "./menu-animated.css?v=47",
-  "./script.js?v=20",
+  "./script.js?v=21",
   "./cloud-loader.js?v=6",
   "./dashboard-v2.js?v=2",
   "./health-v3.js?v=3",

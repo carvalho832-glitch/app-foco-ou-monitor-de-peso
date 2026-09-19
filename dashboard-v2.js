@@ -299,7 +299,7 @@
     if (acao === "refeicao") {
       irParaAba("alimentacao");
       const hora = new Date().getHours();
-      const id = hora < 11 ? "custom-cafe" : hora < 17 ? "custom-almoco" : "custom-jantar";
+      const id = hora < 11 ? "custom-cafe" : hora < 17 ? "custom-almoco" : hora < 21 ? "custom-jantar" : "custom-ceia";
       rolarPara(document.getElementById(id));
       return;
     }

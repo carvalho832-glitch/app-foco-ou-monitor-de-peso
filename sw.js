@@ -1,15 +1,15 @@
-const CACHE_NAME = "monitor-peso-v60-luma-health-wording";
+const CACHE_NAME = "monitor-peso-v61-ceia-photo";
 
 const APP_FILES = [
   "./",
   "./index.html",
   "./style.css?v=18",
   "./menu-animated.css?v=47",
-  "./script.js?v=18",
+  "./script.js?v=19",
   "./cloud-loader.js?v=5",
-  "./dashboard-v2.js?v=1",
+  "./dashboard-v2.js?v=2",
   "./health-v3.js?v=3",
-  "./food-v3.js?v=1",
+  "./food-v3.js?v=2",
   "./account-v3.js?v=1",
   "./third-wave-v4.js?v=1",
   "./third-wave-goals-sync.js?v=1",
@@ -18,7 +18,7 @@ const APP_FILES = [
   "./firebase-config.js?v=1",
   "./firebase-cloud.js?v=2",
   "./native-backup.js?v=1",
-  "./food-photo.js?v=3",
+  "./food-photo.js?v=4",
   "./manifest.json",
   "./icon.svg"
 ];

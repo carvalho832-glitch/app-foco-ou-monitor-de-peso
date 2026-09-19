@@ -216,14 +216,25 @@
 
       aplicarAnaliseNaRefeicao(resultado.analise || {}, refeicao);
 
+      const registroHorario = typeof registrarHorarioFotoRefeicao === "function"
+        ? registrarHorarioFotoRefeicao(refeicao)
+        : null;
+
       if (status) {
         const analise = resultado.analise || {};
         const itens = Array.isArray(analise.itens) ? analise.itens : [];
         const nomes = itens.map((item) => item.nome).filter(Boolean).join(", ");
+        const horario = registroHorario && registroHorario.horario
+          ? registroHorario.horario
+          : new Date().toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+        const leituraHorario = String(analise.observacaoHorario || "").trim();
 
         status.innerText =
           `✅ ${NOMES_REFEICOES[refeicao]}: ${nomes || "itens adicionados"}.\n` +
-          `🔥 Estimativa: ${Number(analise.totalKcal) || 0} kcal. Toque em Salvar Diário para guardar.`;
+          `🔥 Estimativa: ${Number(analise.totalKcal) || 0} kcal.\n` +
+          `🕒 Foto registrada às ${horario}.` +
+          (leituraHorario ? ` ${leituraHorario}` : "") +
+          "\n💾 Foto, alimentos e horário salvos automaticamente.";
       }
 
     } catch (erro) {
@@ -244,23 +255,36 @@
   function montarContextoFotoRefeicao(refeicao) {
     let contextoSaude = null;
     let saudeHoje = null;
+    const agora = new Date();
+    const inputData = document.getElementById("dataAlimentacaoInput");
+    const dataAtual = inputData && inputData.value
+      ? inputData.value
+      : `${agora.getFullYear()}-${String(agora.getMonth() + 1).padStart(2, "0")}-${String(agora.getDate()).padStart(2, "0")}`;
 
     try {
       if (typeof gerarContextoSaudeLuma === "function") contextoSaude = gerarContextoSaudeLuma();
 
       if (typeof obterSaudePorData === "function") {
-        const dataAtual = document.getElementById("dataAlimentacaoInput")
-          ? document.getElementById("dataAlimentacaoInput").value
-          : new Date().toISOString().split("T")[0];
-
         saudeHoje = obterSaudePorData(dataAtual);
       }
     } catch (erro) {
       console.warn("Contexto de saúde indisponível para foto:", erro);
     }
 
+    let registrosFotoAnteriores = null;
+
+    try {
+      if (typeof refeicoesAtuais !== "undefined" && refeicoesAtuais.registrosFoto) {
+        registrosFotoAnteriores = JSON.parse(JSON.stringify(refeicoesAtuais.registrosFoto));
+      }
+    } catch (_) {}
+
     return {
       refeicao,
+      dataDiario: dataAtual,
+      horarioLocal: agora.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" }),
+      dataHoraISO: agora.toISOString(),
+      registrosFotoAnteriores,
       perfilUsuario: typeof obterPerfilUsuario === "function" ? obterPerfilUsuario() : null,
       metaKcalLuma: typeof obterMetaKcalSalva === "function" ? obterMetaKcalSalva() : null,
       saudeHoje,

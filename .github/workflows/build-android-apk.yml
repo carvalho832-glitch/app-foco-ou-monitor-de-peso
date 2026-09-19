@@ -1,0 +1,133 @@
+name: Build Android APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+      - feature/firebase-android-apk
+    paths:
+      - "*.html"
+      - "*.css"
+      - "*.js"
+      - "*.json"
+      - "scripts/**"
+      - "android-signing/**"
+      - "package.json"
+      - "capacitor.config.json"
+      - ".github/workflows/build-android-apk.yml"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "*.html"
+      - "*.css"
+      - "*.js"
+      - "*.json"
+      - "scripts/**"
+      - "android-signing/**"
+      - "package.json"
+      - "capacitor.config.json"
+      - ".github/workflows/build-android-apk.yml"
+
+jobs:
+  build-apk:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Prepare web assets
+        run: npm run prepare:web
+
+      - name: Add Android platform
+        run: npx cap add android
+
+      - name: Sync Capacitor
+        run: npx cap sync android
+
+      - name: Configure stable development signing
+        env:
+          EVOLUAFIT_DEV_STORE_PASSWORD: EvoluaFitDev2026!
+          EVOLUAFIT_DEV_KEY_PASSWORD: EvoluaFitDev2026!
+        run: |
+          base64 --decode android-signing/evoluafit-dev.jks.b64 > android/evoluafit-dev.jks
+          python - <<'PY'
+          from pathlib import Path
+          import os, re
+
+          p = Path('android/app/build.gradle')
+          s = p.read_text()
+          run_number = int(os.environ.get('GITHUB_RUN_NUMBER', '1'))
+
+          s = re.sub(r'versionCode\s+\d+', f'versionCode {run_number}', s, count=1)
+          s = re.sub(r'versionName\s+"[^"]+"', f'versionName "1.0.{run_number}"', s, count=1)
+
+          if 'evoluaFitDev {' not in s:
+              signing = '''    signingConfigs {\n        evoluaFitDev {\n            storeFile file("../evoluafit-dev.jks")\n            storePassword System.getenv("EVOLUAFIT_DEV_STORE_PASSWORD")\n            keyAlias "evoluafit-dev"\n            keyPassword System.getenv("EVOLUAFIT_DEV_KEY_PASSWORD")\n        }\n    }\n'''
+              s = s.replace('android {\n', 'android {\n' + signing, 1)
+
+          if 'signingConfig signingConfigs.evoluaFitDev' not in s:
+              s = s.replace(
+                  'buildTypes {',
+                  'buildTypes {\n        debug {\n            signingConfig signingConfigs.evoluaFitDev\n        }',
+                  1
+              )
+
+          p.write_text(s)
+          print(f'Configured versionCode={run_number}, versionName=1.0.{run_number}')
+          PY
+
+      - name: Add location permissions
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('android/app/src/main/AndroidManifest.xml')
+          s = p.read_text()
+          permissions = (
+              '    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />\n'
+              '    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />\n'
+          )
+          if 'android.permission.ACCESS_FINE_LOCATION' not in s:
+              s = s.replace('<application', permissions + '\n    <application', 1)
+              p.write_text(s)
+          PY
+
+      - name: Build debug APK
+        working-directory: android
+        env:
+          EVOLUAFIT_DEV_STORE_PASSWORD: EvoluaFitDev2026!
+          EVOLUAFIT_DEV_KEY_PASSWORD: EvoluaFitDev2026!
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleDebug --no-daemon
+
+      - name: Verify APK signature
+        run: |
+          APKSIGNER=$(find "$ANDROID_HOME/build-tools" -type f -name apksigner | sort -V | tail -n 1)
+          "$APKSIGNER" verify --verbose --print-certs android/app/build/outputs/apk/debug/app-debug.apk
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: EvoluaFit-debug-apk
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+          retention-days: 14

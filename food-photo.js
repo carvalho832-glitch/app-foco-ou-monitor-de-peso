@@ -6,7 +6,8 @@
   const NOMES_REFEICOES = {
     cafe: "Café",
     almoco: "Almoço",
-    jantar: "Jantar"
+    jantar: "Jantar",
+    ceia: "Ceia"
   };
 
   document.addEventListener("DOMContentLoaded", iniciarFotoRefeicaoLuma);
@@ -54,7 +55,7 @@
   }
 
   function inserirBotoesNasRefeicoes() {
-    ["cafe", "almoco", "jantar"].forEach((refeicao) => {
+    ["cafe", "almoco", "jantar", "ceia"].forEach((refeicao) => {
       const customInput = document.getElementById(`custom-${refeicao}`);
       const tagsContainer = document.getElementById(`tags-${refeicao}`);
 
@@ -291,6 +292,7 @@
         cafe: 0,
         almoco: 0,
         jantar: 0,
+        ceia: 0,
         total: 0,
         observacao: "Estimativa aproximada pela foto."
       };
@@ -300,7 +302,8 @@
     refeicoesAtuais.kcal.total =
       (Number(refeicoesAtuais.kcal.cafe) || 0) +
       (Number(refeicoesAtuais.kcal.almoco) || 0) +
-      (Number(refeicoesAtuais.kcal.jantar) || 0);
+      (Number(refeicoesAtuais.kcal.jantar) || 0) +
+      (Number(refeicoesAtuais.kcal.ceia) || 0);
 
     refeicoesAtuais.kcal.observacao = analise.observacao || "Calorias estimadas pela foto. Ajuste as porções se necessário.";
 

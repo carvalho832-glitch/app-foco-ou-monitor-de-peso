@@ -1,12 +1,12 @@
-const CACHE_NAME = "monitor-peso-v61-ceia-photo";
+const CACHE_NAME = "monitor-peso-v62-meal-photo-times";
 
 const APP_FILES = [
   "./",
   "./index.html",
-  "./style.css?v=18",
+  "./style.css?v=19",
   "./menu-animated.css?v=47",
-  "./script.js?v=19",
-  "./cloud-loader.js?v=5",
+  "./script.js?v=20",
+  "./cloud-loader.js?v=6",
   "./dashboard-v2.js?v=2",
   "./health-v3.js?v=3",
   "./food-v3.js?v=2",
@@ -18,7 +18,7 @@ const APP_FILES = [
   "./firebase-config.js?v=1",
   "./firebase-cloud.js?v=2",
   "./native-backup.js?v=1",
-  "./food-photo.js?v=4",
+  "./food-photo.js?v=5",
   "./manifest.json",
   "./icon.svg"
 ];

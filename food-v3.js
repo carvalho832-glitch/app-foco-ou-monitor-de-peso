@@ -6,9 +6,9 @@
   const FAVORITOS_KEY = "evoluaFoodFavoritesV3";
   const $ = (id) => document.getElementById(id);
   const parse = (txt, fallback) => { try { const v = JSON.parse(txt); return v == null ? fallback : v; } catch (_) { return fallback; } };
-  const tipos = ["cafe","almoco","jantar"];
+  const tipos = ["cafe","almoco","jantar","ceia"];
 
-  function nome(tipo) { return ({cafe:"Café da manhã",almoco:"Almoço",jantar:"Jantar"})[tipo] || tipo; }
+  function nome(tipo) { return ({cafe:"Café da manhã",almoco:"Almoço",jantar:"Jantar",ceia:"Ceia"})[tipo] || tipo; }
   function normalizar(t) { return String(t || "").normalize("NFD").replace(/[\u0300-\u036f]/g,"").trim().toLowerCase(); }
   function isoLocal(d) { return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`; }
 
@@ -27,7 +27,7 @@
 
   function favoritos() {
     const s = parse(localStorage.getItem(FAVORITOS_KEY)||"{}",{});
-    return {cafe:Array.isArray(s.cafe)?s.cafe:[],almoco:Array.isArray(s.almoco)?s.almoco:[],jantar:Array.isArray(s.jantar)?s.jantar:[]};
+    return {cafe:Array.isArray(s.cafe)?s.cafe:[],almoco:Array.isArray(s.almoco)?s.almoco:[],jantar:Array.isArray(s.jantar)?s.jantar:[],ceia:Array.isArray(s.ceia)?s.ceia:[]};
   }
 
   function selecionados(tipo) {
@@ -53,7 +53,7 @@
   function aplicarGrupo(tipo,itens) { (itens||[]).forEach(i=>aplicarItem(tipo,i,true)); toast(`${nome(tipo)} favorita aplicada.`); }
 
   function recentes() {
-    const h=parse(localStorage.getItem("historicoAlimentacao")||"{}",{}), datas=Object.keys(h).sort().reverse().slice(0,14), out={cafe:[],almoco:[],jantar:[]};
+    const h=parse(localStorage.getItem("historicoAlimentacao")||"{}",{}), datas=Object.keys(h).sort().reverse().slice(0,14), out={cafe:[],almoco:[],jantar:[],ceia:[]};
     tipos.forEach(tipo=>{const vistos=new Set();datas.forEach(d=>{const arr=h[d]&&h[d][tipo];if(!Array.isArray(arr))return;arr.forEach(i=>{const txt=String(i||"").trim(),k=normalizar(txt);if(!txt||vistos.has(k))return;vistos.add(k);out[tipo].push(txt);});});out[tipo]=out[tipo].slice(0,8);});return out;
   }
 
@@ -70,7 +70,7 @@
 
   function copiarOntem() {
     const input=$("dataAlimentacaoInput"), atual=input&&input.value?input.value:new Date().toISOString().slice(0,10), d=new Date(`${atual}T12:00:00`);d.setDate(d.getDate()-1);const ontem=isoLocal(d), h=parse(localStorage.getItem("historicoAlimentacao")||"{}",{}), ant=h[ontem];
-    if(!ant){toast("Não encontrei diário salvo no dia anterior.");return;}const hoje=h[atual]||{};h[atual]={...hoje,cafe:Array.isArray(ant.cafe)?ant.cafe.slice():[],almoco:Array.isArray(ant.almoco)?ant.almoco.slice():[],jantar:Array.isArray(ant.jantar)?ant.jantar.slice():[],agua:Number(hoje.agua)||0,kcal:null,assinaturaKcal:null};localStorage.setItem("historicoAlimentacao",JSON.stringify(h));if(typeof window.carregarRefeicoesDoDia==="function")window.carregarRefeicoesDoDia();toast("Refeições de ontem copiadas. Revise e salve o diário.");
+    if(!ant){toast("Não encontrei diário salvo no dia anterior.");return;}const hoje=h[atual]||{};h[atual]={...hoje,cafe:Array.isArray(ant.cafe)?ant.cafe.slice():[],almoco:Array.isArray(ant.almoco)?ant.almoco.slice():[],jantar:Array.isArray(ant.jantar)?ant.jantar.slice():[],ceia:Array.isArray(ant.ceia)?ant.ceia.slice():[],agua:Number(hoje.agua)||0,kcal:null,assinaturaKcal:null};localStorage.setItem("historicoAlimentacao",JSON.stringify(h));if(typeof window.carregarRefeicoesDoDia==="function")window.carregarRefeicoesDoDia();toast("Refeições de ontem copiadas. Revise e salve o diário.");
   }
 
   function montar() {

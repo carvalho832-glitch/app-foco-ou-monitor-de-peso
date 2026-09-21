@@ -62,33 +62,53 @@
     return { prioridade:1, classe:"ok", rotulo:"Sem alerta", texto:`Sua pressão registrada hoje foi ${s}/${d} mmHg e não gerou alerta no app.` };
   }
 
+  function textoObservacaoGlicose(item) {
+    const observacao = item && item.glicose ? String(item.glicose.observacao || "").trim() : "";
+    if (!observacao) return "";
+    const limite = 180;
+    return observacao.length > limite ? observacao.slice(0, limite - 1).trim() + "…" : observacao;
+  }
+
   function classificarGlicose(item) {
     if (!item || !item.glicose) return null;
     const valor = Number(item.glicose.valor);
     const quando = item.glicose.momento || "";
+    const observacao = textoObservacaoGlicose(item);
+    const contextoExtra = observacao ? ` Contexto informado: “${observacao}”.` : "";
     if (!valor) return null;
 
     if (valor < 70) {
-      return { prioridade:2, classe:"attention", rotulo:"Baixa", texto:`Sua glicose registrada hoje foi ${valor} mg/dL e está baixa pela faixa de referência usada no app.` };
+      return { prioridade:2, classe:"attention", rotulo:"Baixa", texto:`Sua glicose registrada hoje foi ${valor} mg/dL e está baixa pela faixa de referência usada no app.${contextoExtra}` };
     }
 
     if (quando === "jejum") {
-      if (valor >= 126) return { prioridade:2, classe:"attention", rotulo:"Alta no jejum", texto:`Sua glicose em jejum hoje foi ${valor} mg/dL e está alta pela faixa de referência usada no app.` };
-      if (valor >= 100) return { prioridade:2, classe:"attention", rotulo:"Atenção no jejum", texto:`Sua glicose em jejum hoje foi ${valor} mg/dL e ficou acima da faixa de acompanhamento usada no app.` };
-      return { prioridade:1, classe:"ok", rotulo:"Sem alerta no jejum", texto:`Sua glicose em jejum hoje foi ${valor} mg/dL e não gerou alerta no app.` };
+      if (valor >= 126) return { prioridade:2, classe:"attention", rotulo:"Alta no jejum", texto:`Sua glicose em jejum hoje foi ${valor} mg/dL e está alta pela faixa de referência usada no app.${contextoExtra}` };
+      if (valor >= 100) return { prioridade:2, classe:"attention", rotulo:"Atenção no jejum", texto:`Sua glicose em jejum hoje foi ${valor} mg/dL e ficou acima da faixa de acompanhamento usada no app.${contextoExtra}` };
+      return { prioridade:1, classe:"ok", rotulo:"Sem alerta no jejum", texto:`Sua glicose em jejum hoje foi ${valor} mg/dL e não gerou alerta no app.${contextoExtra}` };
     }
 
     if (quando === "apos_refeicao") {
-      if (valor >= 250) return { prioridade:3, classe:"alert", rotulo:"Muito alta", texto:`Sua glicose após refeição hoje foi ${valor} mg/dL e está muito alta pela faixa de referência usada no app.` };
-      if (valor >= 180) return { prioridade:2, classe:"attention", rotulo:"Alta após refeição", texto:`Sua glicose após refeição hoje foi ${valor} mg/dL e está alta pela faixa de referência usada no app.` };
-      return { prioridade:1, classe:"ok", rotulo:"Sem alerta após refeição", texto:`Sua glicose após refeição hoje foi ${valor} mg/dL e não gerou alerta no app.` };
+      if (valor >= 250) return { prioridade:3, classe:"alert", rotulo:"Muito alta", texto:`Sua glicose após refeição hoje foi ${valor} mg/dL e está muito alta pela faixa de referência usada no app.${contextoExtra}` };
+      if (valor >= 180) return { prioridade:2, classe:"attention", rotulo:"Alta após refeição", texto:`Sua glicose após refeição hoje foi ${valor} mg/dL e está alta pela faixa de referência usada no app.${contextoExtra}` };
+      return { prioridade:1, classe:"ok", rotulo:"Sem alerta após refeição", texto:`Sua glicose após refeição hoje foi ${valor} mg/dL e não gerou alerta no app.${contextoExtra}` };
+    }
+
+    if (quando === "outro") {
+      return {
+        prioridade:0,
+        classe:"neutral",
+        rotulo:"Registrada",
+        texto: observacao
+          ? `Sua glicose registrada hoje foi ${valor} mg/dL (Outro). Contexto informado: “${observacao}”. A Luma considerou essa observação, mas mantém a interpretação cautelosa porque o registro não está classificado como jejum ou pós-refeição.`
+          : `Sua glicose registrada hoje foi ${valor} mg/dL (Outro). Não foi registrada uma observação adicional, então o app mantém a interpretação cautelosa.`
+      };
     }
 
     return {
       prioridade:0,
       classe:"neutral",
       rotulo:"Registrada",
-      texto:`Sua glicose registrada hoje foi ${valor} mg/dL${quando ? ` (${momento(quando)})` : ""}. O contexto informado não é suficiente para classificar esse valor com segurança no app.`
+      texto:`Sua glicose registrada hoje foi ${valor} mg/dL${quando ? ` (${momento(quando)})` : ""}.${contextoExtra} O contexto disponível não permite aplicar no app uma classificação específica de jejum ou pós-refeição.`
     };
   }
 
@@ -133,7 +153,13 @@
       fechamento = `Resumo dos dados de hoje: ${partesAtencao.join(". ")}.`;
 
       if (g && cg && cg.prioridade === 0 && g.glicose.momento) {
-        fechamento += ` A glicose foi registrada ${momento(g.glicose.momento).toLowerCase()} e será interpretada com cautela.`;
+        if (g.glicose.momento === "outro") {
+          fechamento += textoObservacaoGlicose(g)
+            ? " A observação da glicose registrada em “Outro” foi considerada na leitura."
+            : " A glicose foi marcada como “Outro” e permanece com interpretação cautelosa.";
+        } else {
+          fechamento += ` A glicose foi registrada em ${momento(g.glicose.momento).toLowerCase()} e será interpretada com cautela.`;
+        }
       }
     } else {
       fechamento = "Resumo dos dados registrados hoje: não foi identificado alerta pelas faixas de acompanhamento do app.";

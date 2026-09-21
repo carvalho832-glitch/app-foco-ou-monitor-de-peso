@@ -6,7 +6,8 @@
   const NOMES_REFEICOES = {
     cafe: "Café",
     almoco: "Almoço",
-    jantar: "Jantar"
+    jantar: "Jantar",
+    ceia: "Ceia"
   };
 
   document.addEventListener("DOMContentLoaded", iniciarFotoRefeicaoLuma);
@@ -54,7 +55,7 @@
   }
 
   function inserirBotoesNasRefeicoes() {
-    ["cafe", "almoco", "jantar"].forEach((refeicao) => {
+    ["cafe", "almoco", "jantar", "ceia"].forEach((refeicao) => {
       const customInput = document.getElementById(`custom-${refeicao}`);
       const tagsContainer = document.getElementById(`tags-${refeicao}`);
 
@@ -66,7 +67,7 @@
       botao.type = "button";
       botao.className = "foto-refeicao-inline-btn";
       botao.innerHTML = `<i class="bi bi-camera"></i> Foto`;
-      botao.setAttribute("aria-label", `Analisar foto do ${NOMES_REFEICOES[refeicao]}`);
+      botao.setAttribute("aria-label", `Analisar foto: ${NOMES_REFEICOES[refeicao]}`);
 
       botao.addEventListener("click", function () {
         const input = document.getElementById("inputFotoRefeicaoLuma");
@@ -190,7 +191,7 @@
 
     try {
       botoes.forEach((botao) => botao.disabled = true);
-      if (status) status.innerText = `📸 Luma analisando a foto do ${NOMES_REFEICOES[refeicao]}...`;
+      if (status) status.innerText = `📸 Luma analisando ${NOMES_REFEICOES[refeicao].toLowerCase()}...`;
 
       const imagem = await reduzirImagemParaBase64(arquivo);
 
@@ -215,14 +216,25 @@
 
       aplicarAnaliseNaRefeicao(resultado.analise || {}, refeicao);
 
+      const registroHorario = typeof registrarHorarioFotoRefeicao === "function"
+        ? registrarHorarioFotoRefeicao(refeicao)
+        : null;
+
       if (status) {
         const analise = resultado.analise || {};
         const itens = Array.isArray(analise.itens) ? analise.itens : [];
         const nomes = itens.map((item) => item.nome).filter(Boolean).join(", ");
+        const horario = registroHorario && registroHorario.horario
+          ? registroHorario.horario
+          : new Date().toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+        const leituraHorario = String(analise.observacaoHorario || "").trim();
 
         status.innerText =
-          `✅ ${NOMES_REFEICOES[refeicao]} analisado: ${nomes || "itens adicionados"}.\n` +
-          `🔥 Estimativa: ${Number(analise.totalKcal) || 0} kcal. Toque em Salvar Diário para guardar.`;
+          `✅ ${NOMES_REFEICOES[refeicao]}: ${nomes || "itens adicionados"}.\n` +
+          `🔥 Estimativa: ${Number(analise.totalKcal) || 0} kcal.\n` +
+          `🕒 Foto registrada às ${horario}.` +
+          (leituraHorario ? ` ${leituraHorario}` : "") +
+          "\n💾 Foto, alimentos e horário salvos automaticamente.";
       }
 
     } catch (erro) {
@@ -243,23 +255,36 @@
   function montarContextoFotoRefeicao(refeicao) {
     let contextoSaude = null;
     let saudeHoje = null;
+    const agora = new Date();
+    const inputData = document.getElementById("dataAlimentacaoInput");
+    const dataAtual = inputData && inputData.value
+      ? inputData.value
+      : `${agora.getFullYear()}-${String(agora.getMonth() + 1).padStart(2, "0")}-${String(agora.getDate()).padStart(2, "0")}`;
 
     try {
       if (typeof gerarContextoSaudeLuma === "function") contextoSaude = gerarContextoSaudeLuma();
 
       if (typeof obterSaudePorData === "function") {
-        const dataAtual = document.getElementById("dataAlimentacaoInput")
-          ? document.getElementById("dataAlimentacaoInput").value
-          : new Date().toISOString().split("T")[0];
-
         saudeHoje = obterSaudePorData(dataAtual);
       }
     } catch (erro) {
       console.warn("Contexto de saúde indisponível para foto:", erro);
     }
 
+    let registrosFotoAnteriores = null;
+
+    try {
+      if (typeof refeicoesAtuais !== "undefined" && refeicoesAtuais.registrosFoto) {
+        registrosFotoAnteriores = JSON.parse(JSON.stringify(refeicoesAtuais.registrosFoto));
+      }
+    } catch (_) {}
+
     return {
       refeicao,
+      dataDiario: dataAtual,
+      horarioLocal: agora.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" }),
+      dataHoraISO: agora.toISOString(),
+      registrosFotoAnteriores,
       perfilUsuario: typeof obterPerfilUsuario === "function" ? obterPerfilUsuario() : null,
       metaKcalLuma: typeof obterMetaKcalSalva === "function" ? obterMetaKcalSalva() : null,
       saudeHoje,
@@ -291,6 +316,7 @@
         cafe: 0,
         almoco: 0,
         jantar: 0,
+        ceia: 0,
         total: 0,
         observacao: "Estimativa aproximada pela foto."
       };
@@ -300,7 +326,8 @@
     refeicoesAtuais.kcal.total =
       (Number(refeicoesAtuais.kcal.cafe) || 0) +
       (Number(refeicoesAtuais.kcal.almoco) || 0) +
-      (Number(refeicoesAtuais.kcal.jantar) || 0);
+      (Number(refeicoesAtuais.kcal.jantar) || 0) +
+      (Number(refeicoesAtuais.kcal.ceia) || 0);
 
     refeicoesAtuais.kcal.observacao = analise.observacao || "Calorias estimadas pela foto. Ajuste as porções se necessário.";
 

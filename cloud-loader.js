@@ -9,9 +9,7 @@
     }
 
     const script = document.createElement("script");
-
     if (id) script.id = id;
-
     script.src = src;
     script.async = false;
 
@@ -21,7 +19,6 @@
 
     script.onerror = function () {
       console.log("Erro ao carregar:", src);
-
       if (callback) callback();
     };
 
@@ -41,25 +38,62 @@
     }
   }
 
-  function carregarFotoRefeicao() {
-    carregarScript("food-photo.js?v=3", "luma-food-photo-script");
+  function carregarExperiencia() {
+    carregarScript("dashboard-v2.js?v=2", "evoluafit-dashboard-v2");
+    carregarScript("health-v3.js?v=4", "evoluafit-health-v3");
+    carregarScript("food-v3.js?v=2", "evoluafit-food-v3");
+    carregarScript("account-v3.js?v=1", "evoluafit-account-v3");
+    carregarScript("third-wave-v4.js?v=1", "evoluafit-third-wave-v4");
+    carregarScript("third-wave-goals-sync.js?v=1", "evoluafit-third-wave-goals-sync");
+    carregarScript("third-wave-hotfix-v5.js?v=1", "evoluafit-third-wave-hotfix-v5");
+    carregarScript("luma-medication-v7.js?v=1", "evoluafit-luma-medication-v7");
   }
 
-  function carregarCloudSync() {
-    carregarScript("cloud-sync.js?v=2", "luma-cloud-sync-script", function () {
+  function carregarFotoRefeicao() {
+    carregarScript("food-photo.js?v=5", "luma-food-photo-script");
+  }
+
+  function carregarBackupNativo() {
+    carregarScript("native-backup.js?v=1", "evoluafit-native-backup");
+  }
+
+  function carregarIntegracaoFirebase() {
+    carregarScript("firebase-cloud.js?v=2", "evoluafit-firebase-cloud", function () {
+      carregarBackupNativo();
       setTimeout(dispararDOMContentLoadedExtra, 120);
       setTimeout(carregarFotoRefeicao, 250);
     });
   }
 
-  if (window.supabase && window.supabase.createClient) {
-    carregarCloudSync();
-    return;
+  function carregarFirestore() {
+    carregarScript(
+      "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore-compat.js",
+      "evoluafit-firebase-firestore",
+      carregarIntegracaoFirebase
+    );
   }
 
-  carregarScript(
-    "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2",
-    "luma-supabase-js",
-    carregarCloudSync
-  );
+  function carregarAuth() {
+    carregarScript(
+      "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth-compat.js",
+      "evoluafit-firebase-auth",
+      carregarFirestore
+    );
+  }
+
+  function carregarFirebaseApp() {
+    if (window.firebase && window.firebase.initializeApp) {
+      carregarAuth();
+      return;
+    }
+
+    carregarScript(
+      "https://www.gstatic.com/firebasejs/12.19.0/firebase-app-compat.js",
+      "evoluafit-firebase-app",
+      carregarAuth
+    );
+  }
+
+  carregarExperiencia();
+  carregarScript("firebase-config.js?v=1", "evoluafit-firebase-config", carregarFirebaseApp);
 })();

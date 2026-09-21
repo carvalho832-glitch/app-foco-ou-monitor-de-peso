@@ -9,7 +9,7 @@
 
   <title>EvoluaFit I.A. - Jornada Saudável</title>
 
-  <link rel="stylesheet" href="style.css?v=18">
+  <link rel="stylesheet" href="style.css?v=19">
   <link rel="stylesheet" href="menu-animated.css?v=47">
   <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
@@ -220,6 +220,8 @@
           </span>
         </div>
 
+        <div class="meal-photo-times" id="horarios-foto-cafe" hidden></div>
+
         <div class="food-tags" id="tags-cafe"></div>
 
         <div class="custom-food-input">
@@ -239,6 +241,8 @@
             <i class="bi bi-fire"></i> <span id="kcal-almoco">--</span> kcal
           </span>
         </div>
+
+        <div class="meal-photo-times" id="horarios-foto-almoco" hidden></div>
 
         <div class="food-tags" id="tags-almoco"></div>
 
@@ -260,12 +264,36 @@
           </span>
         </div>
 
+        <div class="meal-photo-times" id="horarios-foto-jantar" hidden></div>
+
         <div class="food-tags" id="tags-jantar"></div>
 
         <div class="custom-food-input">
           <input type="text" id="custom-jantar" placeholder="Outro item... (Ex: Sopa)">
 
           <button type="button" class="btn-add-food" onclick="adicionarComidaCustomizada('jantar')">
+            <i class="bi bi-plus-lg"></i>
+          </button>
+        </div>
+      </div>
+
+      <div class="card meal-card">
+        <div class="meal-title-row">
+          <h3><i class="bi bi-moon"></i> Ceia <span style="font-size:11px;color:var(--text-muted);font-weight:700;">(opcional)</span></h3>
+
+          <span class="kcal-refeicao">
+            <i class="bi bi-fire"></i> <span id="kcal-ceia">--</span> kcal
+          </span>
+        </div>
+
+        <div class="meal-photo-times" id="horarios-foto-ceia" hidden></div>
+
+        <div class="food-tags" id="tags-ceia"></div>
+
+        <div class="custom-food-input">
+          <input type="text" id="custom-ceia" placeholder="Outro item... (Ex: Iogurte)">
+
+          <button type="button" class="btn-add-food" onclick="adicionarComidaCustomizada('ceia')">
             <i class="bi bi-plus-lg"></i>
           </button>
         </div>
@@ -907,8 +935,8 @@
   <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-  <script src="script.js?v=17"></script>
-  <script src="cloud-loader.js?v=1"></script>
+  <script src="script.js?v=21"></script>
+  <script src="cloud-loader.js?v=7"></script>
 
   <script>
     if ("serviceWorker" in navigator) {

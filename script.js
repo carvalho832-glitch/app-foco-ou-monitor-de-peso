@@ -23,6 +23,14 @@ function byId(id) {
   return document.getElementById(id);
 }
 
+function dataLocalISOApp(data = new Date()) {
+  const d = data instanceof Date ? data : new Date(data);
+  const ano = d.getFullYear();
+  const mes = String(d.getMonth() + 1).padStart(2, "0");
+  const dia = String(d.getDate()).padStart(2, "0");
+  return `${ano}-${mes}-${dia}`;
+}
+
 function addListener(id, evento, funcao) {
   const elemento = byId(id);
 
@@ -878,7 +886,8 @@ function montarDadosMetaKcal() {
   const historicoTreinos = JSON.parse(localStorage.getItem("historicoTreinos") || "[]");
   const historicoSaude = obterHistoricoSaude();
 
-  const hojeISO = new Date().toISOString().split("T")[0];
+  const hojeISO = dataLocalISOApp();
+  const diarioHoje = historicoAlimentacao[hojeISO] || null;
   const altura = parseFloat(localStorage.getItem("usuarioAltura"));
   const metaPeso = localStorage.getItem("usuarioMeta") || "80.0";
 
@@ -899,7 +908,10 @@ function montarDadosMetaKcal() {
     imc: imc ? Number(imc.toFixed(1)) : null,
     metaPeso: metaPeso,
     historicoPeso: historicoPeso.slice(-10),
-    diarioHoje: historicoAlimentacao[hojeISO] || null,
+    diarioHoje,
+    horariosRefeicoesHoje: diarioHoje && diarioHoje.registrosFoto ? diarioHoje.registrosFoto : null,
+    aguaConsumidaMl: Number((diarioHoje || {}).agua) || 0,
+    metaAguaMl: typeof obterMetaAguaDinamica === "function" ? obterMetaAguaDinamica() : 2000,
     ultimosTreinos: historicoTreinos.slice(-7),
     saudeHoje: obterSaudePorData(hojeISO),
     ultimosRegistrosSaude: historicoSaude.slice(-7),
@@ -1069,7 +1081,8 @@ function montarDadosParaIA() {
   const historicoAlimentacao = JSON.parse(localStorage.getItem("historicoAlimentacao") || "{}");
   const historicoTreinos = JSON.parse(localStorage.getItem("historicoTreinos") || "[]");
   const historicoSaude = obterHistoricoSaude();
-  const hojeISO = new Date().toISOString().split("T")[0];
+  const hojeISO = dataLocalISOApp();
+  const diarioHoje = historicoAlimentacao[hojeISO] || null;
 
   return {
     dataHoje: hojeISO,
@@ -1078,7 +1091,10 @@ function montarDadosParaIA() {
     altura: localStorage.getItem("usuarioAltura"),
     metaPeso: localStorage.getItem("usuarioMeta") || "80.0",
     historicoPeso: historicoPeso.slice(-10),
-    diarioHoje: historicoAlimentacao[hojeISO] || null,
+    diarioHoje,
+    horariosRefeicoesHoje: diarioHoje && diarioHoje.registrosFoto ? diarioHoje.registrosFoto : null,
+    aguaConsumidaMl: Number((diarioHoje || {}).agua) || 0,
+    metaAguaMl: typeof obterMetaAguaDinamica === "function" ? obterMetaAguaDinamica() : 2000,
     ultimosTreinos: historicoTreinos.slice(-5),
     saudeHoje: obterSaudePorData(hojeISO),
     ultimosRegistrosSaude: historicoSaude.slice(-7),
@@ -1205,7 +1221,7 @@ function montarDadosTreinoIA() {
   const historicoTreinos = JSON.parse(localStorage.getItem("historicoTreinos") || "[]");
   const historicoSaude = obterHistoricoSaude();
 
-  const hojeISO = new Date().toISOString().split("T")[0];
+  const hojeISO = dataLocalISOApp();
   const altura = parseFloat(localStorage.getItem("usuarioAltura"));
   const metaPeso = localStorage.getItem("usuarioMeta") || "80.0";
 
@@ -1466,7 +1482,7 @@ function gerarLeituraSaude(registro) {
 }
 
 function gerarContextoSaudeLuma() {
-  const hojeISO = new Date().toISOString().split("T")[0];
+  const hojeISO = dataLocalISOApp();
   const historico = obterHistoricoSaude().sort((a, b) => a.id - b.id);
 
   const saudeHoje = obterSaudePorData(hojeISO);
@@ -1632,7 +1648,7 @@ function gerarContextoSaudeLuma() {
 function montarBlocoSaudeParaTela(tipo = "plano") {
   const contexto = gerarContextoSaudeLuma();
 
-  if (!contexto.temDados) return "";
+  if (!contexto.temDados || contexto.nivel === "normal") return "";
 
   const titulo = "🩺 Ajuste de saúde da Luma";
 
@@ -2414,13 +2430,21 @@ function fecharModalTreino() {
 const itensPreProgramados = {
   cafe: ["Pão Francês", "Fruta", "Iogurte", "Café Preto", "Suco", "Ovos", "Biscoito"],
   almoco: ["Arroz", "Feijão", "Frango", "Carne", "Salada", "Legumes", "Macarrão"],
-  jantar: ["Sopa", "Salada", "Frango", "Omelete", "Pão", "Iogurte", "Fruta"]
+  jantar: ["Sopa", "Salada", "Frango", "Omelete", "Pão", "Iogurte", "Fruta"],
+  ceia: ["Iogurte", "Fruta", "Leite", "Chá", "Aveia", "Castanhas", "Pão"]
 };
 
 let refeicoesAtuais = {
   cafe: [],
   almoco: [],
   jantar: [],
+  ceia: [],
+  registrosFoto: {
+    cafe: [],
+    almoco: [],
+    jantar: [],
+    ceia: []
+  },
   agua: 0,
   kcal: null,
   assinaturaKcal: null
@@ -2428,7 +2452,7 @@ let refeicoesAtuais = {
 
 function configurarDataAlimentacaoPadrao() {
   if (byId("dataAlimentacaoInput")) {
-    byId("dataAlimentacaoInput").value = new Date().toISOString().split("T")[0];
+    byId("dataAlimentacaoInput").value = typeof dataLocalISOApp === "function" ? dataLocalISOApp() : new Date().toISOString().split("T")[0];
   }
 }
 
@@ -2447,6 +2471,8 @@ function carregarRefeicoesDoDia() {
     if (!Array.isArray(refeicoesAtuais.cafe)) refeicoesAtuais.cafe = [];
     if (!Array.isArray(refeicoesAtuais.almoco)) refeicoesAtuais.almoco = [];
     if (!Array.isArray(refeicoesAtuais.jantar)) refeicoesAtuais.jantar = [];
+    if (!Array.isArray(refeicoesAtuais.ceia)) refeicoesAtuais.ceia = [];
+    garantirRegistrosFotoRefeicoes();
     if (typeof refeicoesAtuais.kcal === "undefined") refeicoesAtuais.kcal = null;
     if (typeof refeicoesAtuais.assinaturaKcal === "undefined") refeicoesAtuais.assinaturaKcal = null;
 
@@ -2455,15 +2481,96 @@ function carregarRefeicoesDoDia() {
       cafe: [],
       almoco: [],
       jantar: [],
+      ceia: [],
+      registrosFoto: {
+        cafe: [],
+        almoco: [],
+        jantar: [],
+        ceia: []
+      },
       agua: 0,
       kcal: null,
       assinaturaKcal: null
     };
   }
 
+  garantirRegistrosFotoRefeicoes();
   renderizarTagsDeComida();
   renderizarAgua();
   renderizarCalorias();
+  renderizarHorariosFotoRefeicoes();
+}
+
+function garantirRegistrosFotoRefeicoes() {
+  if (!refeicoesAtuais.registrosFoto || typeof refeicoesAtuais.registrosFoto !== "object") {
+    refeicoesAtuais.registrosFoto = {};
+  }
+
+  ["cafe", "almoco", "jantar", "ceia"].forEach(refeicao => {
+    if (!Array.isArray(refeicoesAtuais.registrosFoto[refeicao])) {
+      refeicoesAtuais.registrosFoto[refeicao] = [];
+    }
+  });
+
+  return refeicoesAtuais.registrosFoto;
+}
+
+function renderizarHorariosFotoRefeicoes() {
+  const registros = garantirRegistrosFotoRefeicoes();
+
+  ["cafe", "almoco", "jantar", "ceia"].forEach(refeicao => {
+    const elemento = byId(`horarios-foto-${refeicao}`);
+    if (!elemento) return;
+
+    const lista = registros[refeicao]
+      .map(item => item && item.horario ? String(item.horario) : "")
+      .filter(Boolean);
+
+    if (!lista.length) {
+      elemento.hidden = true;
+      elemento.innerText = "";
+      return;
+    }
+
+    elemento.hidden = false;
+    elemento.innerText = lista.length === 1
+      ? `📸 Foto analisada às ${lista[0]}`
+      : `📸 Fotos analisadas: ${lista.join(" • ")}`;
+  });
+}
+
+function registrarHorarioFotoRefeicao(refeicao, dataRegistro = new Date()) {
+  if (!["cafe", "almoco", "jantar", "ceia"].includes(refeicao)) return null;
+
+  const registros = garantirRegistrosFotoRefeicoes();
+  const horario = dataRegistro.toLocaleTimeString("pt-BR", {
+    hour: "2-digit",
+    minute: "2-digit"
+  });
+
+  const registro = {
+    origem: "foto",
+    horario,
+    timestamp: dataRegistro.toISOString()
+  };
+
+  registros[refeicao].push(registro);
+  renderizarHorariosFotoRefeicoes();
+
+  const inputData = byId("dataAlimentacaoInput");
+  const dataSelect = inputData && inputData.value
+    ? inputData.value
+    : (typeof dataLocalISOApp === "function" ? dataLocalISOApp() : new Date().toISOString().split("T")[0]);
+
+  try {
+    const historico = JSON.parse(localStorage.getItem("historicoAlimentacao") || "{}");
+    historico[dataSelect] = JSON.parse(JSON.stringify(refeicoesAtuais));
+    localStorage.setItem("historicoAlimentacao", JSON.stringify(historico));
+  } catch (erro) {
+    console.warn("Não consegui salvar imediatamente o horário da foto:", erro);
+  }
+
+  return registro;
 }
 
 function obterMetaAguaDinamica() {
@@ -2504,7 +2611,7 @@ function renderizarAgua() {
 }
 
 function renderizarTagsDeComida() {
-  ["cafe", "almoco", "jantar"].forEach(refeicao => {
+  ["cafe", "almoco", "jantar", "ceia"].forEach(refeicao => {
     const container = byId(`tags-${refeicao}`);
 
     if (!container) return;
@@ -2571,7 +2678,8 @@ function obterAssinaturaRefeicoes() {
   return JSON.stringify({
     cafe: [...(refeicoesAtuais.cafe || [])].sort(),
     almoco: [...(refeicoesAtuais.almoco || [])].sort(),
-    jantar: [...(refeicoesAtuais.jantar || [])].sort()
+    jantar: [...(refeicoesAtuais.jantar || [])].sort(),
+    ceia: [...(refeicoesAtuais.ceia || [])].sort()
   });
 }
 
@@ -2592,6 +2700,7 @@ function renderizarCalorias() {
   if (byId("kcal-cafe")) byId("kcal-cafe").innerText = kcal && typeof kcal.cafe !== "undefined" ? kcal.cafe : "--";
   if (byId("kcal-almoco")) byId("kcal-almoco").innerText = kcal && typeof kcal.almoco !== "undefined" ? kcal.almoco : "--";
   if (byId("kcal-jantar")) byId("kcal-jantar").innerText = kcal && typeof kcal.jantar !== "undefined" ? kcal.jantar : "--";
+  if (byId("kcal-ceia")) byId("kcal-ceia").innerText = kcal && typeof kcal.ceia !== "undefined" ? kcal.ceia : "--";
   if (byId("kcal-total")) byId("kcal-total").innerText = kcal && typeof kcal.total !== "undefined" ? kcal.total : "--";
 
   const metaDisplay = byId("kcal-meta-luma");
@@ -2674,7 +2783,8 @@ async function salvarRefeicoes() {
   const temAlimento =
     refeicoesAtuais.cafe.length > 0 ||
     refeicoesAtuais.almoco.length > 0 ||
-    refeicoesAtuais.jantar.length > 0;
+    refeicoesAtuais.jantar.length > 0 ||
+    refeicoesAtuais.ceia.length > 0;
 
   try {
     if (temAlimento && refeicoesAtuais.assinaturaKcal !== assinaturaAtual) {
@@ -2684,6 +2794,7 @@ async function salvarRefeicoes() {
         cafe: Number(calorias.cafe) || 0,
         almoco: Number(calorias.almoco) || 0,
         jantar: Number(calorias.jantar) || 0,
+        ceia: Number(calorias.ceia) || 0,
         total: Number(calorias.total) || 0,
         observacao: calorias.observacao || "Estimativa aproximada calculada pela Luma."
       };
@@ -2696,6 +2807,7 @@ async function salvarRefeicoes() {
         cafe: 0,
         almoco: 0,
         jantar: 0,
+        ceia: 0,
         total: 0,
         observacao: "Nenhum alimento registrado."
       };
@@ -2748,6 +2860,8 @@ async function calcularCaloriasComIA() {
     cafe: refeicoesAtuais.cafe || [],
     almoco: refeicoesAtuais.almoco || [],
     jantar: refeicoesAtuais.jantar || [],
+    ceia: refeicoesAtuais.ceia || [],
+    registrosFoto: refeicoesAtuais.registrosFoto || null,
     agua: refeicoesAtuais.agua || 0,
     data: dataAtual,
     saudeHoje: obterSaudePorData(dataAtual),

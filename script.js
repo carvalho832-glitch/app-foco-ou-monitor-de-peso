@@ -880,6 +880,14 @@ async function atualizarMetaKcalComIA() {
   }
 }
 
+function obterResumoHealthConnect() {
+  try {
+    return JSON.parse(localStorage.getItem("evoluafitHealthConnectSnapshot") || "null");
+  } catch (_) {
+    return null;
+  }
+}
+
 function montarDadosMetaKcal() {
   const historicoPeso = JSON.parse(localStorage.getItem("historicoPeso") || "[]");
   const historicoAlimentacao = JSON.parse(localStorage.getItem("historicoAlimentacao") || "{}");
@@ -915,7 +923,8 @@ function montarDadosMetaKcal() {
     ultimosTreinos: historicoTreinos.slice(-7),
     saudeHoje: obterSaudePorData(hojeISO),
     ultimosRegistrosSaude: historicoSaude.slice(-7),
-    contextoSaudeLuma: gerarContextoSaudeLuma()
+    contextoSaudeLuma: gerarContextoSaudeLuma(),
+    healthConnect: obterResumoHealthConnect()
   };
 }
 
@@ -1098,7 +1107,8 @@ function montarDadosParaIA() {
     ultimosTreinos: historicoTreinos.slice(-5),
     saudeHoje: obterSaudePorData(hojeISO),
     ultimosRegistrosSaude: historicoSaude.slice(-7),
-    contextoSaudeLuma: gerarContextoSaudeLuma()
+    contextoSaudeLuma: gerarContextoSaudeLuma(),
+    healthConnect: obterResumoHealthConnect()
   };
 }
 
@@ -1250,7 +1260,8 @@ function montarDadosTreinoIA() {
     ultimosTreinos: historicoTreinos.slice(-7),
     saudeHoje: obterSaudePorData(hojeISO),
     ultimosRegistrosSaude: historicoSaude.slice(-7),
-    contextoSaudeLuma: gerarContextoSaudeLuma()
+    contextoSaudeLuma: gerarContextoSaudeLuma(),
+    healthConnect: obterResumoHealthConnect()
   };
 }
 
@@ -2865,7 +2876,8 @@ async function calcularCaloriasComIA() {
     agua: refeicoesAtuais.agua || 0,
     data: dataAtual,
     saudeHoje: obterSaudePorData(dataAtual),
-    contextoSaudeLuma: gerarContextoSaudeLuma()
+    contextoSaudeLuma: gerarContextoSaudeLuma(),
+    healthConnect: obterResumoHealthConnect()
   };
 
   let resposta;

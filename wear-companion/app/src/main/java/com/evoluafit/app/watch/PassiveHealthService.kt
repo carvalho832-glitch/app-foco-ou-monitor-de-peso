@@ -11,8 +11,15 @@ class PassiveHealthService : PassiveListenerService() {
 
         val dailySteps = dataPoints.getData(DataType.STEPS_DAILY).lastOrNull()?.value
         if (dailySteps != null) {
-            WearDataSender.saveSteps(this, dailySteps)
+            WearDataSender.saveDailySteps(this, dailySteps)
             changed = true
+        } else {
+            val deltas = dataPoints.getData(DataType.STEPS)
+            if (deltas.isNotEmpty()) {
+                val deltaTotal = deltas.sumOf { it.value }
+                WearDataSender.addStepDelta(this, deltaTotal)
+                changed = true
+            }
         }
 
         val heartRate = dataPoints.getData(DataType.HEART_RATE_BPM).lastOrNull()?.value

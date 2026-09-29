@@ -1,4 +1,4 @@
-const CACHE_NAME = "monitor-peso-v68-health-dashboard-v150";
+const CACHE_NAME = "monitor-peso-v69-health-diagnostics";
 
 const APP_FILES = [
   "./",
@@ -9,7 +9,7 @@ const APP_FILES = [
   "./cloud-loader.js?v=8",
   "./dashboard-v2.js?v=2",
   "./health-v3.js?v=4",
-  "./health-connect.js?v=2",
+  "./health-connect.js?v=3",
   "./food-v3.js?v=2",
   "./account-v3.js?v=1",
   "./third-wave-v4.js?v=1",

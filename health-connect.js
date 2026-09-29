@@ -18,6 +18,8 @@
 
   let healthPlugin = null;
   let refreshing = false;
+  let diagnosing = false;
+  let lastDiagnosticReport = null;
 
   function isAndroidNative() {
     try {
@@ -202,6 +204,12 @@
       .hc-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.hc-item{padding:10px 11px;border:1px solid var(--border-color);border-radius:14px;background:rgba(148,163,184,.045)}.hc-label{font-size:9px;font-weight:850;text-transform:uppercase;color:var(--text-muted)}.hc-value{margin-top:4px;font-size:16px;font-weight:900;line-height:1.15}
       .hc-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:11px}.hc-btn{flex:1;min-width:110px;min-height:38px;border:0;border-radius:12px;padding:8px 10px;font-size:11px;font-weight:850}.hc-btn.primary{background:#2563eb;color:#fff}.hc-btn.secondary{background:rgba(37,99,235,.09);color:#2563eb;border:1px solid rgba(37,99,235,.16)}
       .hc-foot{margin-top:9px;color:var(--text-muted);font-size:9.5px;line-height:1.4}
+      .hc-diagnostic{display:none;margin-top:12px;padding:12px;border:1px dashed rgba(37,99,235,.28);border-radius:14px;background:rgba(37,99,235,.035)}
+      .hc-diagnostic.open{display:block}.hc-diagnostic h4{margin:0 0 5px;font-size:13px}.hc-diagnostic-note{font-size:9.5px;color:var(--text-muted);line-height:1.45;margin-bottom:10px}
+      .hc-diag-block{margin-top:9px;padding:9px 10px;border-radius:12px;background:var(--card-bg);border:1px solid var(--border-color)}
+      .hc-diag-title{font-size:11px;font-weight:900;margin-bottom:6px}.hc-diag-row{display:flex;justify-content:space-between;gap:10px;font-size:9.5px;line-height:1.5;padding:2px 0}.hc-diag-row span:first-child{color:var(--text-muted)}.hc-diag-row strong{text-align:right;overflow-wrap:anywhere}
+      .hc-diag-source{margin-top:6px;padding-top:6px;border-top:1px solid var(--border-color);font-size:9px;color:var(--text-muted);line-height:1.5;overflow-wrap:anywhere}
+      .hc-diag-actions{display:flex;gap:7px;margin-top:10px}.hc-diag-actions button{flex:1}
     `;
     document.head.appendChild(style);
   }
@@ -235,6 +243,15 @@
         <button id="hcConnectBtn" class="hc-btn primary" type="button">Conectar dados de saúde</button>
         <button id="hcRefreshBtn" class="hc-btn secondary" type="button">Atualizar</button>
         <button id="hcSettingsBtn" class="hc-btn secondary" type="button">Permissões</button>
+        <button id="hcDiagnosticBtn" class="hc-btn secondary" type="button">Diagnóstico</button>
+      </div>
+      <div id="hcDiagnosticPanel" class="hc-diagnostic">
+        <h4>Diagnóstico do Health Connect</h4>
+        <div class="hc-diagnostic-note">Compara o valor agregado com as amostras brutas e mostra origem, dispositivo e horário dos registros. Nada é enviado para fora do aparelho.</div>
+        <div id="hcDiagnosticContent">Toque em Diagnóstico para analisar os dados de hoje.</div>
+        <div class="hc-diag-actions">
+          <button id="hcCopyDiagnosticBtn" class="hc-btn secondary" type="button">Copiar relatório</button>
+        </div>
       </div>
       <div id="hcUpdated" class="hc-foot"></div>
       <div class="hc-foot">No Samsung Health, mantenha a sincronização com Health Connect habilitada. O EvoluaFit solicita somente leitura.</div>
@@ -251,9 +268,250 @@
     document.getElementById("hcConnectBtn").addEventListener("click", connect);
     document.getElementById("hcRefreshBtn").addEventListener("click", refresh);
     document.getElementById("hcSettingsBtn").addEventListener("click", openSettings);
+    document.getElementById("hcDiagnosticBtn").addEventListener("click", runDiagnostics);
+    document.getElementById("hcCopyDiagnosticBtn").addEventListener("click", copyDiagnosticReport);
 
     const saved = parseStoredSnapshot();
     if (saved) updateCard(saved);
+  }
+
+
+  function formatDiagNumber(value, digits) {
+    const n = safeNumber(value);
+    if (n == null) return "--";
+    return Number(n.toFixed(digits == null ? 2 : digits)).toLocaleString("pt-BR", {
+      maximumFractionDigits: digits == null ? 2 : digits
+    });
+  }
+
+  function formatDiagTime(value) {
+    if (!value) return "--";
+    const d = new Date(value);
+    if (Number.isNaN(d.getTime())) return "--";
+    return d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+  }
+
+  function escapeHtml(value) {
+    return String(value == null ? "" : value)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  }
+
+  async function readDiagnosticSamples(health, dataType, startDate, endDate) {
+    const result = await health.readSamples({
+      dataType,
+      startDate: startDate.toISOString(),
+      endDate: endDate.toISOString(),
+      limit: 2000
+    });
+    const samples = result && Array.isArray(result.samples) ? result.samples : [];
+    const sorted = samples.slice().sort((a, b) => new Date(a.startDate || 0) - new Date(b.startDate || 0));
+    const total = samples.reduce((sum, sample) => {
+      const value = safeNumber(sample && sample.value);
+      return sum + (value == null ? 0 : value);
+    }, 0);
+
+    const sourceMap = new Map();
+    samples.forEach((sample) => {
+      const sourceName = sample.sourceName || sample.sourceId || "Origem não informada";
+      const sourceId = sample.sourceId || "";
+      const deviceType = sample.deviceType || "não informado";
+      const key = sourceName + "|" + sourceId + "|" + deviceType;
+      const current = sourceMap.get(key) || {
+        sourceName,
+        sourceId,
+        deviceType,
+        count: 0,
+        total: 0,
+        first: null,
+        last: null
+      };
+      current.count += 1;
+      const value = safeNumber(sample.value);
+      if (value != null) current.total += value;
+      const start = sample.startDate || sample.endDate || null;
+      const end = sample.endDate || sample.startDate || null;
+      if (!current.first || (start && new Date(start) < new Date(current.first))) current.first = start;
+      if (!current.last || (end && new Date(end) > new Date(current.last))) current.last = end;
+      sourceMap.set(key, current);
+    });
+
+    return {
+      count: samples.length,
+      total,
+      unit: samples.find((sample) => sample && sample.unit)?.unit || "",
+      first: sorted[0] ? (sorted[0].startDate || sorted[0].endDate || null) : null,
+      last: sorted.length ? (sorted[sorted.length - 1].endDate || sorted[sorted.length - 1].startDate || null) : null,
+      sources: Array.from(sourceMap.values()).sort((a, b) => b.total - a.total),
+      recent: sorted.slice(-8).map((sample) => ({
+        value: sample.value,
+        unit: sample.unit || "",
+        startDate: sample.startDate || null,
+        endDate: sample.endDate || null,
+        sourceName: sample.sourceName || null,
+        sourceId: sample.sourceId || null,
+        deviceType: sample.deviceType || null
+      }))
+    };
+  }
+
+  async function readDiagnosticHours(health, dataType, startDate, endDate) {
+    try {
+      const result = await health.queryAggregated({
+        dataType,
+        startDate: startDate.toISOString(),
+        endDate: endDate.toISOString(),
+        bucket: "hour",
+        aggregation: "sum"
+      });
+      const samples = result && Array.isArray(result.samples) ? result.samples : [];
+      return samples
+        .filter((sample) => safeNumber(sample && sample.value) != null && Number(sample.value) !== 0)
+        .map((sample) => ({
+          value: Number(sample.value),
+          unit: sample.unit || "",
+          startDate: sample.startDate || null,
+          endDate: sample.endDate || null
+        }));
+    } catch (error) {
+      return [];
+    }
+  }
+
+  function diagDisplayValue(type, value) {
+    const n = safeNumber(value);
+    if (n == null) return "--";
+    if (type === "steps") return Math.round(n).toLocaleString("pt-BR") + " passos";
+    if (type === "distance") return formatDiagNumber(n / 1000, 3) + " km (" + formatDiagNumber(n, 0) + " m)";
+    if (type === "calories") return formatDiagNumber(n, 1) + " kcal";
+    return formatDiagNumber(n, 2);
+  }
+
+  function renderDiagnosticMetric(type, label, metric) {
+    const sources = (metric.samples.sources || []).map((source) => {
+      const device = source.deviceType && source.deviceType !== "não informado" ? " • " + source.deviceType : "";
+      const id = source.sourceId ? " [" + source.sourceId + "]" : "";
+      return "<div><strong>" + escapeHtml(source.sourceName) + "</strong>" + escapeHtml(device + id) +
+        "<br>" + source.count + " amostras • " + escapeHtml(diagDisplayValue(type, source.total)) +
+        " • última " + escapeHtml(formatDiagTime(source.last)) + "</div>";
+    }).join("");
+
+    const hours = (metric.hours || []).slice(-8).map((item) => {
+      return formatDiagTime(item.startDate) + " = " + diagDisplayValue(type, item.value);
+    }).join(" • ");
+
+    return '<div class="hc-diag-block">' +
+      '<div class="hc-diag-title">' + escapeHtml(label) + '</div>' +
+      '<div class="hc-diag-row"><span>Agregado do dia</span><strong>' + escapeHtml(diagDisplayValue(type, metric.aggregated)) + '</strong></div>' +
+      '<div class="hc-diag-row"><span>Soma das amostras</span><strong>' + escapeHtml(diagDisplayValue(type, metric.samples.total)) + '</strong></div>' +
+      '<div class="hc-diag-row"><span>Quantidade</span><strong>' + metric.samples.count + ' amostras</strong></div>' +
+      '<div class="hc-diag-row"><span>Primeira / última</span><strong>' + escapeHtml(formatDiagTime(metric.samples.first)) + ' / ' + escapeHtml(formatDiagTime(metric.samples.last)) + '</strong></div>' +
+      '<div class="hc-diag-source"><strong>Origens:</strong><br>' + (sources || "Nenhuma origem retornada") + '</div>' +
+      '<div class="hc-diag-source"><strong>Últimas horas com dados:</strong><br>' + escapeHtml(hours || "Nenhum bloco horário retornado") + '</div>' +
+      '</div>';
+  }
+
+  function renderDiagnostics(report) {
+    const panel = document.getElementById("hcDiagnosticPanel");
+    const content = document.getElementById("hcDiagnosticContent");
+    if (!panel || !content) return;
+    panel.classList.add("open");
+
+    if (!report) {
+      content.innerHTML = "Sem relatório disponível.";
+      return;
+    }
+
+    const pluginText = report.pluginVersion ? "Plugin " + report.pluginVersion : "Versão do plugin não informada";
+    content.innerHTML =
+      '<div class="hc-diag-row"><span>Horário</span><strong>' + escapeHtml(new Date(report.createdAt).toLocaleString("pt-BR")) + '</strong></div>' +
+      '<div class="hc-diag-row"><span>Health plugin</span><strong>' + escapeHtml(pluginText) + '</strong></div>' +
+      '<div class="hc-diag-row"><span>Permissões lidas</span><strong>' + escapeHtml((report.authorized || []).join(", ") || "nenhuma") + '</strong></div>' +
+      renderDiagnosticMetric("steps", "Passos", report.metrics.steps) +
+      renderDiagnosticMetric("distance", "Distância", report.metrics.distance) +
+      renderDiagnosticMetric("calories", "Calorias ativas", report.metrics.calories);
+  }
+
+  async function runDiagnostics() {
+    if (diagnosing || !isAndroidNative()) return;
+    injectCard();
+    const health = getHealthPlugin();
+    if (!health) return;
+
+    const button = document.getElementById("hcDiagnosticBtn");
+    const panel = document.getElementById("hcDiagnosticPanel");
+    const content = document.getElementById("hcDiagnosticContent");
+    if (panel) panel.classList.add("open");
+    if (content) content.textContent = "Lendo amostras brutas do Health Connect...";
+    if (button) {
+      button.disabled = true;
+      button.textContent = "Analisando...";
+    }
+    diagnosing = true;
+
+    try {
+      const auth = await checkAuthorization(health);
+      const authorized = auth && Array.isArray(auth.readAuthorized) ? auth.readAuthorized : [];
+      const now = new Date();
+      const today = startOfToday();
+      const pluginVersionResult = health.getPluginVersion ? await health.getPluginVersion().catch(() => null) : null;
+
+      const types = ["steps", "distance", "calories"];
+      const results = await Promise.all(types.map(async (type) => {
+        const [aggregated, samples, hours] = await Promise.all([
+          aggregate(health, type, today, now, "sum"),
+          readDiagnosticSamples(health, type, today, now),
+          readDiagnosticHours(health, type, today, now)
+        ]);
+        return [type, { aggregated, samples, hours }];
+      }));
+
+      lastDiagnosticReport = {
+        createdAt: new Date().toISOString(),
+        pluginVersion: pluginVersionResult && pluginVersionResult.version ? pluginVersionResult.version : null,
+        authorized,
+        metrics: Object.fromEntries(results)
+      };
+      renderDiagnostics(lastDiagnosticReport);
+    } catch (error) {
+      console.error("[Health Connect] diagnostic", error);
+      if (content) content.textContent = "Falha ao gerar diagnóstico: " + (error && error.message ? error.message : String(error));
+    } finally {
+      diagnosing = false;
+      if (button) {
+        button.disabled = false;
+        button.textContent = "Diagnóstico";
+      }
+    }
+  }
+
+  async function copyDiagnosticReport() {
+    if (!lastDiagnosticReport) {
+      await runDiagnostics();
+      if (!lastDiagnosticReport) return;
+    }
+    const payload = JSON.stringify(lastDiagnosticReport, null, 2);
+    try {
+      await navigator.clipboard.writeText(payload);
+      const button = document.getElementById("hcCopyDiagnosticBtn");
+      if (button) {
+        const old = button.textContent;
+        button.textContent = "Copiado ✓";
+        setTimeout(() => { button.textContent = old; }, 1400);
+      }
+    } catch (_) {
+      const area = document.createElement("textarea");
+      area.value = payload;
+      area.style.position = "fixed";
+      area.style.opacity = "0";
+      document.body.appendChild(area);
+      area.select();
+      try { document.execCommand("copy"); } catch (_) {}
+      area.remove();
+    }
   }
 
   async function checkAuthorization(health) {

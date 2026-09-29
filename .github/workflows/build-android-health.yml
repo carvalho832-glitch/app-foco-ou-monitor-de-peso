@@ -1,0 +1,60 @@
+name: Build Android APK - Health Connect
+
+on:
+  push:
+    branches:
+      - main
+      - health-connect-integration
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: "temurin"
+          java-version: "21"
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Keep Health Connect read-only
+        run: node scripts/patch-health-plugin.mjs
+
+      - name: Prepare web assets
+        run: npm run prepare:www
+
+      - name: Add Android platform
+        run: npx cap add android
+
+      - name: Sync Capacitor
+        run: npx cap sync android
+
+      - name: Build debug APK
+        run: |
+          chmod +x android/gradlew
+          cd android
+          ./gradlew assembleDebug --stacktrace
+
+      - name: Rename APK
+        run: cp android/app/build/outputs/apk/debug/app-debug.apk EvoluaFit_HealthConnect_v149.apk
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: EvoluaFit-HealthConnect-v149
+          path: EvoluaFit_HealthConnect_v149.apk
+          if-no-files-found: error
+          retention-days: 30

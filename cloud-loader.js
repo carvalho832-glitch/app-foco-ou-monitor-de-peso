@@ -41,7 +41,7 @@
   function carregarExperiencia() {
     carregarScript("dashboard-v2.js?v=2", "evoluafit-dashboard-v2");
     carregarScript("health-v3.js?v=4", "evoluafit-health-v3");
-    carregarScript("health-connect.js?v=2", "evoluafit-health-connect");
+    carregarScript("health-connect.js?v=3", "evoluafit-health-connect");
     carregarScript("food-v3.js?v=2", "evoluafit-food-v3");
     carregarScript("account-v3.js?v=1", "evoluafit-account-v3");
     carregarScript("third-wave-v4.js?v=1", "evoluafit-third-wave-v4");

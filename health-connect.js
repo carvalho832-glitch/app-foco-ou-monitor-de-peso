@@ -131,6 +131,47 @@
     }
   }
 
+  function isSamsungHealthSample(sample) {
+    if (!sample) return false;
+    const sourceId = String(sample.sourceId || "").toLowerCase();
+    const sourceName = String(sample.sourceName || "").toLowerCase();
+    return sourceId.includes("com.sec.android.app.shealth") ||
+      sourceName.includes("com.sec.android.app.shealth") ||
+      sourceName === "samsung health";
+  }
+
+  async function readRawSamples(health, dataType, startDate, endDate, limit) {
+    try {
+      const result = await health.readSamples({
+        dataType,
+        startDate: startDate.toISOString(),
+        endDate: endDate.toISOString(),
+        limit: limit || 2000
+      });
+      return result && Array.isArray(result.samples) ? result.samples : [];
+    } catch (error) {
+      console.warn("[Health Connect] raw samples", dataType, error);
+      return [];
+    }
+  }
+
+  function samsungHealthMetricValue(samples) {
+    const samsung = (samples || []).filter(isSamsungHealthSample).filter((sample) => safeNumber(sample.value) != null);
+    if (!samsung.length) return null;
+
+    const dailyLike = samsung.filter((sample) => {
+      const start = new Date(sample.startDate || 0).getTime();
+      const end = new Date(sample.endDate || 0).getTime();
+      return start && end && end > start && (end - start) >= 20 * 60 * 60 * 1000;
+    });
+
+    if (dailyLike.length) {
+      return Math.max(...dailyLike.map((sample) => Number(sample.value)));
+    }
+
+    return samsung.reduce((total, sample) => total + Number(sample.value || 0), 0);
+  }
+
   async function readWorkouts(health, startDate, endDate) {
     try {
       const result = await health.queryWorkouts({
@@ -174,9 +215,12 @@
 
   function updateCard(snapshot) {
     if (!snapshot) return;
+    const distanceMissing = snapshot.distanceSyncStatus === "not_shared_by_samsung_health";
+    const caloriesMissing = snapshot.caloriesSyncStatus === "not_shared_by_samsung_health";
+
     setText("hcSteps", snapshot.steps == null ? "--" : Number(snapshot.steps).toLocaleString("pt-BR"));
-    setText("hcDistance", snapshot.distanceKm == null ? "--" : `${snapshot.distanceKm.toFixed(2)} km`);
-    setText("hcCalories", snapshot.activeCaloriesKcal == null ? "--" : `${Math.round(snapshot.activeCaloriesKcal)} kcal`);
+    setText("hcDistance", distanceMissing ? "Não sinc." : (snapshot.distanceKm == null ? "--" : `${snapshot.distanceKm.toFixed(2)} km`));
+    setText("hcCalories", caloriesMissing ? "Não sinc." : (snapshot.activeCaloriesKcal == null ? "--" : `${Math.round(snapshot.activeCaloriesKcal)} kcal`));
     setText("hcHeart", snapshot.heartRateAvg == null ? "--" : `${Math.round(snapshot.heartRateAvg)} bpm`);
     setText("hcRestingHr", snapshot.restingHeartRate == null ? "--" : `${Math.round(snapshot.restingHeartRate)} bpm`);
     setText("hcWeight", snapshot.weightKg == null ? "--" : `${snapshot.weightKg.toFixed(1)} kg`);
@@ -184,6 +228,18 @@
     setText("hcSpo2", snapshot.oxygenSaturationPct == null ? "--" : `${Math.round(snapshot.oxygenSaturationPct)}%`);
     setText("hcWorkout", snapshot.workoutsToday == null ? "--" : `${snapshot.workoutsToday} • ${formatDuration(snapshot.workoutMinutesToday)}`);
     setText("hcUpdated", snapshot.updatedAt ? `Atualizado ${new Date(snapshot.updatedAt).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}` : "");
+
+    const notes = [];
+    if (snapshot.stepsSource === "samsung_health") notes.push("Passos: Samsung Health");
+    if (distanceMissing) notes.push("Distância não compartilhada pelo Samsung Health");
+    if (caloriesMissing) notes.push("Calorias ativas não compartilhadas pelo Samsung Health");
+    setText("hcSourceNote", notes.join(" • "));
+
+    const connectBtn = document.getElementById("hcConnectBtn");
+    if (connectBtn && snapshot.updatedAt) {
+      connectBtn.textContent = "Conectado ✓";
+      connectBtn.disabled = true;
+    }
   }
 
   function setStatus(text, kind) {
@@ -254,6 +310,7 @@
         </div>
       </div>
       <div id="hcUpdated" class="hc-foot"></div>
+      <div id="hcSourceNote" class="hc-foot"></div>
       <div class="hc-foot">No Samsung Health, mantenha a sincronização com Health Connect habilitada. O EvoluaFit solicita somente leitura.</div>
     `;
 
@@ -594,15 +651,18 @@
       const last30d = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
 
       const [
-        steps,
-        distance,
-        calories,
+        stepsAggregate,
+        distanceAggregate,
+        caloriesAggregate,
         heart,
         weight,
         sleep,
         spo2,
         restingHeart,
-        workouts
+        workouts,
+        stepSamples,
+        distanceSamples,
+        calorieSamples
       ] = await Promise.all([
         aggregate(health, "steps", today, now, "sum"),
         aggregate(health, "distance", today, now, "sum"),
@@ -612,16 +672,27 @@
         readLatest(health, "sleep", last36h, now, true),
         readLatest(health, "oxygenSaturation", last36h, now, false),
         readLatest(health, "restingHeartRate", last30d, now, false),
-        readWorkouts(health, today, now)
+        readWorkouts(health, today, now),
+        readRawSamples(health, "steps", today, now, 2000),
+        readRawSamples(health, "distance", today, now, 2000),
+        readRawSamples(health, "calories", today, now, 2000)
       ]);
+
+      const samsungSteps = samsungHealthMetricValue(stepSamples);
+      const samsungDistance = samsungHealthMetricValue(distanceSamples);
+      const samsungCalories = samsungHealthMetricValue(calorieSamples);
+      const finalSteps = samsungSteps == null ? stepsAggregate : samsungSteps;
 
       const heartAvg = heart && safeNumber(heart.average);
       const snapshot = {
         source: "Health Connect / Samsung Health",
         updatedAt: new Date().toISOString(),
-        steps: steps == null ? null : Math.round(steps),
-        distanceKm: distance == null ? null : round(distance / 1000, 2),
-        activeCaloriesKcal: calories == null ? null : round(calories, 0),
+        steps: finalSteps == null ? null : Math.round(finalSteps),
+        stepsSource: samsungSteps == null ? "health_connect_aggregate" : "samsung_health",
+        distanceKm: samsungDistance == null ? null : round(samsungDistance / 1000, 2),
+        distanceSyncStatus: samsungDistance == null && distanceAggregate != null ? "not_shared_by_samsung_health" : (samsungDistance == null ? "unavailable" : "samsung_health"),
+        activeCaloriesKcal: samsungCalories == null ? null : round(samsungCalories, 0),
+        caloriesSyncStatus: samsungCalories == null && caloriesAggregate != null ? "not_shared_by_samsung_health" : (samsungCalories == null ? "unavailable" : "samsung_health"),
         heartRateAvg: heartAvg == null ? null : round(heartAvg, 0),
         heartRateMin: heart && safeNumber(heart.min) != null ? round(heart.min, 0) : null,
         heartRateMax: heart && safeNumber(heart.max) != null ? round(heart.max, 0) : null,

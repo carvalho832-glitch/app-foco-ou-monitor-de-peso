@@ -1,4 +1,4 @@
-const CACHE_NAME = "monitor-peso-v64-glucose-context";
+const CACHE_NAME = "monitor-peso-v65-food-photo-retry";
 
 const APP_FILES = [
   "./",
@@ -6,7 +6,7 @@ const APP_FILES = [
   "./style.css?v=19",
   "./menu-animated.css?v=47",
   "./script.js?v=21",
-  "./cloud-loader.js?v=7",
+  "./cloud-loader.js?v=8",
   "./dashboard-v2.js?v=2",
   "./health-v3.js?v=4",
   "./food-v3.js?v=2",
@@ -18,7 +18,7 @@ const APP_FILES = [
   "./firebase-config.js?v=1",
   "./firebase-cloud.js?v=2",
   "./native-backup.js?v=1",
-  "./food-photo.js?v=5",
+  "./food-photo.js?v=6",
   "./manifest.json",
   "./icon.svg"
 ];

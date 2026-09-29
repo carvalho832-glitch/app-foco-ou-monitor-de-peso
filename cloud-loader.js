@@ -41,6 +41,10 @@
     }
   }
 
+  function carregarHealthConnect() {
+    carregarScript("health-connect.js?v=1", "luma-health-connect-script");
+  }
+
   function carregarFotoRefeicao() {
     carregarScript("food-photo.js?v=4", "luma-food-photo-script");
   }
@@ -51,6 +55,8 @@
       setTimeout(carregarFotoRefeicao, 250);
     });
   }
+
+  carregarHealthConnect();
 
   if (window.supabase && window.supabase.createClient) {
     carregarCloudSync();

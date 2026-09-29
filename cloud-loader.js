@@ -50,7 +50,7 @@
   }
 
   function carregarFotoRefeicao() {
-    carregarScript("food-photo.js?v=5", "luma-food-photo-script");
+    carregarScript("food-photo.js?v=6", "luma-food-photo-script");
   }
 
   function carregarBackupNativo() {

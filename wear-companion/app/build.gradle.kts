@@ -44,4 +44,6 @@ dependencies {
     implementation("androidx.core:core-ktx:1.15.0")
     implementation("androidx.health:health-services-client:1.1.0")
     implementation("com.google.android.gms:play-services-wearable:20.0.1")
+    implementation("com.google.guava:guava:33.3.1-android")
+    implementation("androidx.concurrent:concurrent-futures:1.2.0")
 }

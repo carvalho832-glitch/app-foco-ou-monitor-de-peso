@@ -15,6 +15,7 @@ on:
       - "*.json"
       - "scripts/**"
       - "phone-wear-bridge/**"
+      - "wear-companion/**"
       - "android-signing/**"
       - "package.json"
       - "capacitor.config.json"
@@ -222,5 +223,53 @@ jobs:
         with:
           name: EvoluaFit-debug-apk
           path: android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+          retention-days: 14
+
+
+  build-watch:
+    if: ${{ github.ref == 'refs/heads/feature/evoluafit-watch-companion' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.10.2"
+
+      - name: Prepare Watch signing
+        env:
+          EVOLUAFIT_DEV_STORE_PASSWORD: EvoluaFitDev2026!
+          EVOLUAFIT_DEV_KEY_PASSWORD: EvoluaFitDev2026!
+        run: |
+          base64 --decode android-signing/evoluafit-dev.jks.b64 > wear-companion/evoluafit-dev.jks
+
+      - name: Build EvoluaFit Watch APK
+        env:
+          EVOLUAFIT_DEV_STORE_PASSWORD: EvoluaFitDev2026!
+          EVOLUAFIT_DEV_KEY_PASSWORD: EvoluaFitDev2026!
+        run: gradle -p wear-companion :app:assembleDebug --no-daemon
+
+      - name: Verify Watch APK signature
+        run: |
+          APKSIGNER=$(find "$ANDROID_HOME/build-tools" -type f -name apksigner | sort -V | tail -n 1)
+          "$APKSIGNER" verify --verbose --print-certs wear-companion/app/build/outputs/apk/debug/app-debug.apk
+
+      - name: Upload Watch APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: EvoluaFit-Watch-prototype
+          path: wear-companion/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
           retention-days: 14

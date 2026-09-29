@@ -1,4 +1,4 @@
-const CACHE_NAME = "monitor-peso-v51-food-photo-v3";
+const CACHE_NAME = "monitor-peso-v52-food-photo-retry-v4";
 
 const APP_FILES = [
   "./",
@@ -6,9 +6,9 @@ const APP_FILES = [
   "./style.css?v=18",
   "./menu-animated.css?v=47",
   "./script.js?v=17",
-  "./cloud-loader.js?v=2",
+  "./cloud-loader.js?v=3",
   "./cloud-sync.js?v=2",
-  "./food-photo.js?v=3",
+  "./food-photo.js?v=4",
   "./manifest.json",
   "./icon.svg"
 ];

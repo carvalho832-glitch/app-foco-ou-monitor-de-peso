@@ -6,6 +6,7 @@ on:
     branches:
       - main
       - feature/firebase-android-apk
+      - feature/health-connect-samsung
     paths:
       - "*.html"
       - "*.css"
@@ -63,6 +64,19 @@ jobs:
       - name: Sync Capacitor
         run: npx cap sync android
 
+      - name: Configure Android min SDK for Health Connect
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+
+          p = Path('android/variables.gradle')
+          s = p.read_text()
+          s = re.sub(r'minSdkVersion\s*=\s*\d+', 'minSdkVersion = 26', s, count=1)
+          p.write_text(s)
+          print('Configured minSdkVersion=26 for Health Connect')
+          PY
+
       - name: Configure stable development signing
         env:
           EVOLUAFIT_DEV_STORE_PASSWORD: EvoluaFitDev2026!
@@ -95,7 +109,7 @@ jobs:
           print(f'Configured versionCode={run_number}, versionName=1.0.{run_number}')
           PY
 
-      - name: Add location permissions
+      - name: Add location and Health Connect permissions
         run: |
           python - <<'PY'
           from pathlib import Path
@@ -104,6 +118,15 @@ jobs:
           permissions = (
               '    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />\n'
               '    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />\n'
+              '    <uses-permission android:name="android.permission.health.READ_STEPS" />\n'
+              '    <uses-permission android:name="android.permission.health.READ_DISTANCE" />\n'
+              '    <uses-permission android:name="android.permission.health.READ_ACTIVE_CALORIES_BURNED" />\n'
+              '    <uses-permission android:name="android.permission.health.READ_HEART_RATE" />\n'
+              '    <uses-permission android:name="android.permission.health.READ_WEIGHT" />\n'
+              '    <uses-permission android:name="android.permission.health.READ_SLEEP" />\n'
+              '    <uses-permission android:name="android.permission.health.READ_OXYGEN_SATURATION" />\n'
+              '    <uses-permission android:name="android.permission.health.READ_RESTING_HEART_RATE" />\n'
+              '    <uses-permission android:name="android.permission.health.READ_EXERCISE" />\n'
           )
           if 'android.permission.ACCESS_FINE_LOCATION' not in s:
               s = s.replace('<application', permissions + '\n    <application', 1)

@@ -109,28 +109,93 @@ jobs:
           print(f'Configured versionCode={run_number}, versionName=1.0.{run_number}')
           PY
 
-      - name: Add location and Health Connect permissions
+      - name: Keep only required Health Connect read permissions
         run: |
           python - <<'PY'
           from pathlib import Path
+
           p = Path('android/app/src/main/AndroidManifest.xml')
           s = p.read_text()
-          permissions = (
-              '    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />\n'
-              '    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />\n'
-              '    <uses-permission android:name="android.permission.health.READ_STEPS" />\n'
-              '    <uses-permission android:name="android.permission.health.READ_DISTANCE" />\n'
-              '    <uses-permission android:name="android.permission.health.READ_ACTIVE_CALORIES_BURNED" />\n'
-              '    <uses-permission android:name="android.permission.health.READ_HEART_RATE" />\n'
-              '    <uses-permission android:name="android.permission.health.READ_WEIGHT" />\n'
-              '    <uses-permission android:name="android.permission.health.READ_SLEEP" />\n'
-              '    <uses-permission android:name="android.permission.health.READ_OXYGEN_SATURATION" />\n'
-              '    <uses-permission android:name="android.permission.health.READ_RESTING_HEART_RATE" />\n'
-              '    <uses-permission android:name="android.permission.health.READ_EXERCISE" />\n'
+
+          if 'xmlns:tools=' not in s:
+              s = s.replace(
+                  'xmlns:android="http://schemas.android.com/apk/res/android"',
+                  'xmlns:android="http://schemas.android.com/apk/res/android"\n    xmlns:tools="http://schemas.android.com/tools"',
+                  1
+              )
+
+          required = [
+              'android.permission.ACCESS_COARSE_LOCATION',
+              'android.permission.ACCESS_FINE_LOCATION',
+              'android.permission.health.READ_STEPS',
+              'android.permission.health.READ_DISTANCE',
+              'android.permission.health.READ_ACTIVE_CALORIES_BURNED',
+              'android.permission.health.READ_HEART_RATE',
+              'android.permission.health.READ_WEIGHT',
+              'android.permission.health.READ_SLEEP',
+              'android.permission.health.READ_OXYGEN_SATURATION',
+              'android.permission.health.READ_RESTING_HEART_RATE',
+              'android.permission.health.READ_EXERCISE',
+          ]
+
+          remove = [
+              'android.permission.health.READ_BASAL_BODY_TEMPERATURE',
+              'android.permission.health.READ_BASAL_METABOLIC_RATE',
+              'android.permission.health.READ_BLOOD_GLUCOSE',
+              'android.permission.health.READ_BLOOD_PRESSURE',
+              'android.permission.health.READ_BODY_FAT',
+              'android.permission.health.READ_BODY_TEMPERATURE',
+              'android.permission.health.READ_FLOORS_CLIMBED',
+              'android.permission.health.READ_HEART_RATE_VARIABILITY',
+              'android.permission.health.READ_HEIGHT',
+              'android.permission.health.READ_HYDRATION',
+              'android.permission.health.READ_MINDFULNESS',
+              'android.permission.health.READ_NUTRITION',
+              'android.permission.health.READ_RESPIRATORY_RATE',
+              'android.permission.health.READ_TOTAL_CALORIES_BURNED',
+              'android.permission.health.READ_VO2_MAX',
+              'android.permission.health.WRITE_ACTIVE_CALORIES_BURNED',
+              'android.permission.health.WRITE_BASAL_BODY_TEMPERATURE',
+              'android.permission.health.WRITE_BASAL_METABOLIC_RATE',
+              'android.permission.health.WRITE_BLOOD_GLUCOSE',
+              'android.permission.health.WRITE_BLOOD_PRESSURE',
+              'android.permission.health.WRITE_BODY_FAT',
+              'android.permission.health.WRITE_BODY_TEMPERATURE',
+              'android.permission.health.WRITE_DISTANCE',
+              'android.permission.health.WRITE_FLOORS_CLIMBED',
+              'android.permission.health.WRITE_HEART_RATE',
+              'android.permission.health.WRITE_HEART_RATE_VARIABILITY',
+              'android.permission.health.WRITE_HEIGHT',
+              'android.permission.health.WRITE_HYDRATION',
+              'android.permission.health.WRITE_MINDFULNESS',
+              'android.permission.health.WRITE_NUTRITION',
+              'android.permission.health.WRITE_OXYGEN_SATURATION',
+              'android.permission.health.WRITE_RESPIRATORY_RATE',
+              'android.permission.health.WRITE_RESTING_HEART_RATE',
+              'android.permission.health.WRITE_SLEEP',
+              'android.permission.health.WRITE_STEPS',
+              'android.permission.health.WRITE_TOTAL_CALORIES_BURNED',
+              'android.permission.health.WRITE_VO2_MAX',
+              'android.permission.health.WRITE_WEIGHT',
+          ]
+
+          declarations = ''.join(
+              f'    <uses-permission android:name="{name}" />\n'
+              for name in required
+              if f'android:name="{name}"' not in s
           )
-          if 'android.permission.ACCESS_FINE_LOCATION' not in s:
-              s = s.replace('<application', permissions + '\n    <application', 1)
-              p.write_text(s)
+          removals = ''.join(
+              f'    <uses-permission android:name="{name}" tools:node="remove" />\n'
+              for name in remove
+          )
+
+          marker = '<!-- EvoluaFit Health Connect permission filter -->'
+          if marker not in s:
+              payload = declarations + '    ' + marker + '\n' + removals + '\n'
+              s = s.replace('<application', payload + '    <application', 1)
+
+          p.write_text(s)
+          print('Configured read-only Health Connect manifest permissions')
           PY
 
       - name: Build debug APK

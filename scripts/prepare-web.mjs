@@ -12,6 +12,7 @@ const arquivos = [
   "cloud-loader.js",
   "dashboard-v2.js",
   "health-v3.js",
+  "health-connect.js",
   "food-v3.js",
   "account-v3.js",
   "third-wave-v4.js",
@@ -28,7 +29,8 @@ const arquivos = [
   "icon.svg",
   "icon-192.png",
   "icon-512.png",
-  "diagnostico-dados.html"
+  "diagnostico-dados.html",
+  "privacypolicy.html"
 ];
 
 await rm(destino, { recursive: true, force: true });

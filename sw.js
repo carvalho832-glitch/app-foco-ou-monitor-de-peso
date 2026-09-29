@@ -1,4 +1,4 @@
-const CACHE_NAME = "monitor-peso-v67-health-dashboard";
+const CACHE_NAME = "monitor-peso-v68-health-dashboard-v150";
 
 const APP_FILES = [
   "./",

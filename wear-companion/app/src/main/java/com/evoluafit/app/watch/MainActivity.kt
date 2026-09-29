@@ -15,8 +15,8 @@ import androidx.health.services.client.data.DataPointContainer
 import androidx.health.services.client.data.DataType
 import androidx.health.services.client.data.DataTypeAvailability
 import androidx.health.services.client.data.DeltaDataType
+import androidx.health.services.client.data.PassiveListenerConfig
 import androidx.health.services.client.MeasureCallback
-import androidx.health.services.client.PassiveListenerConfig
 
 class MainActivity : Activity() {
 

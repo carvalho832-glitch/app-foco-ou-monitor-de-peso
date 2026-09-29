@@ -14,7 +14,6 @@ on:
       - "*.js"
       - "*.json"
       - "scripts/**"
-      - "wear-companion/**"
       - "phone-wear-bridge/**"
       - "android-signing/**"
       - "package.json"
@@ -67,39 +66,8 @@ jobs:
       - name: Sync Capacitor
         run: npx cap sync android
 
-      - name: Inject Galaxy Watch Data Layer bridge
-        run: |
-          cp phone-wear-bridge/EvoluaFitWearListenerService.java android/app/src/main/java/com/evoluafit/app/EvoluaFitWearListenerService.java
-          python - <<'PY'
-          from pathlib import Path
-
-          gradle = Path('android/app/build.gradle')
-          g = gradle.read_text()
-          dep = "implementation 'com.google.android.gms:play-services-wearable:20.0.1'"
-          if dep not in g:
-              g = g.replace('dependencies {', 'dependencies {\n    ' + dep, 1)
-          gradle.write_text(g)
-
-          manifest = Path('android/app/src/main/AndroidManifest.xml')
-          m = manifest.read_text()
-          marker = 'EvoluaFitWearListenerService'
-          if marker not in m:
-              service = '''        <service
-            android:name=".EvoluaFitWearListenerService"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="com.google.android.gms.wearable.DATA_CHANGED" />
-                <data
-                    android:scheme="wear"
-                    android:host="*"
-                    android:path="/evoluafit/health" />
-            </intent-filter>
-        </service>
-'''
-              m = m.replace('</application>', service + '    </application>', 1)
-          manifest.write_text(m)
-          print('Injected Wear OS Data Layer receiver into handheld app')
-          PY
+      - name: Inject Galaxy Watch bridge
+        run: python scripts/inject-wear-bridge.py
 
       - name: Configure Android min SDK for Health Connect
         run: |
@@ -254,54 +222,5 @@ jobs:
         with:
           name: EvoluaFit-debug-apk
           path: android/app/build/outputs/apk/debug/app-debug.apk
-          if-no-files-found: error
-          retention-days: 14
-
-
-  build-watch:
-    if: github.ref == 'refs/heads/feature/evoluafit-watch-companion' || github.event_name == 'workflow_dispatch'
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Java
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: "21"
-
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
-        with:
-          gradle-version: "8.10.2"
-
-      - name: Prepare Watch signing
-        env:
-          EVOLUAFIT_DEV_STORE_PASSWORD: EvoluaFitDev2026!
-          EVOLUAFIT_DEV_KEY_PASSWORD: EvoluaFitDev2026!
-        run: |
-          base64 --decode android-signing/evoluafit-dev.jks.b64 > wear-companion/evoluafit-dev.jks
-
-      - name: Build EvoluaFit Watch APK
-        env:
-          EVOLUAFIT_DEV_STORE_PASSWORD: EvoluaFitDev2026!
-          EVOLUAFIT_DEV_KEY_PASSWORD: EvoluaFitDev2026!
-        run: |
-          gradle -p wear-companion :app:assembleDebug --no-daemon
-
-      - name: Verify Watch APK signature
-        run: |
-          APKSIGNER=$(find "$ANDROID_HOME/build-tools" -type f -name apksigner | sort -V | tail -n 1)
-          "$APKSIGNER" verify --verbose --print-certs wear-companion/app/build/outputs/apk/debug/app-debug.apk
-
-      - name: Upload EvoluaFit Watch APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: EvoluaFit-Watch-debug-apk
-          path: wear-companion/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
           retention-days: 14

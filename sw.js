@@ -1,4 +1,4 @@
-const CACHE_NAME = "monitor-peso-v70-samsung-source-fix";
+const CACHE_NAME = "monitor-peso-v71-watch-direct-prototype";
 
 const APP_FILES = [
   "./",
@@ -10,6 +10,7 @@ const APP_FILES = [
   "./dashboard-v2.js?v=2",
   "./health-v3.js?v=4",
   "./health-connect.js?v=4",
+  "./wear-bridge.js?v=1",
   "./food-v3.js?v=2",
   "./account-v3.js?v=1",
   "./third-wave-v4.js?v=1",
@@ -86,6 +87,8 @@ self.addEventListener("fetch", (event) => {
     url.pathname.endsWith("health-v3.js") ||
     url.pathname.endsWith("/health-connect.js") ||
     url.pathname.endsWith("health-connect.js") ||
+    url.pathname.endsWith("/wear-bridge.js") ||
+    url.pathname.endsWith("wear-bridge.js") ||
     url.pathname.endsWith("/food-v3.js") ||
     url.pathname.endsWith("food-v3.js") ||
     url.pathname.endsWith("/account-v3.js") ||

@@ -1,0 +1,19 @@
+{
+  "name": "evoluafit-ia",
+  "version": "1.48.1",
+  "private": true,
+  "description": "EvoluaFit I.A. com integração Android Health Connect",
+  "scripts": {
+    "prepare:www": "node scripts/prepare-web.mjs",
+    "android:prepare": "npm run prepare:www && node scripts/patch-health-plugin.mjs && npx cap sync android",
+    "android:debug": "npm run prepare:www && node scripts/patch-health-plugin.mjs && npx cap sync android && cd android && ./gradlew assembleDebug"
+  },
+  "dependencies": {
+    "@capacitor/android": "^8.0.0",
+    "@capacitor/core": "^8.0.0",
+    "@capgo/capacitor-health": "^8.11.3"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^8.0.0"
+  }
+}

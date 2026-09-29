@@ -148,8 +148,12 @@
       const start = new Date(item.startDate || item.startTime || 0).getTime();
       const end = new Date(item.endDate || item.endTime || 0).getTime();
       if (start && end && end > start) return total + ((end - start) / 60000);
-      const duration = Number(item.duration || item.durationMinutes || 0);
-      return total + (Number.isFinite(duration) ? duration : 0);
+      const durationMinutes = Number(item.durationMinutes || 0);
+      if (Number.isFinite(durationMinutes) && durationMinutes > 0) {
+        return total + durationMinutes;
+      }
+      const durationSeconds = Number(item.duration || 0);
+      return total + (Number.isFinite(durationSeconds) ? durationSeconds / 60 : 0);
     }, 0));
   }
 
@@ -172,6 +176,7 @@
     setText("hcDistance", snapshot.distanceKm == null ? "--" : `${snapshot.distanceKm.toFixed(2)} km`);
     setText("hcCalories", snapshot.activeCaloriesKcal == null ? "--" : `${Math.round(snapshot.activeCaloriesKcal)} kcal`);
     setText("hcHeart", snapshot.heartRateAvg == null ? "--" : `${Math.round(snapshot.heartRateAvg)} bpm`);
+    setText("hcRestingHr", snapshot.restingHeartRate == null ? "--" : `${Math.round(snapshot.restingHeartRate)} bpm`);
     setText("hcWeight", snapshot.weightKg == null ? "--" : `${snapshot.weightKg.toFixed(1)} kg`);
     setText("hcSleep", snapshot.sleepMinutes == null ? "--" : formatDuration(snapshot.sleepMinutes));
     setText("hcSpo2", snapshot.oxygenSaturationPct == null ? "--" : `${Math.round(snapshot.oxygenSaturationPct)}%`);
@@ -203,7 +208,7 @@
 
   function injectCard() {
     if (!isAndroidNative() || document.getElementById("healthConnectCard")) return;
-    const aba = document.getElementById("aba-saude");
+    const aba = document.getElementById("aba-dashboard");
     if (!aba) return;
 
     injectStyles();
@@ -220,6 +225,7 @@
         <div class="hc-item"><div class="hc-label">Distância</div><div id="hcDistance" class="hc-value">--</div></div>
         <div class="hc-item"><div class="hc-label">Calorias ativas</div><div id="hcCalories" class="hc-value">--</div></div>
         <div class="hc-item"><div class="hc-label">FC média</div><div id="hcHeart" class="hc-value">--</div></div>
+        <div class="hc-item"><div class="hc-label">FC repouso</div><div id="hcRestingHr" class="hc-value">--</div></div>
         <div class="hc-item"><div class="hc-label">Peso recente</div><div id="hcWeight" class="hc-value">--</div></div>
         <div class="hc-item"><div class="hc-label">Sono</div><div id="hcSleep" class="hc-value">--</div></div>
         <div class="hc-item"><div class="hc-label">SpO₂</div><div id="hcSpo2" class="hc-value">--</div></div>
@@ -234,8 +240,8 @@
       <div class="hc-foot">No Samsung Health, mantenha a sincronização com Health Connect habilitada. O EvoluaFit solicita somente leitura.</div>
     `;
 
-    const overview = document.getElementById("healthOverviewV3");
-    if (overview && overview.parentNode) overview.insertAdjacentElement("afterend", card);
+    const destaque = aba.querySelector(".card-highlight");
+    if (destaque) destaque.insertAdjacentElement("afterend", card);
     else {
       const header = aba.querySelector("header");
       if (header) header.insertAdjacentElement("afterend", card);

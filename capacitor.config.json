@@ -1,0 +1,8 @@
+{
+  "appId": "com.evoluafit.app",
+  "appName": "EvoluaFit I.A.",
+  "webDir": "www",
+  "android": {
+    "allowMixedContent": false
+  }
+}

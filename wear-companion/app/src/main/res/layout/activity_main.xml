@@ -19,7 +19,7 @@
             android:id="@+id/title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="EvoluaFit Watch v2.1"
+            android:text="EvoluaFit Watch v2.2"
             android:textColor="#FFFFFF"
             android:textStyle="bold"
             android:textSize="18sp" />
@@ -39,7 +39,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="14dp"
-            android:text="Passos: aguardando"
+            android:text="Passos hoje: aguardando"
             android:textColor="#FFFFFF"
             android:textStyle="bold"
             android:textSize="18sp"
@@ -95,7 +95,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:text="v2.1 • passos com fallback • FC • envio automático"
+            android:text="v2.2 • passos do dia • reboot seguro • envio automático"
             android:textColor="#7F8A9B"
             android:textSize="8sp"
             android:gravity="center" />

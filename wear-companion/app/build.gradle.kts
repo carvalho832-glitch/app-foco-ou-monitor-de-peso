@@ -12,7 +12,7 @@ android {
         minSdk = 30
         targetSdk = 35
         versionCode = (System.getenv("GITHUB_RUN_NUMBER") ?: "1").toInt()
-        versionName = "0.2.1." + (System.getenv("GITHUB_RUN_NUMBER") ?: "1")
+        versionName = "0.2.2." + (System.getenv("GITHUB_RUN_NUMBER") ?: "1")
     }
 
     signingConfigs {
@@ -46,4 +46,5 @@ dependencies {
     implementation("com.google.android.gms:play-services-wearable:20.0.1")
     implementation("com.google.guava:guava:33.3.1-android")
     implementation("androidx.concurrent:concurrent-futures:1.2.0")
+    implementation("androidx.work:work-runtime-ktx:2.10.1")
 }

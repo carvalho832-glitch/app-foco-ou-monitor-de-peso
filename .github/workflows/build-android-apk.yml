@@ -226,7 +226,6 @@ jobs:
           if-no-files-found: error
           retention-days: 14
 
-
   build-watch:
     if: ${{ github.ref == 'refs/heads/feature/evoluafit-watch-companion' }}
     runs-on: ubuntu-latest
@@ -269,7 +268,52 @@ jobs:
       - name: Upload Watch APK
         uses: actions/upload-artifact@v4
         with:
-          name: EvoluaFit-Watch-v2.1
+          name: EvoluaFit-Watch-v2.2
           path: wear-companion/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
           retention-days: 14
+
+  release-watch-v2-2:
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/feature/evoluafit-watch-companion' && contains(github.event.head_commit.message, '[release-watch-v2.2]') }}
+    needs: build-watch
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Download Watch APK
+        uses: actions/download-artifact@v4
+        with:
+          name: EvoluaFit-Watch-v2.2
+          path: release
+
+      - name: Prepare release asset
+        run: mv release/app-debug.apk release/EvoluaFit_Watch_v2.2_SM-R965F.apk
+
+      - name: Publish GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="evoluafit-watch-v2.2"
+          TITLE="EvoluaFit Watch v2.2"
+          cat > release-notes.md <<'EOF'
+          EvoluaFit Watch v2.2
+
+          - Passos do dia persistentes no fallback físico
+          - Referência diária automática na virada da meia-noite
+          - Preserva o acumulado quando o relógio reinicia
+          - Restaura o registro do Health Services após reboot
+          - Prioridade: STEPS_DAILY -> STEPS -> contador físico
+          - STEPS usa timestamp real para não misturar lotes entre dias
+          - Sincronização Watch -> celular continua pelo Wear OS Data Layer
+          - Frequência cardíaca direta preservada
+
+          Observação: no dia em que a v2.2 é instalada, o fallback físico pode ser marcado como parcial porque não existe como reconstruir retroativamente o valor bruto do sensor à meia-noite. A partir da próxima virada diária, o contador físico representa o dia completo.
+          EOF
+
+          if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release upload "$TAG" release/EvoluaFit_Watch_v2.2_SM-R965F.apk --clobber --repo "$GITHUB_REPOSITORY"
+            gh release edit "$TAG" --title "$TITLE" --notes-file release-notes.md --repo "$GITHUB_REPOSITORY"
+          else
+            gh release create "$TAG" release/EvoluaFit_Watch_v2.2_SM-R965F.apk               --target "$GITHUB_SHA"               --title "$TITLE"               --notes-file release-notes.md               --repo "$GITHUB_REPOSITORY"
+          fi

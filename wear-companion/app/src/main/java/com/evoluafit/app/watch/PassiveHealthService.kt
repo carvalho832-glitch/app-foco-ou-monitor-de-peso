@@ -1,26 +1,40 @@
 package com.evoluafit.app.watch
 
+import android.os.SystemClock
 import androidx.health.services.client.PassiveListenerService
 import androidx.health.services.client.data.DataPointContainer
 import androidx.health.services.client.data.DataType
+import java.time.Instant
 
 class PassiveHealthService : PassiveListenerService() {
 
     override fun onNewDataPointsReceived(dataPoints: DataPointContainer) {
         var changed = false
+        val bootInstant = Instant.ofEpochMilli(
+            System.currentTimeMillis() - SystemClock.elapsedRealtime()
+        )
 
-        val dailySteps = dataPoints.getData(DataType.STEPS_DAILY).lastOrNull()?.value
-        if (dailySteps != null) {
-            WearDataSender.saveDailySteps(this, dailySteps)
-            changed = true
-        } else {
-            val deltas = dataPoints.getData(DataType.STEPS)
-            if (deltas.isNotEmpty()) {
-                val deltaTotal = deltas.sumOf { it.value }
-                WearDataSender.addStepDelta(this, deltaTotal)
+        dataPoints.getData(DataType.STEPS_DAILY)
+            .sortedBy { it.getEndInstant(bootInstant) }
+            .forEach { point ->
+                WearDataSender.saveDailySteps(
+                    this,
+                    point.value,
+                    point.getEndInstant(bootInstant).toEpochMilli()
+                )
                 changed = true
             }
-        }
+
+        dataPoints.getData(DataType.STEPS)
+            .sortedBy { it.getEndInstant(bootInstant) }
+            .forEach { point ->
+                WearDataSender.addStepDelta(
+                    this,
+                    point.value,
+                    point.getEndInstant(bootInstant).toEpochMilli()
+                )
+                changed = true
+            }
 
         val heartRate = dataPoints.getData(DataType.HEART_RATE_BPM).lastOrNull()?.value
         if (heartRate != null) {

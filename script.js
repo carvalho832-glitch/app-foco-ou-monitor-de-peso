@@ -40,6 +40,8 @@ function addListener(id, evento, funcao) {
 }
 
 function iniciarApp() {
+  if (window.__evoluaMainAppStarted) return;
+  window.__evoluaMainAppStarted = true;
   configurarListeners();
 
   carregarTema();

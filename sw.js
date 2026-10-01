@@ -1,4 +1,4 @@
-const CACHE_NAME = "monitor-peso-v75-touch-fix";
+const CACHE_NAME = "monitor-peso-v76-full-ui";
 
 const APP_FILES = [
   "./",
@@ -6,11 +6,10 @@ const APP_FILES = [
   "./style.css?v=19",
   "./menu-animated.css?v=47",
   "./script.js?v=22",
-  "./cloud-loader.js?v=11",
+  "./cloud-loader.js?v=12",
   "./dashboard-v2.js?v=2",
   "./health-v3.js?v=4",
   "./health-connect.js?v=6",
-  "./experience-v6.js?v=1",
   "./food-v3.js?v=2",
   "./account-v3.js?v=1",
   "./third-wave-v4.js?v=1",

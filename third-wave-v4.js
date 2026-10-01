@@ -25,7 +25,7 @@
     prepararToquesAndroid();
     atualizarTudo();
     clearInterval(timer);
-    timer = setInterval(atualizarTudo, 2500);
+    timer = setInterval(atualizarTudo, 8000);
   }
 
   function injetarEstilos() {
@@ -317,6 +317,7 @@
   }
 
   function atualizarTudo() {
+    if (document.hidden) return;
     atualizarTendencias();
     atualizarMetas();
     renderizarGrafico();

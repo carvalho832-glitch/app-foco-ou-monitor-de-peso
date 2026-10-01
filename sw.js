@@ -1,11 +1,11 @@
-const CACHE_NAME = "monitor-peso-v70-samsung-source-fix";
+const CACHE_NAME = "monitor-peso-v71-native-share-fix";
 
 const APP_FILES = [
   "./",
   "./index.html",
   "./style.css?v=19",
   "./menu-animated.css?v=47",
-  "./script.js?v=21",
+  "./script.js?v=22",
   "./cloud-loader.js?v=8",
   "./dashboard-v2.js?v=2",
   "./health-v3.js?v=4",

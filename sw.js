@@ -1,4 +1,4 @@
-const CACHE_NAME = "monitor-peso-v73-interactive-health-charts";
+const CACHE_NAME = "monitor-peso-v74-unified-experience-v6";
 
 const APP_FILES = [
   "./",
@@ -6,10 +6,11 @@ const APP_FILES = [
   "./style.css?v=19",
   "./menu-animated.css?v=47",
   "./script.js?v=22",
-  "./cloud-loader.js?v=10",
+  "./cloud-loader.js?v=11",
   "./dashboard-v2.js?v=2",
   "./health-v3.js?v=4",
   "./health-connect.js?v=6",
+  "./experience-v6.js?v=1",
   "./food-v3.js?v=2",
   "./account-v3.js?v=1",
   "./third-wave-v4.js?v=1",
@@ -19,7 +20,7 @@ const APP_FILES = [
   "./firebase-config.js?v=1",
   "./firebase-cloud.js?v=2",
   "./native-backup.js?v=1",
-  "./food-photo.js?v=6",
+  "./food-photo.js?v=7",
   "./manifest.json",
   "./icon.svg"
 ];

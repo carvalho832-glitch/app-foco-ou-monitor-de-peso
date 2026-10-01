@@ -21,7 +21,7 @@
     observarTutorial();
 
     clearInterval(timerAtualizacao);
-    timerAtualizacao = setInterval(atualizarTudo, 1600);
+    timerAtualizacao = setInterval(atualizarTudo, 5000);
   }
 
   function injetarEstilos() {
@@ -373,6 +373,7 @@
   }
 
   function atualizarTudo() {
+    if (document.hidden) return;
     atualizarCabecalho();
     atualizarResumo();
     ajustarTutorialAtual();

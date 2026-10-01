@@ -13,7 +13,9 @@
   const FOTO_DB_NAME = "evoluafit-food-photo";
   const FOTO_DB_STORE = "fotos-pendentes";
   const FOTO_DB_VERSION = 1;
-  const FOTO_REQUEST_TIMEOUT_MS = 65000;
+  const FOTO_REQUEST_TIMEOUT_MS = 90000;
+  const FOTO_RETRY_DELAYS_MS = [0, 1800, 4500];
+  const FOTO_HTTP_RETRY = new Set([408, 425, 429, 500, 502, 503, 504]);
   const FOTO_LOCAL_FALLBACK_PREFIX = "lumaFotoPendente:";
   const TIPOS_REFEICAO = ["cafe", "almoco", "jantar", "ceia"];
   window.__lumaFotosPendentesMemoria = window.__lumaFotosPendentesMemoria || {};
@@ -479,64 +481,99 @@
   }
 
   async function enviarFotoParaAnalise(refeicao, imagem) {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), FOTO_REQUEST_TIMEOUT_MS);
+    const corpo = JSON.stringify({
+      imagemBase64: imagem.dataUrl,
+      mimeType: imagem.mimeType || "image/jpeg",
+      refeicao,
+      contexto: montarContextoFotoRefeicao(refeicao)
+    });
 
-    try {
-      const resposta = await fetch(`${FOTO_FOOD_API}/analisar-foto-refeicao`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          imagemBase64: imagem.dataUrl,
-          mimeType: imagem.mimeType || "image/jpeg",
-          refeicao,
-          contexto: montarContextoFotoRefeicao(refeicao)
-        }),
-        signal: controller.signal
-      });
+    let ultimoErro = null;
 
-      const textoResposta = await resposta.text();
-      let resultado = {};
+    for (let tentativa = 0; tentativa < FOTO_RETRY_DELAYS_MS.length; tentativa += 1) {
+      const atraso = FOTO_RETRY_DELAYS_MS[tentativa];
 
-      if (textoResposta) {
-        try {
-          resultado = JSON.parse(textoResposta);
-        } catch (_) {
-          resultado = {};
+      if (atraso > 0) {
+        await new Promise((resolve) => setTimeout(resolve, atraso));
+      }
+
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), FOTO_REQUEST_TIMEOUT_MS);
+
+      try {
+        const resposta = await fetch(`${FOTO_FOOD_API}/analisar-foto-refeicao`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: corpo,
+          cache: "no-store",
+          signal: controller.signal
+        });
+
+        const textoResposta = await resposta.text();
+        let resultado = {};
+
+        if (textoResposta) {
+          try {
+            resultado = JSON.parse(textoResposta);
+          } catch (_) {
+            resultado = {};
+          }
         }
+
+        if (!resposta.ok) {
+          const detalhe = resultado.erro || resultado.message || "";
+          const erroHttp = new Error(
+            detalhe
+              ? `Servidor da Luma respondeu ${resposta.status}: ${detalhe}`
+              : `Servidor da Luma respondeu erro ${resposta.status}.`
+          );
+          erroHttp.status = resposta.status;
+          ultimoErro = erroHttp;
+
+          if (FOTO_HTTP_RETRY.has(resposta.status) && tentativa < FOTO_RETRY_DELAYS_MS.length - 1) {
+            continue;
+          }
+
+          throw erroHttp;
+        }
+
+        if (!resultado.sucesso) {
+          throw new Error(resultado.erro || "A Luma não conseguiu concluir a leitura da foto.");
+        }
+
+        return resultado;
+
+      } catch (erro) {
+        ultimoErro = erro;
+
+        const aindaPodeTentar = tentativa < FOTO_RETRY_DELAYS_MS.length - 1;
+        const status = Number(erro && erro.status);
+        const erroTemporarioHttp = FOTO_HTTP_RETRY.has(status);
+        const erroDeRede = erro instanceof TypeError;
+        const estourouTempo = erro && erro.name === "AbortError";
+
+        if (aindaPodeTentar && (erroTemporarioHttp || erroDeRede || estourouTempo)) {
+          continue;
+        }
+
+        if (estourouTempo) {
+          throw new Error("A análise demorou demais após novas tentativas. A foto ficou salva para tentar novamente.");
+        }
+
+        if (erroDeRede) {
+          throw new Error("Falha de conexão com a Luma mesmo após novas tentativas. A foto ficou salva para tentar novamente.");
+        }
+
+        throw erro;
+
+      } finally {
+        clearTimeout(timeout);
       }
-
-      if (!resposta.ok) {
-        const detalhe = resultado.erro || resultado.message || "";
-        throw new Error(
-          detalhe
-            ? `Servidor da Luma respondeu ${resposta.status}: ${detalhe}`
-            : `Servidor da Luma respondeu erro ${resposta.status}.`
-        );
-      }
-
-      if (!resultado.sucesso) {
-        throw new Error(resultado.erro || "A Luma não conseguiu concluir a leitura da foto.");
-      }
-
-      return resultado;
-
-    } catch (erro) {
-      if (erro && erro.name === "AbortError") {
-        throw new Error("A análise demorou demais. A foto ficou salva para tentar novamente.");
-      }
-
-      if (erro instanceof TypeError) {
-        throw new Error("Falha de conexão com a Luma. A foto ficou salva para tentar novamente.");
-      }
-
-      throw erro;
-
-    } finally {
-      clearTimeout(timeout);
     }
+
+    throw ultimoErro || new Error("Não foi possível enviar a foto para análise.");
   }
 
   function mostrarSucessoAnalise(analise, refeicao, registroHorario) {
@@ -917,7 +954,7 @@
         const img = new Image();
 
         img.onload = function () {
-          const maxLado = 1280;
+          const maxLado = 1100;
           let largura = img.width;
           let altura = img.height;
 
@@ -936,7 +973,7 @@
           const ctx = canvas.getContext("2d");
           ctx.drawImage(img, 0, 0, largura, altura);
 
-          const dataUrl = canvas.toDataURL("image/jpeg", 0.78);
+          const dataUrl = canvas.toDataURL("image/jpeg", 0.72);
 
           resolve({
             dataUrl,

@@ -25,19 +25,6 @@
     document.body.appendChild(script);
   }
 
-  function dispararDOMContentLoadedExtra() {
-    try {
-      document.dispatchEvent(new Event("DOMContentLoaded", {
-        bubbles: true,
-        cancelable: true
-      }));
-    } catch (erro) {
-      const evento = document.createEvent("Event");
-      evento.initEvent("DOMContentLoaded", true, true);
-      document.dispatchEvent(evento);
-    }
-  }
-
   function carregarExperiencia() {
     carregarScript("dashboard-v2.js?v=2", "evoluafit-dashboard-v2");
     carregarScript("health-v3.js?v=4", "evoluafit-health-v3");
@@ -62,7 +49,6 @@
   function carregarIntegracaoFirebase() {
     carregarScript("firebase-cloud.js?v=2", "evoluafit-firebase-cloud", function () {
       carregarBackupNativo();
-      setTimeout(dispararDOMContentLoadedExtra, 120);
       setTimeout(carregarFotoRefeicao, 250);
     });
   }

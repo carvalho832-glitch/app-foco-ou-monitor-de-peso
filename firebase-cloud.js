@@ -31,9 +31,15 @@
   let ultimaSyncEm = lerUltimaSyncLocal();
   let overflowAnterior = "";
 
-  document.addEventListener("DOMContentLoaded", iniciarFirebaseEvoluaFit);
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", iniciarFirebaseEvoluaFit, { once: true });
+  } else {
+    setTimeout(iniciarFirebaseEvoluaFit, 0);
+  }
 
   async function iniciarFirebaseEvoluaFit() {
+    if (window.__evoluaFirebaseStarted) return;
+    window.__evoluaFirebaseStarted = true;
     criarEstilosNuvem();
     criarPainelConta();
     atualizarUltimaSyncUI();

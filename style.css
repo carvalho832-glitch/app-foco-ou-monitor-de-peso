@@ -2403,3 +2403,15 @@ button i {
   border-color: rgba(167, 139, 250, 0.22);
   background: rgba(124, 58, 237, 0.12);
 }
+
+
+/* Protecao contra camadas invisiveis bloqueando toques */
+.tutorial-overlay[style*="display: none"],
+.quick-backdrop-v2:not(.open),
+.v4-modal-backdrop:not(.open),
+.v4-modal:not(.open),
+.cloud-modal-evoluafit:not(.aberto),
+.hc-detail-page:not(.open),
+.foto-refeicao-source-overlay:not(.visivel) {
+  pointer-events: none !important;
+}

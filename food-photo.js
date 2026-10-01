@@ -589,7 +589,10 @@
 
     status.innerText =
       `✅ ${NOMES_REFEICOES[refeicao]}: ${nomes || "itens adicionados"}.\n` +
-      `🔥 Estimativa: ${Number(analise.totalKcal) || 0} kcal.\n` +
+      `🔥 Estimativa: ${Number(analise.totalKcal) || 0} kcal.` +
+      ((Number(analise.proteinaG) || Number(analise.carboidratosG) || Number(analise.gordurasG))
+        ? ` • P ${Number(analise.proteinaG) || 0}g • C ${Number(analise.carboidratosG) || 0}g • G ${Number(analise.gordurasG) || 0}g\n`
+        : "\n") +
       `🕒 Foto registrada às ${horario}.` +
       (leituraHorario ? ` ${leituraHorario}` : "") +
       "\n💾 Foto, alimentos e horário salvos automaticamente.";
@@ -932,12 +935,42 @@
 
     refeicoesAtuais.kcal.observacao = analise.observacao || "Calorias estimadas pela foto. Ajuste as porções se necessário.";
 
+    if (!refeicoesAtuais.analisesFoto || typeof refeicoesAtuais.analisesFoto !== "object") {
+      refeicoesAtuais.analisesFoto = {};
+    }
+
+    refeicoesAtuais.analisesFoto[refeicao] = {
+      itens: itens.map((item) => ({
+        nome: formatarNomeItemFoto(item.nome || "Alimento"),
+        quantidade: String(item.quantidade || "").trim(),
+        kcal: Number(item.kcal) || 0,
+        proteinaG: Number(item.proteinaG) || 0,
+        carboidratosG: Number(item.carboidratosG) || 0,
+        gordurasG: Number(item.gordurasG) || 0,
+        confianca: String(item.confianca || "").trim()
+      })),
+      totalKcal: Number(analise.totalKcal) || 0,
+      proteinaG: Number(analise.proteinaG) || 0,
+      carboidratosG: Number(analise.carboidratosG) || 0,
+      gordurasG: Number(analise.gordurasG) || 0,
+      observacao: String(analise.observacao || "").trim(),
+      observacaoHorario: String(analise.observacaoHorario || "").trim(),
+      atualizadoEm: new Date().toISOString()
+    };
+
     if (typeof obterAssinaturaRefeicoes === "function") {
       refeicoesAtuais.assinaturaKcal = obterAssinaturaRefeicoes();
     }
 
     if (typeof renderizarTagsDeComida === "function") renderizarTagsDeComida();
     if (typeof renderizarCalorias === "function") renderizarCalorias();
+
+    document.dispatchEvent(new CustomEvent("evoluafit:meal-analysis-updated", {
+      detail: {
+        refeicao,
+        analise: refeicoesAtuais.analisesFoto[refeicao]
+      }
+    }));
   }
 
   function formatarNomeItemFoto(nome) {

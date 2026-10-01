@@ -26,6 +26,7 @@
   }
 
   function carregarExperiencia() {
+    document.body && document.body.classList.remove("evolua-v6");
     carregarScript("dashboard-v2.js?v=2", "evoluafit-dashboard-v2");
     carregarScript("health-v3.js?v=4", "evoluafit-health-v3");
     carregarScript("health-connect.js?v=6", "evoluafit-health-connect");
@@ -35,7 +36,6 @@
     carregarScript("third-wave-goals-sync.js?v=1", "evoluafit-third-wave-goals-sync");
     carregarScript("third-wave-hotfix-v5.js?v=1", "evoluafit-third-wave-hotfix-v5");
     carregarScript("luma-medication-v7.js?v=1", "evoluafit-luma-medication-v7");
-    carregarScript("experience-v6.js?v=1", "evoluafit-experience-v6");
   }
 
   function carregarFotoRefeicao() {

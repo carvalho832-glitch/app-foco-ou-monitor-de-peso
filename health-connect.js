@@ -1138,12 +1138,12 @@
   function boot() {
     if (!isAndroidNative()) return;
     injectCard();
-    setTimeout(refresh, 900);
+    setTimeout(refresh, 2200);
     document.addEventListener("visibilitychange", function () {
-      if (!document.hidden) setTimeout(refresh, 400);
+      if (!document.hidden) setTimeout(refresh, 1200);
     });
     window.addEventListener("focus", function () {
-      setTimeout(refresh, 400);
+      setTimeout(refresh, 1200);
     });
   }
 

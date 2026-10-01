@@ -266,7 +266,7 @@
       .hc-diag-title{font-size:11px;font-weight:900;margin-bottom:6px}.hc-diag-row{display:flex;justify-content:space-between;gap:10px;font-size:9.5px;line-height:1.5;padding:2px 0}.hc-diag-row span:first-child{color:var(--text-muted)}.hc-diag-row strong{text-align:right;overflow-wrap:anywhere}
       .hc-diag-source{margin-top:6px;padding-top:6px;border-top:1px solid var(--border-color);font-size:9px;color:var(--text-muted);line-height:1.5;overflow-wrap:anywhere}
       .hc-diag-actions{display:flex;gap:7px;margin-top:10px}.hc-diag-actions button{flex:1}
-      .hc-detail-page{position:fixed;inset:0;z-index:99999;background:var(--body-bg,#071426);color:var(--text-color,#fff);overflow:auto;padding:0 0 32px;display:none}.hc-detail-page.open{display:block}.hc-detail-top{position:sticky;top:0;z-index:2;display:flex;align-items:center;gap:12px;padding:16px 18px;background:rgba(7,20,38,.94);backdrop-filter:blur(14px);border-bottom:1px solid var(--border-color)}.hc-detail-back{width:38px;height:38px;border:0;border-radius:12px;background:rgba(148,163,184,.1);color:inherit;font-size:24px}.hc-detail-title{font-size:18px;font-weight:900}.hc-detail-sub{font-size:10px;color:var(--text-muted);margin-top:2px}.hc-detail-body{padding:16px}.hc-detail-hero{padding:18px;border-radius:20px;background:linear-gradient(135deg,rgba(37,99,235,.22),rgba(139,92,246,.12));border:1px solid rgba(96,165,250,.25)}.hc-detail-hero-label{font-size:10px;text-transform:uppercase;font-weight:850;color:var(--text-muted)}.hc-detail-hero-value{font-size:38px;font-weight:950;line-height:1.1;margin-top:7px}.hc-detail-hero-note{font-size:10px;color:var(--text-muted);margin-top:8px}.hc-detail-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:12px}.hc-detail-stat{padding:12px 9px;border:1px solid var(--border-color);border-radius:15px;background:var(--card-bg)}.hc-detail-stat span{display:block;font-size:9px;color:var(--text-muted);text-transform:uppercase;font-weight:800}.hc-detail-stat strong{display:block;margin-top:5px;font-size:15px}.hc-detail-section{margin-top:14px;padding:15px;border:1px solid var(--border-color);border-radius:18px;background:var(--card-bg)}.hc-detail-section h3{margin:0 0 11px;font-size:14px}.hc-detail-chart{width:100%;height:130px;display:block}.hc-detail-empty{font-size:11px;color:var(--text-muted);line-height:1.5}.hc-detail-list{display:flex;flex-direction:column;gap:8px}.hc-detail-row{display:flex;justify-content:space-between;gap:14px;padding:9px 0;border-bottom:1px solid var(--border-color);font-size:11px}.hc-detail-row:last-child{border-bottom:0}.hc-detail-row span{color:var(--text-muted)}.hc-detail-row strong{text-align:right}.hc-detail-loading{padding:32px;text-align:center;color:var(--text-muted);font-size:12px}
+      .hc-detail-page{position:fixed;inset:0;z-index:99999;background:var(--body-bg,#071426);color:var(--text-color,#fff);overflow:auto;padding:0 0 32px;display:none}.hc-detail-page.open{display:block}.hc-detail-top{position:sticky;top:0;z-index:2;display:flex;align-items:center;gap:12px;padding:16px 18px;background:rgba(7,20,38,.94);backdrop-filter:blur(14px);border-bottom:1px solid var(--border-color)}.hc-detail-back{width:38px;height:38px;border:0;border-radius:12px;background:rgba(148,163,184,.1);color:inherit;font-size:24px}.hc-detail-title{font-size:18px;font-weight:900}.hc-detail-sub{font-size:10px;color:var(--text-muted);margin-top:2px}.hc-detail-body{padding:16px}.hc-detail-hero{padding:18px;border-radius:20px;background:linear-gradient(135deg,rgba(37,99,235,.22),rgba(139,92,246,.12));border:1px solid rgba(96,165,250,.25)}.hc-detail-hero-label{font-size:10px;text-transform:uppercase;font-weight:850;color:var(--text-muted)}.hc-detail-hero-value{font-size:38px;font-weight:950;line-height:1.1;margin-top:7px}.hc-detail-hero-note{font-size:10px;color:var(--text-muted);margin-top:8px}.hc-detail-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:12px}.hc-detail-stat{padding:12px 9px;border:1px solid var(--border-color);border-radius:15px;background:var(--card-bg)}.hc-detail-stat span{display:block;font-size:9px;color:var(--text-muted);text-transform:uppercase;font-weight:800}.hc-detail-stat strong{display:block;margin-top:5px;font-size:15px}.hc-detail-section{margin-top:14px;padding:15px;border:1px solid var(--border-color);border-radius:18px;background:var(--card-bg);animation:hcDetailUp .28s ease both}.hc-detail-section h3{margin:0 0 11px;font-size:14px}.hc-periods{display:flex;gap:7px;margin:0 0 13px;padding:4px;border:1px solid var(--border-color);border-radius:14px;background:rgba(148,163,184,.045)}.hc-period-btn{flex:1;border:0;border-radius:10px;padding:9px 7px;background:transparent;color:var(--text-muted);font-size:10px;font-weight:900;transition:.16s ease}.hc-period-btn.active{background:rgba(37,99,235,.22);color:#dbeafe;box-shadow:inset 0 0 0 1px rgba(96,165,250,.26)}.hc-chart-shell{position:relative;width:100%;margin-top:4px;user-select:none;-webkit-user-select:none;touch-action:pan-y}.hc-detail-chart{width:100%;height:168px;display:block;overflow:visible}.hc-chart-grid{stroke:currentColor;stroke-width:.65;opacity:.09;vector-effect:non-scaling-stroke}.hc-chart-axis{fill:currentColor;opacity:.48;font-size:8px;font-weight:700}.hc-chart-area{fill:url(#hcChartGradient);opacity:.28}.hc-chart-line{fill:none;stroke:#60a5fa;stroke-width:1.65;vector-effect:non-scaling-stroke;stroke-linecap:round;stroke-linejoin:round;animation:hcChartDraw .55s ease both}.hc-chart-guide{stroke:#93c5fd;stroke-width:.85;stroke-dasharray:3 3;opacity:0;vector-effect:non-scaling-stroke}.hc-chart-focus{fill:#dbeafe;stroke:#2563eb;stroke-width:2;opacity:0;vector-effect:non-scaling-stroke}.hc-chart-tooltip{position:absolute;top:7px;left:50%;transform:translateX(-50%) translateY(-3px);min-width:106px;padding:7px 10px;border-radius:11px;background:rgba(7,20,38,.94);border:1px solid rgba(96,165,250,.32);box-shadow:0 8px 24px rgba(0,0,0,.28);pointer-events:none;opacity:0;transition:opacity .12s ease,transform .12s ease;text-align:center}.hc-chart-tooltip.show{opacity:1;transform:translateX(-50%) translateY(0)}.hc-chart-tooltip strong{display:block;color:#fff;font-size:12px}.hc-chart-tooltip span{display:block;margin-top:2px;color:#94a3b8;font-size:8.5px}.hc-chart-hint{margin-top:6px;text-align:center;color:var(--text-muted);font-size:8.5px}.hc-detail-empty{font-size:11px;color:var(--text-muted);line-height:1.5}.hc-detail-list{display:flex;flex-direction:column;gap:8px}@keyframes hcChartDraw{from{stroke-dasharray:900;stroke-dashoffset:900}to{stroke-dasharray:900;stroke-dashoffset:0}}@keyframes hcDetailUp{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}.hc-detail-row{display:flex;justify-content:space-between;gap:14px;padding:9px 0;border-bottom:1px solid var(--border-color);font-size:11px}.hc-detail-row:last-child{border-bottom:0}.hc-detail-row span{color:var(--text-muted)}.hc-detail-row strong{text-align:right}.hc-detail-loading{padding:32px;text-align:center;color:var(--text-muted);font-size:12px}
     `;
     document.head.appendChild(style);
   }
@@ -417,23 +417,158 @@
       : { hour: "2-digit", minute: "2-digit" });
   }
 
-  function buildSparkline(values) {
-    const nums = values.map(safeNumber).filter((n) => n != null);
-    if (nums.length < 2) return '<div class="hc-detail-empty">Ainda não há pontos suficientes para montar o gráfico.</div>';
-    const w = 320, h = 120, pad = 10;
-    const min = Math.min.apply(null, nums);
-    const max = Math.max.apply(null, nums);
-    const span = Math.max(1, max - min);
-    const points = nums.map(function (v, i) {
-      const x = pad + (i * (w - pad * 2) / Math.max(1, nums.length - 1));
-      const y = h - pad - ((v - min) / span) * (h - pad * 2);
-      return x.toFixed(1) + "," + y.toFixed(1);
-    }).join(" ");
-    return '<svg class="hc-detail-chart" viewBox="0 0 320 120" preserveAspectRatio="none" aria-label="Gráfico">' +
-      '<line x1="10" y1="110" x2="310" y2="110" stroke="currentColor" opacity=".12"/>' +
-      '<polyline points="' + points + '" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>' +
-      '</svg>';
+  function compactAxisValue(key, value) {
+    const n = safeNumber(value);
+    if (n == null) return "--";
+    if (key === "sleep") return (n / 60).toFixed(n >= 600 ? 0 : 1) + "h";
+    if (key === "steps") return n >= 1000 ? (n / 1000).toFixed(1) + "k" : String(Math.round(n));
+    if (key === "distance") return n.toFixed(n >= 10 ? 0 : 1);
+    if (key === "weight") return n.toFixed(1);
+    if (key === "spo2" || key === "heart" || key === "restingHeart" || key === "calories") return String(Math.round(n));
+    return String(Math.round(n * 10) / 10);
   }
+
+  function chartDateLabel(value, days) {
+    const d = new Date(value);
+    if (Number.isNaN(d.getTime())) return "--";
+    if (days <= 1) return d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+    return d.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" });
+  }
+
+  function buildInteractiveChart(points, key, days) {
+    const clean = (points || []).map(function (point) {
+      return {
+        value: safeNumber(point && point.value),
+        time: new Date(point && point.time || 0).getTime()
+      };
+    }).filter(function (point) {
+      return point.value != null && Number.isFinite(point.time) && point.time > 0;
+    }).sort(function (a, b) { return a.time - b.time; });
+
+    if (clean.length < 2) {
+      return '<div class="hc-detail-empty">Ainda não há pontos suficientes para montar o gráfico.</div>';
+    }
+
+    const w = 360, h = 170, left = 34, right = 10, top = 12, bottom = 27;
+    let min = Math.min.apply(null, clean.map(function (p) { return p.value; }));
+    let max = Math.max.apply(null, clean.map(function (p) { return p.value; }));
+    const originalSpan = Math.max(0.0001, max - min);
+    const yPad = Math.max(originalSpan * 0.12, key === "weight" ? 0.15 : 0.5);
+    min -= yPad;
+    max += yPad;
+    const span = Math.max(0.0001, max - min);
+    const minTime = clean[0].time;
+    const maxTime = clean[clean.length - 1].time;
+    const timeSpan = Math.max(1, maxTime - minTime);
+
+    const mapped = clean.map(function (p) {
+      const x = left + ((p.time - minTime) / timeSpan) * (w - left - right);
+      const y = top + ((max - p.value) / span) * (h - top - bottom);
+      return { x, y, value: p.value, time: p.time };
+    });
+
+    const linePoints = mapped.map(function (p) {
+      return p.x.toFixed(2) + "," + p.y.toFixed(2);
+    }).join(" ");
+    const areaPath = "M " + mapped[0].x.toFixed(2) + " " + (h - bottom) +
+      " L " + linePoints.replace(/,/g, " ") +
+      " L " + mapped[mapped.length - 1].x.toFixed(2) + " " + (h - bottom) + " Z";
+
+    const gridFractions = [0, 0.5, 1];
+    const grid = gridFractions.map(function (fraction) {
+      const y = top + fraction * (h - top - bottom);
+      const value = max - fraction * span;
+      return '<line class="hc-chart-grid" x1="' + left + '" y1="' + y.toFixed(2) + '" x2="' + (w - right) + '" y2="' + y.toFixed(2) + '"/>' +
+        '<text class="hc-chart-axis" x="1" y="' + (y + 3).toFixed(2) + '">' + escapeHtml(compactAxisValue(key, value)) + '</text>';
+    }).join("");
+
+    const pointNodes = mapped.map(function (p) {
+      const display = formatDetailValue(key, p.value);
+      const timeLabel = formatDetailDate(new Date(p.time).toISOString(), days > 1);
+      return '<circle class="hc-chart-point" cx="' + p.x.toFixed(2) + '" cy="' + p.y.toFixed(2) + '" r=".01" data-value="' +
+        escapeHtml(display) + '" data-time="' + escapeHtml(timeLabel) + '"></circle>';
+    }).join("");
+
+    const uid = "hcChartGradient";
+    return '<div class="hc-chart-shell" data-hc-chart="' + escapeHtml(key) + '">' +
+      '<svg class="hc-detail-chart" viewBox="0 0 360 170" preserveAspectRatio="none" aria-label="Gráfico interativo">' +
+      '<defs><linearGradient id="' + uid + '" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#60a5fa" stop-opacity=".42"/><stop offset="100%" stop-color="#60a5fa" stop-opacity="0"/></linearGradient></defs>' +
+      grid +
+      '<path class="hc-chart-area" d="' + areaPath + '"></path>' +
+      '<polyline class="hc-chart-line" points="' + linePoints + '"></polyline>' +
+      pointNodes +
+      '<line class="hc-chart-guide" x1="0" y1="' + top + '" x2="0" y2="' + (h - bottom) + '"></line>' +
+      '<circle class="hc-chart-focus" cx="0" cy="0" r="4"></circle>' +
+      '<text class="hc-chart-axis" x="' + left + '" y="' + (h - 6) + '">' + escapeHtml(chartDateLabel(minTime, days)) + '</text>' +
+      '<text class="hc-chart-axis" text-anchor="end" x="' + (w - right) + '" y="' + (h - 6) + '">' + escapeHtml(chartDateLabel(maxTime, days)) + '</text>' +
+      '</svg>' +
+      '<div class="hc-chart-tooltip"><strong></strong><span></span></div>' +
+      '<div class="hc-chart-hint">Toque ou deslize no gráfico para ver o valor exato</div>' +
+      '</div>';
+  }
+
+  function bindInteractiveCharts(root) {
+    (root || document).querySelectorAll(".hc-chart-shell").forEach(function (shell) {
+      const svg = shell.querySelector("svg");
+      const guide = shell.querySelector(".hc-chart-guide");
+      const focus = shell.querySelector(".hc-chart-focus");
+      const tooltip = shell.querySelector(".hc-chart-tooltip");
+      const tooltipValue = tooltip && tooltip.querySelector("strong");
+      const tooltipTime = tooltip && tooltip.querySelector("span");
+      const points = Array.from(shell.querySelectorAll(".hc-chart-point")).map(function (node) {
+        return {
+          node,
+          x: Number(node.getAttribute("cx")),
+          y: Number(node.getAttribute("cy")),
+          value: node.getAttribute("data-value") || "--",
+          time: node.getAttribute("data-time") || "--"
+        };
+      });
+      if (!svg || !points.length) return;
+
+      function showAt(clientX) {
+        const rect = svg.getBoundingClientRect();
+        if (!rect.width) return;
+        const x = Math.max(0, Math.min(360, ((clientX - rect.left) / rect.width) * 360));
+        let nearest = points[0];
+        let distance = Math.abs(nearest.x - x);
+        for (let i = 1; i < points.length; i += 1) {
+          const next = Math.abs(points[i].x - x);
+          if (next < distance) {
+            nearest = points[i];
+            distance = next;
+          }
+        }
+        guide.setAttribute("x1", nearest.x);
+        guide.setAttribute("x2", nearest.x);
+        guide.style.opacity = "1";
+        focus.setAttribute("cx", nearest.x);
+        focus.setAttribute("cy", nearest.y);
+        focus.style.opacity = "1";
+        if (tooltipValue) tooltipValue.textContent = nearest.value;
+        if (tooltipTime) tooltipTime.textContent = nearest.time;
+        if (tooltip) tooltip.classList.add("show");
+      }
+
+      function hide() {
+        guide.style.opacity = "0";
+        focus.style.opacity = "0";
+        if (tooltip) tooltip.classList.remove("show");
+      }
+
+      svg.addEventListener("pointerdown", function (event) {
+        showAt(event.clientX);
+      });
+      svg.addEventListener("pointermove", function (event) {
+        if (event.pointerType === "mouse" || event.buttons || tooltip.classList.contains("show")) {
+          showAt(event.clientX);
+        }
+      });
+      svg.addEventListener("pointerleave", hide);
+      svg.addEventListener("pointercancel", hide);
+    });
+  }
+
 
   function statsFromValues(values) {
     const nums = values.map(safeNumber).filter((n) => n != null);
@@ -446,19 +581,21 @@
     };
   }
 
-  async function readDetailSamples(health, cfg) {
+  async function readDetailSamples(health, cfg, days) {
     const end = new Date();
-    const start = new Date(end.getTime() - cfg.days * 24 * 60 * 60 * 1000);
+    const periodDays = Math.max(1, Number(days || cfg.days || 1));
+    const start = new Date(end.getTime() - periodDays * 24 * 60 * 60 * 1000);
     if (cfg.type === "workouts") {
       return readWorkouts(health, start, end);
     }
     return readRawSamples(health, cfg.type, start, end, 1200);
   }
 
-  async function readDailyDetailSeries(health, cfg) {
+  async function readDailyDetailSeries(health, cfg, days) {
     if (!["steps", "distance", "calories"].includes(cfg.type)) return [];
     const end = new Date();
-    const start = new Date(end.getTime() - cfg.days * 24 * 60 * 60 * 1000);
+    const periodDays = Math.max(1, Number(days || cfg.days || 1));
+    const start = new Date(end.getTime() - periodDays * 24 * 60 * 60 * 1000);
     try {
       const result = await health.queryAggregated({
         dataType: cfg.type,
@@ -473,12 +610,28 @@
     }
   }
 
-  function renderSleepDetail(samples, snapshot) {
+  function renderPeriodSelector(key, days) {
+    const options = [
+      { days: 1, label: "24h" },
+      { days: 7, label: "7 dias" },
+      { days: 30, label: "30 dias" }
+    ];
+    return '<div class="hc-periods">' + options.map(function (option) {
+      return '<button type="button" class="hc-period-btn' + (Number(days) === option.days ? ' active' : '') +
+        '" data-hc-period="' + option.days + '" data-hc-key="' + escapeHtml(key) + '">' + option.label + '</button>';
+    }).join("") + '</div>';
+  }
+
+  function renderSleepDetail(samples, snapshot, days) {
     const valid = samples.filter((x) => safeNumber(x.value) != null).sort((a, b) => new Date(b.endDate || b.startDate || 0) - new Date(a.endDate || a.startDate || 0));
-    const values = valid.slice().reverse().map((x) => safeNumber(x.value));
+    const chronological = valid.slice().reverse();
+    const values = chronological.map((x) => safeNumber(x.value));
     const stats = statsFromValues(values);
     const latest = valid[0];
-    const rows = valid.slice(0, 7).map(function (x) {
+    const points = chronological.map(function (x) {
+      return { value: safeNumber(x.value), time: x.startDate || x.endDate };
+    });
+    const rows = valid.slice(0, days > 7 ? 14 : 7).map(function (x) {
       const when = x.startDate ? new Date(x.startDate).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" }) : "Registro";
       const interval = (x.startDate && x.endDate) ? formatDetailDate(x.startDate, false) + " – " + formatDetailDate(x.endDate, false) : "";
       return '<div class="hc-detail-row"><span>' + escapeHtml(when + (interval ? " • " + interval : "")) + '</span><strong>' + escapeHtml(formatDuration(x.value)) + '</strong></div>';
@@ -488,45 +641,55 @@
       '<div class="hc-detail-stats"><div class="hc-detail-stat"><span>Média</span><strong>' + (stats ? escapeHtml(formatDuration(stats.avg)) : "--") + '</strong></div>' +
       '<div class="hc-detail-stat"><span>Menor</span><strong>' + (stats ? escapeHtml(formatDuration(stats.min)) : "--") + '</strong></div>' +
       '<div class="hc-detail-stat"><span>Maior</span><strong>' + (stats ? escapeHtml(formatDuration(stats.max)) : "--") + '</strong></div></div>' +
-      '<div class="hc-detail-section"><h3>Últimas noites</h3>' + buildSparkline(values) + '</div>' +
+      '<div class="hc-detail-section"><h3>Duração por noite</h3>' + buildInteractiveChart(points, "sleep", days) + '</div>' +
       '<div class="hc-detail-section"><h3>Histórico recebido</h3><div class="hc-detail-list">' + (rows || '<div class="hc-detail-empty">Nenhum registro detalhado de sono foi disponibilizado.</div>') + '</div></div>' +
       '<div class="hc-detail-section"><h3>Fases do sono</h3><div class="hc-detail-empty">O EvoluaFit mostra apenas as fases que o Health Connect entregar. Se o Samsung Health não compartilhar sono REM, profundo, leve e acordado como registros separados, o app não inventa esses dados.</div></div>';
   }
 
-  function renderHeartDetail(samples, snapshot, key) {
+  function renderHeartDetail(samples, snapshot, key, days) {
     const valid = samples.filter((x) => sampleNumericValue(x, key) != null).sort((a, b) => new Date(a.endDate || a.startDate || 0) - new Date(b.endDate || b.startDate || 0));
     const values = valid.map((x) => sampleNumericValue(x, key));
     const stats = statsFromValues(values);
-    const rows = valid.slice(-12).reverse().map(function (x) {
+    const points = valid.map(function (x) {
+      return { value: sampleNumericValue(x, key), time: x.endDate || x.startDate };
+    });
+    const rows = valid.slice(-16).reverse().map(function (x) {
       return '<div class="hc-detail-row"><span>' + escapeHtml(formatDetailDate(x.endDate || x.startDate, true)) + '</span><strong>' + escapeHtml(formatDetailValue(key, sampleNumericValue(x, key))) + '</strong></div>';
     }).join("");
-    const hero = detailHeroValue(key, snapshot);
-    const snapMin = key === "heart" ? snapshot && snapshot.heartRateMin : null;
-    const snapMax = key === "heart" ? snapshot && snapshot.heartRateMax : null;
-    return '<div class="hc-detail-hero"><div class="hc-detail-hero-label">' + (key === "heart" ? "Média de hoje" : "Registro mais recente") + '</div><div class="hc-detail-hero-value">' + escapeHtml(hero) + '</div><div class="hc-detail-hero-note">Dados recebidos do Health Connect</div></div>' +
+    const isToday = Number(days) === 1;
+    const hero = isToday ? detailHeroValue(key, snapshot) : formatDetailValue(key, stats && stats.avg);
+    const snapMin = isToday && key === "heart" ? snapshot && snapshot.heartRateMin : null;
+    const snapMax = isToday && key === "heart" ? snapshot && snapshot.heartRateMax : null;
+    return '<div class="hc-detail-hero"><div class="hc-detail-hero-label">' + (isToday ? (key === "heart" ? "Média das últimas 24h" : "Registro mais recente") : "Média do período") + '</div><div class="hc-detail-hero-value">' + escapeHtml(hero) + '</div><div class="hc-detail-hero-note">' + valid.length + ' leituras recebidas do Health Connect</div></div>' +
       '<div class="hc-detail-stats"><div class="hc-detail-stat"><span>Mínima</span><strong>' + escapeHtml(formatDetailValue(key, snapMin != null ? snapMin : stats && stats.min)) + '</strong></div>' +
       '<div class="hc-detail-stat"><span>Média</span><strong>' + escapeHtml(formatDetailValue(key, stats && stats.avg)) + '</strong></div>' +
       '<div class="hc-detail-stat"><span>Máxima</span><strong>' + escapeHtml(formatDetailValue(key, snapMax != null ? snapMax : stats && stats.max)) + '</strong></div></div>' +
-      '<div class="hc-detail-section"><h3>Variação</h3>' + buildSparkline(values.slice(-80)) + '</div>' +
+      '<div class="hc-detail-section"><h3>Variação precisa</h3>' + buildInteractiveChart(points, key, days) + '</div>' +
       '<div class="hc-detail-section"><h3>Leituras recentes</h3><div class="hc-detail-list">' + (rows || '<div class="hc-detail-empty">Nenhuma leitura detalhada disponível.</div>') + '</div></div>';
   }
 
-  function renderGenericDetail(key, cfg, samples, daily, snapshot) {
+  function renderGenericDetail(key, cfg, samples, daily, snapshot, days) {
     const source = daily.length ? daily : samples;
-    const values = source.map((x) => sampleNumericValue(x, key)).filter((n) => n != null);
+    const points = source.map(function (x) {
+      return { value: sampleNumericValue(x, key), time: x.startDate || x.endDate };
+    }).filter(function (p) { return p.value != null && p.time; });
+    const values = points.map(function (p) { return p.value; });
     const stats = statsFromValues(values);
     const sorted = samples.slice().sort((a, b) => new Date(b.endDate || b.startDate || 0) - new Date(a.endDate || a.startDate || 0));
-    const rows = sorted.slice(0, 12).map(function (x) {
+    const rows = sorted.slice(0, 14).map(function (x) {
       const value = sampleNumericValue(x, key);
       if (value == null) return "";
       return '<div class="hc-detail-row"><span>' + escapeHtml(formatDetailDate(x.endDate || x.startDate, true)) + '</span><strong>' + escapeHtml(formatDetailValue(key, value)) + '</strong></div>';
     }).join("");
-    return '<div class="hc-detail-hero"><div class="hc-detail-hero-label">Valor atual</div><div class="hc-detail-hero-value">' + escapeHtml(detailHeroValue(key, snapshot)) + '</div><div class="hc-detail-hero-note">Sincronizado pelo Health Connect</div></div>' +
+    const averageDaily = Number(days) > 1 && ["steps", "distance", "calories"].includes(key);
+    const heroValue = averageDaily && stats ? formatDetailValue(key, stats.avg) : detailHeroValue(key, snapshot);
+    const heroLabel = averageDaily ? "Média diária do período" : "Valor atual";
+    return '<div class="hc-detail-hero"><div class="hc-detail-hero-label">' + heroLabel + '</div><div class="hc-detail-hero-value">' + escapeHtml(heroValue) + '</div><div class="hc-detail-hero-note">Sincronizado pelo Health Connect</div></div>' +
       '<div class="hc-detail-stats"><div class="hc-detail-stat"><span>Mínimo</span><strong>' + escapeHtml(formatDetailValue(key, stats && stats.min)) + '</strong></div><div class="hc-detail-stat"><span>Média</span><strong>' + escapeHtml(formatDetailValue(key, stats && stats.avg)) + '</strong></div><div class="hc-detail-stat"><span>Máximo</span><strong>' + escapeHtml(formatDetailValue(key, stats && stats.max)) + '</strong></div></div>' +
-      '<div class="hc-detail-section"><h3>Evolução</h3>' + buildSparkline(values) + '</div><div class="hc-detail-section"><h3>Registros</h3><div class="hc-detail-list">' + (rows || '<div class="hc-detail-empty">Nenhum registro detalhado disponível para este item.</div>') + '</div></div>';
+      '<div class="hc-detail-section"><h3>Evolução</h3>' + buildInteractiveChart(points, key, days) + '</div><div class="hc-detail-section"><h3>Registros</h3><div class="hc-detail-list">' + (rows || '<div class="hc-detail-empty">Nenhum registro detalhado disponível para este item.</div>') + '</div></div>';
   }
 
-  function renderWorkoutDetail(samples, snapshot) {
+  function renderWorkoutDetail(samples, snapshot, days) {
     const rows = samples.slice().sort((a, b) => new Date(b.endDate || b.startDate || 0) - new Date(a.endDate || a.startDate || 0)).slice(0, 12).map(function (x) {
       const mins = safeNumber(x.duration) != null ? Math.round(Number(x.duration) / 60) : null;
       const name = x.workoutType || x.activityType || x.type || "Treino";
@@ -536,9 +699,10 @@
       '<div class="hc-detail-section"><h3>Treinos recentes</h3><div class="hc-detail-list">' + (rows || '<div class="hc-detail-empty">Nenhum treino detalhado disponível.</div>') + '</div></div>';
   }
 
-  async function openHealthDetail(key) {
+  async function openHealthDetail(key, requestedDays) {
     const cfg = DETAIL_CONFIG[key];
     if (!cfg) return;
+    const days = Math.max(1, Number(requestedDays || cfg.days || 1));
     const page = ensureDetailPage();
     const title = document.getElementById("hcDetailTitle");
     const body = document.getElementById("hcDetailBody");
@@ -556,13 +720,23 @@
 
     try {
       const [samples, daily] = await Promise.all([
-        readDetailSamples(health, cfg),
-        readDailyDetailSeries(health, cfg)
+        readDetailSamples(health, cfg, days),
+        readDailyDetailSeries(health, cfg, days)
       ]);
-      if (key === "sleep") body.innerHTML = renderSleepDetail(samples, snapshot);
-      else if (key === "heart" || key === "restingHeart") body.innerHTML = renderHeartDetail(samples, snapshot, key);
-      else if (key === "workouts") body.innerHTML = renderWorkoutDetail(samples, snapshot);
-      else body.innerHTML = renderGenericDetail(key, cfg, samples, daily, snapshot);
+      let html = "";
+      if (key === "sleep") html = renderSleepDetail(samples, snapshot, days);
+      else if (key === "heart" || key === "restingHeart") html = renderHeartDetail(samples, snapshot, key, days);
+      else if (key === "workouts") html = renderWorkoutDetail(samples, snapshot, days);
+      else html = renderGenericDetail(key, cfg, samples, daily, snapshot, days);
+
+      body.innerHTML = renderPeriodSelector(key, days) + html;
+      body.querySelectorAll("[data-hc-period]").forEach(function (button) {
+        button.addEventListener("click", function () {
+          const nextDays = Number(button.getAttribute("data-hc-period") || days);
+          openHealthDetail(key, nextDays);
+        });
+      });
+      bindInteractiveCharts(body);
     } catch (error) {
       console.error("[Health Connect] detalhe", key, error);
       body.innerHTML = '<div class="hc-detail-section"><div class="hc-detail-empty">Não consegui carregar os detalhes agora. Tente atualizar os dados e abrir novamente.</div></div>';

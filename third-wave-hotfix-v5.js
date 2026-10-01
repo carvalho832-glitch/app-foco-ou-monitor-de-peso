@@ -289,6 +289,7 @@
   }
 
   function atualizarTudo() {
+    if (document.hidden) return;
     envolverRegistroDeAgua();
     observarLuma();
     atualizarHidratacaoTendencia();
@@ -307,7 +308,7 @@
     setTimeout(corrigirDatasUTC, 900);
 
     clearInterval(timer);
-    timer = setInterval(atualizarTudo, 550);
+    timer = setInterval(atualizarTudo, 4000);
   }
 
   if (document.readyState === "loading") {

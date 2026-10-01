@@ -13,6 +13,7 @@ const arquivos = [
   "dashboard-v2.js",
   "health-v3.js",
   "health-connect.js",
+  "experience-v6.js",
   "food-v3.js",
   "account-v3.js",
   "third-wave-v4.js",

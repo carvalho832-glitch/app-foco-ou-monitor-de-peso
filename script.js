@@ -970,20 +970,62 @@ function calcularStatusKcal(totalConsumido, metaKcal) {
    COMPARTILHAMENTO
 ========================================== */
 
+async function compartilharTextoEvoluaFit(titulo, texto) {
+  const capacitor = window.Capacitor;
+  const plugins = capacitor && capacitor.Plugins;
+  const Share = plugins && plugins.Share;
+  const nativo = !!(
+    capacitor &&
+    typeof capacitor.isNativePlatform === "function" &&
+    capacitor.isNativePlatform()
+  );
+
+  if (nativo && Share && typeof Share.share === "function") {
+    try {
+      await Share.share({
+        title: titulo,
+        text: texto,
+        dialogTitle: titulo
+      });
+      return;
+    } catch (erro) {
+      console.warn("Falha no compartilhamento nativo do Capacitor:", erro);
+    }
+  }
+
+  if (navigator.share) {
+    try {
+      await navigator.share({
+        title: titulo,
+        text: texto
+      });
+      return;
+    } catch (erro) {
+      if (erro && erro.name === "AbortError") return;
+      console.warn("Falha na Web Share API:", erro);
+    }
+  }
+
+  try {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      await navigator.clipboard.writeText(texto);
+      alert("Não consegui abrir o menu de compartilhamento, mas o texto foi copiado para a área de transferência.");
+      return;
+    }
+  } catch (erro) {
+    console.warn("Falha ao copiar texto:", erro);
+  }
+
+  alert("Copie o texto abaixo:\n\n" + texto);
+}
+
 function compartilharProgresso() {
   const pesoAtual = byId("pesoAtualCard").innerText.replace("kg", "").trim();
   const eliminado = byId("totalEliminadoCard").innerText;
 
   const texto = `Bora focar! 🚀 Já eliminei ${eliminado} e estou pesando ${pesoAtual} kg. 💪 Acompanhando tudo pelo meu app EvoluaFit I.A.!`;
 
-  if (navigator.share) {
-    navigator.share({
-      title: "Minha Evolução",
-      text: texto
-    }).catch(console.error);
-  } else {
-    alert("Seu navegador não suporta o compartilhamento nativo. Copie o texto:\n\n" + texto);
-  }
+  compartilharTextoEvoluaFit("Minha Evolução", texto);
 }
 
 let treinoAtualModalId = null;
@@ -998,14 +1040,7 @@ function compartilharTreinoModal() {
 
   const texto = `Treino concluído! ${nome}\n⏱️ Tempo: ${treino.tempo}\n🛣️ Distância: ${treino.distancia} km\n🔥 Gasto: ${treino.calorias} kcal.\nBora focar com o EvoluaFit I.A.! 💪`;
 
-  if (navigator.share) {
-    navigator.share({
-      title: "Meu Treino",
-      text: texto
-    }).catch(console.error);
-  } else {
-    alert("Seu navegador não suporta o compartilhamento nativo. Copie o texto:\n\n" + texto);
-  }
+  compartilharTextoEvoluaFit("Meu Treino", texto);
 }
 
 /* ==========================================

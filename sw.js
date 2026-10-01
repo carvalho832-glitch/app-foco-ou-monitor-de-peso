@@ -1,4 +1,4 @@
-const CACHE_NAME = "monitor-peso-v74-unified-experience-v6";
+const CACHE_NAME = "monitor-peso-v75-touch-fix";
 
 const APP_FILES = [
   "./",

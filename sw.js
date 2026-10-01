@@ -1,4 +1,4 @@
-const CACHE_NAME = "monitor-peso-v71-native-share-fix";
+const CACHE_NAME = "monitor-peso-v72-health-detail-pages";
 
 const APP_FILES = [
   "./",
@@ -6,10 +6,10 @@ const APP_FILES = [
   "./style.css?v=19",
   "./menu-animated.css?v=47",
   "./script.js?v=22",
-  "./cloud-loader.js?v=8",
+  "./cloud-loader.js?v=9",
   "./dashboard-v2.js?v=2",
   "./health-v3.js?v=4",
-  "./health-connect.js?v=4",
+  "./health-connect.js?v=5",
   "./food-v3.js?v=2",
   "./account-v3.js?v=1",
   "./third-wave-v4.js?v=1",
